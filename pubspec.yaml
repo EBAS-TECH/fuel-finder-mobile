@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -20,4 +21,10 @@ flutter:
   assets: 
     - assets/images/
     - assets/fonts/
+  fonts:
+    - family: ProductSans
+      fonts:
+        - asset: assets/fonts/ProductSans-Regular.ttf
+        - asset: assets/fonts/ProductSans-Bold.ttf
+          weight: 700
 
