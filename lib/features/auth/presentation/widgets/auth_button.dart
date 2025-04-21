@@ -14,12 +14,12 @@ class AuthButton extends StatelessWidget {
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppPalette.primaryColor,
+          backgroundColor: AppPallete.primaryColor,
         ),
         onPressed: () {},
         child: Text(
           text,
-          style: TextStyle(color: AppPalette.whiteColor, fontSize: 16),
+          style: TextStyle(color: AppPallete.whiteColor, fontSize: 16),
         ),
       ),
     );

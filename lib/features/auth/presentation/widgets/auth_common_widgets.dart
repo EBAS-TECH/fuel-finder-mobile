@@ -49,11 +49,11 @@ class AuthCommonWidgets {
       child: RichText(
         text: TextSpan(
           text: text,
-          style: TextStyle(color: AppPalette.primaryColor, fontSize: 14),
+          style: TextStyle(color: AppPallete.primaryColor, fontSize: 14),
           children: [
             TextSpan(
               text: actionText,
-              style: TextStyle(color: AppPalette.secondaryColor),
+              style: TextStyle(color: AppPallete.secondaryColor),
             ),
           ],
         ),

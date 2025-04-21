@@ -12,7 +12,6 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: Container(
         margin: EdgeInsets.all(22),
         child: Column(

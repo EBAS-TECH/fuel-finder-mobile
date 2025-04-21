@@ -46,12 +46,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppPalette.whiteColor,
+      backgroundColor: AppPallete.whiteColor,
       body: Stack(
         children: [
           Positioned.fill(
             child: CustomPaint(
-              painter: TopCurvePainter(color: AppPalette.primaryColor),
+              painter: TopCurvePainter(color: AppPallete.primaryColor),
             ),
           ),
           SafeArea(
@@ -95,7 +95,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             ),
                             Text(
                               data['title'] as String,
-                              style: TextThemes.textTheme.titleLarge,
+                              style: Theme.of(context).textTheme.headlineLarge,
                               textAlign: TextAlign.center,
                             ),
                             SizedBox(
@@ -104,7 +104,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             Text(
                               data['subtitle'] as String,
                               key: ValueKey(data['subtitle']),
-                              style: TextThemes.textTheme.bodyLarge,
+                              style: Theme.of(context).textTheme.headlineSmall,
                               textAlign: TextAlign.center,
                             ),
                             const Spacer(),
@@ -127,7 +127,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         effect: ExpandingDotsEffect(
                           dotHeight: 8,
                           dotWidth: 8,
-                          activeDotColor: AppPalette.primaryColor,
+                          activeDotColor: AppPallete.primaryColor,
                           expansionFactor: 3,
                         ),
                       ),

@@ -30,8 +30,8 @@ class OnboardingButton extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               isPrimary
-                  ? AppPalette.primaryColor
-                  : AppPalette.primaryColorShade,
+                  ? AppPallete.primaryColor
+                  : AppPallete.greyColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child:
@@ -40,7 +40,7 @@ class OnboardingButton extends StatelessWidget {
                   text,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppPalette.whiteColor,
+                    color: AppPallete.whiteColor,
                     fontWeight: FontWeight.w600,
                   ),
                 )
@@ -52,8 +52,8 @@ class OnboardingButton extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color:
                         isPrimary
-                            ? AppPalette.whiteColor
-                            : AppPalette.primaryColor,
+                            ? AppPallete.whiteColor
+                            : AppPallete.primaryColor,
                   ),
                 ),
       ),

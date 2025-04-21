@@ -11,6 +11,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: AppTheme.lightThemeMode, home: OnboardingPage());
+    return MaterialApp(
+      title: 'Fuel Finder',
+      theme: AppTheme.lightThemeMode,
+      darkTheme: AppTheme.darkThemeMode,
+      themeMode: ThemeMode.system,
+      home: const OnboardingPage(),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
+
