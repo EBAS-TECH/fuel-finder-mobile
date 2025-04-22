@@ -9,12 +9,12 @@ class TopCurvePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = Path();
     path.moveTo(0, 0);
-    path.lineTo(0, size.height * 0.5);
+    path.lineTo(0, size.height * 0.75);
     path.quadraticBezierTo(
       size.width / 2,
-      size.height * 0.60,
+      size.height * 1,
       size.width,
-      size.height * 0.5,
+      size.height * 0.75,
     );
     path.lineTo(size.width, 0);
     path.close();

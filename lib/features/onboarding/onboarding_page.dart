@@ -16,24 +16,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _controller = PageController();
   bool onLastPage = false;
 
-  final List<Map<String, dynamic>> onboardingData = [
-    {
-      "image": "assets/images/onboarding_one.png",
-      "title": "Find Nearby Fuel Stations",
-      "subtitle": "Discover fuel stations near you using only your phone",
-    },
-    {
-      "image": "assets/images/onboarding_two.png",
-      "title": "View Fuel Availability",
-      "subtitle": "Check real-time fuel availability before you go to the station",
-    },
-    {
-      "image": "assets/images/onboarding_three.png",
-      "title": "View Official Fuel Price",
-      "subtitle": "Stay informed with up-to-date fuel prices across all stations",
-    },
-  ];
-
   @override
   void dispose() {
     _controller.dispose();
@@ -47,85 +29,42 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final isSmallScreen = screenHeight < 600;
 
     return Scaffold(
-      backgroundColor: AppPallete.whiteColor,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: TopCurvePainter(color: AppPallete.primaryColor),
-            ),
-          ),
           SafeArea(
             child: Column(
               children: [
                 Expanded(
-                  child: PageView.builder(
+                  child: PageView(
                     controller: _controller,
-                    itemCount: onboardingData.length,
                     onPageChanged: (index) {
                       setState(() {
-                        onLastPage = index == onboardingData.length - 1;
+                        onLastPage = index == 2;
                       });
                     },
-                    itemBuilder: (context, index) {
-                      final data = onboardingData[index];
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.05,
-                          vertical: isSmallScreen ? 10 : 15,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            AnimatedScale(
-                              scale: onLastPage && index == onboardingData.length - 1
-                                  ? 1.05
-                                  : 1.0,
-                              duration: const Duration(milliseconds: 10),
-                              child: Hero(
-                                tag: 'onboarding-image-$index',
-                                child: Image.asset(
-                                  data['image'] as String,
-                                  height: isSmallScreen 
-                                      ? screenHeight * 0.25 
-                                      : screenHeight * 0.35,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: isSmallScreen ? 15 : 25),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                data['title'] as String,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineLarge
-                                    ?.copyWith(
-                                      fontSize: isSmallScreen ? 22 : 28,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            SizedBox(height: isSmallScreen ? 8 : 12),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                data['subtitle'] as String,
-                                key: ValueKey(data['subtitle']),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontSize: isSmallScreen ? 14 : 16,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                    children: [
+                      _buildOnboardingPage(
+                        context,
+                        'assets/images/onboarding_one.png',
+                        "Find Nearby Fuel Stations",
+                        "Discover fuel stations near you using only your phone",
+                        isSmallScreen,
+                      ),
+                      _buildOnboardingPage(
+                        context,
+                        'assets/images/onboarding_two.png',
+                        "View Fuel Availabilty",
+                        "Check real-time fuel availabilty before you go to the station",
+                        isSmallScreen,
+                      ),
+                      _buildOnboardingPage(
+                        context,
+                        'assets/images/onboarding_three.png',
+                        "View Official Fuel Prices",
+                        "Stay informed with up-to-date fuel prices across all stations",
+                        isSmallScreen,
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -137,7 +76,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     children: [
                       SmoothPageIndicator(
                         controller: _controller,
-                        count: onboardingData.length,
+                        count: 3,
                         effect: ExpandingDotsEffect(
                           dotHeight: 8,
                           dotWidth: 8,
@@ -147,51 +86,55 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                       SizedBox(height: isSmallScreen ? 15 : 25),
                       AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder: (child, animation) {
-                          return ScaleTransition(
-                            scale: animation,
-                            child: child,
-                          );
-                        },
-                        child: onLastPage
-                            ? OnboardingButton(
-                                text: "Get Started",
-                                isPrimary: true,
-                                width: double.infinity,
-                                onPressed: () {
-                                  Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                      builder: (context) => const RegisterPage(),
+                        duration: const Duration(milliseconds: 20),
+                        transitionBuilder:
+                            (child, animation) =>
+                                ScaleTransition(scale: animation, child: child),
+                        child:
+                            onLastPage
+                                ? OnboardingButton(
+                                  key: const ValueKey('get_started'),
+                                  text: "Get Started",
+                                  isPrimary: true,
+                                  width: double.infinity,
+                                  onPressed: () {
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => const RegisterPage(),
+                                      ),
+                                    );
+                                  },
+                                )
+                                : Row(
+                                  key: const ValueKey('navigation_buttons'),
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    OnboardingButton(
+                                      text: "Skip",
+                                      isPrimary: false,
+                                      width: screenWidth * 0.4,
+                                      onPressed: () {
+                                        _controller.jumpToPage(2);
+                                      },
                                     ),
-                                  );
-                                },
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  OnboardingButton(
-                                    text: "Skip",
-                                    isPrimary: false,
-                                    width: screenWidth * 0.4,
-                                    onPressed: () {
-                                      _controller.jumpToPage(onboardingData.length - 1);
-                                    },
-                                  ),
-                                  OnboardingButton(
-                                    text: "Continue",
-                                    width: screenWidth * 0.4,
-                                    isPrimary: true,
-                                    isIconButton: true,
-                                    onPressed: () {
-                                      _controller.nextPage(
-                                        duration: const Duration(milliseconds: 200),
-                                        curve: Curves.easeInOut,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
+                                    OnboardingButton(
+                                      text: "Continue",
+                                      width: screenWidth * 0.4,
+                                      isPrimary: true,
+                                      isIconButton: true,
+                                      onPressed: () {
+                                        _controller.nextPage(
+                                          duration: const Duration(
+                                            milliseconds: 20,
+                                          ),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                       ),
                     ],
                   ),
@@ -201,6 +144,58 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildOnboardingPage(
+    BuildContext context,
+    String imagePath,
+    String title,
+    String description,
+    bool isSmallScreen,
+  ) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Column(
+      children: [
+        CustomPaint(
+          painter: TopCurvePainter(color: AppPallete.primaryColor),
+          child: SizedBox(
+            height: screenHeight * 0.55,
+            width: double.infinity,
+            child: Center(
+              child: Image.asset(
+                imagePath,
+                height: screenHeight * 0.3,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontSize: isSmallScreen ? 24 : 30,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: isSmallScreen ? 16 : 18,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
