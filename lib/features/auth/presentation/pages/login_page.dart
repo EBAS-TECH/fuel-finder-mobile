@@ -1,38 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:fuel_finder/features/auth/presentation/pages/email_verification.dart';
-import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
+import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/widgets/auth_footer.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
+  bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
-    _formKey.currentState?.reset();
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.height < 600;
@@ -56,14 +41,14 @@ class _RegisterPageState extends State<RegisterPage> {
     final buttonVerticalPadding = isSmallScreen ? 14.0 : 16.0;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         child: Column(
           children: [
             SizedBox(height: sectionSpacing / 2),
             Text(
-              'Create Account',
+              'Login',
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
@@ -71,7 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: textFieldSpacing / 2),
             Text(
-              "Enter your email and create a password to sign up",
+              "Enter your email and password to sign in",
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: subtitleFontSize,
               ),
@@ -103,7 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(width: 10),
                     Text(
-                      'Sign up with Google',
+                      'Sign in with Google',
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: subtitleFontSize,
@@ -119,42 +104,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: sectionSpacing),
-                  _buildTextField(
-                    controller: _firstNameController,
-                    label: 'First Name',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'First name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: textFieldSpacing),
-                  _buildTextField(
-                    controller: _lastNameController,
-                    label: 'Last Name',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Last name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: textFieldSpacing),
-                  _buildTextField(
-                    controller: _usernameController,
-                    label: 'Username',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Username is required';
-                      }
-                      if (value.length < 4) {
-                        return 'Username must be at least 4 characters';
-                      }
-                      return null;
-                    },
-                  ),
                   SizedBox(height: textFieldSpacing),
                   _buildTextField(
                     controller: _emailController,
@@ -186,21 +135,34 @@ class _RegisterPageState extends State<RegisterPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: textFieldSpacing),
-                  _buildTextField(
-                    controller: _confirmPasswordController,
-                    label: 'Confirm Password',
-                    obscureText: true,
-                    validator: (value) {
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      } else if (value == null || value.trim().isEmpty) {
-                        return 'Password is required';
-                      }
-                      return null;
-                    },
-                  ),
                   SizedBox(height: sectionSpacing),
+                  Row(
+                    children: [
+                      Checkbox(
+                        checkColor: AppPallete.whiteColor,
+                        activeColor: AppPallete.primaryColor,
+                        value: isChecked,
+                        onChanged:
+                            (value) => {
+                              setState(() {
+                                isChecked = value ?? false;
+                              }),
+                            },
+                      ),
+                      Text("Keep me logged in"),
+                      Spacer(),
+                      Row(
+                        children: [
+                          Text(
+                            "Forgot password?",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppPallete.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   SizedBox(
                     width: size.width * 0.9,
                     child: ElevatedButton(
@@ -210,8 +172,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           vertical: buttonVerticalPadding,
                         ),
                       ),
+
                       child: Text(
-                        'SIGN UP',
+                        'LOGIN',
                         style: TextStyle(fontSize: subtitleFontSize),
                       ),
                     ),
@@ -219,10 +182,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: textFieldSpacing),
                   authFooterText(
                     context,
-                    "Already have an account? ",
-                    "Login",
-                    LoginPage(),
-                    false,
+                    "Not registerd yet? ",
+                    "Register",
+                    RegisterPage(),
+                    true,
                   ),
                   SizedBox(height: sectionSpacing / 2),
                 ],
@@ -254,16 +217,10 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _submitForm() {
-   /*    if (_formKey.currentState!.validate()) {
-      final firstName = _firstNameController.text.trim();
-      final lastName = _lastNameController.text.trim();
-      final username = _usernameController.text.trim();
+    if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-    }  */
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => EmailVerification()));
+    }
   }
 }
 

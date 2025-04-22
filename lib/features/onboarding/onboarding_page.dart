@@ -86,7 +86,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                       SizedBox(height: isSmallScreen ? 15 : 25),
                       AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 20),
+                        duration: const Duration(milliseconds: 200),
                         transitionBuilder:
                             (child, animation) =>
                                 ScaleTransition(scale: animation, child: child),
@@ -114,6 +114,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     OnboardingButton(
                                       text: "Skip",
                                       isPrimary: false,
+                                      isShade: true,
                                       width: screenWidth * 0.4,
                                       onPressed: () {
                                         _controller.jumpToPage(2);
@@ -123,11 +124,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                       text: "Continue",
                                       width: screenWidth * 0.4,
                                       isPrimary: true,
-                                      isIconButton: true,
+
                                       onPressed: () {
                                         _controller.nextPage(
                                           duration: const Duration(
-                                            milliseconds: 20,
+                                            milliseconds: 200,
                                           ),
                                           curve: Curves.easeInOut,
                                         );
@@ -166,7 +167,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: Center(
               child: Image.asset(
                 imagePath,
-                height: screenHeight * 0.3,
+                height: screenHeight * 0.35,
                 fit: BoxFit.contain,
               ),
             ),

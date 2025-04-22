@@ -12,6 +12,8 @@ void main() async {
 }
 
 class MainApp extends StatelessWidget {
+  static final RouteObserver<PageRoute> routeObserver =
+      RouteObserver<PageRoute>();
   const MainApp({super.key});
 
   @override
@@ -22,6 +24,7 @@ class MainApp extends StatelessWidget {
       darkTheme: AppTheme.darkThemeMode,
       themeMode: ThemeMode.system,
       home: const OnboardingPage(),
+      navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
     );
   }

@@ -64,9 +64,6 @@ class AppTheme {
           minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 45)),
         ),
       ),
-      iconTheme: IconThemeData(
-        color: AppPallete.lightIconColor,
-      ),
       dialogTheme: DialogTheme(
         backgroundColor: Colors.grey.shade200,
       ),
@@ -131,9 +128,6 @@ class AppTheme {
         ),
         minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 45)),
       ),
-    ),
-    iconTheme: const IconThemeData(
-      color: AppPallete.darkIconColor,
     ),
   );
 }
