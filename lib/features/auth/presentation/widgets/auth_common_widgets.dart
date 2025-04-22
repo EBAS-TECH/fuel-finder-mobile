@@ -15,6 +15,8 @@ class AuthCommonWidgets {
   static Widget orDividerWithGoogle(String text) {
     return Column(
       children: [
+        Text("Or"),
+        SizedBox(height: 15),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -23,8 +25,6 @@ class AuthCommonWidgets {
             Text(text, style: TextStyle(fontSize: 15)),
           ],
         ),
-        Text("Or"),
-        SizedBox(height: 15),
       ],
     );
   }

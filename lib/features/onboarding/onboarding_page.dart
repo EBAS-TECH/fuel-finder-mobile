@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:fuel_finder/core/themes/text_theme.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
-import 'package:fuel_finder/features/onboarding/widgets/onboarding_button.dart.dart';
+import 'package:fuel_finder/features/onboarding/widgets/onboarding_button..dart';
 import 'package:fuel_finder/features/onboarding/widgets/top_curve_painter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -25,15 +24,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
     },
     {
       "image": "assets/images/onboarding_two.png",
-      "title": "View Fuel Availabilty",
-      "subtitle":
-          "Check real-time fuel availabilty before you go to the station",
+      "title": "View Fuel Availability",
+      "subtitle": "Check real-time fuel availability before you go to the station",
     },
     {
       "image": "assets/images/onboarding_three.png",
       "title": "View Official Fuel Price",
-      "subtitle":
-          "Stay informed with up-to-date fuel prices across all stations",
+      "subtitle": "Stay informed with up-to-date fuel prices across all stations",
     },
   ];
 
@@ -45,6 +42,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenHeight < 600;
+
     return Scaffold(
       backgroundColor: AppPallete.whiteColor,
       body: Stack(
@@ -69,45 +70,58 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     itemBuilder: (context, index) {
                       final data = onboardingData[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.05,
+                          vertical: isSmallScreen ? 10 : 15,
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             AnimatedScale(
-                              scale:
-                                  onLastPage &&
-                                          index == onboardingData.length - 1
-                                      ? 1.05
-                                      : 1.0,
+                              scale: onLastPage && index == onboardingData.length - 1
+                                  ? 1.05
+                                  : 1.0,
                               duration: const Duration(milliseconds: 10),
                               child: Hero(
                                 tag: 'onboarding-image-$index',
                                 child: Image.asset(
                                   data['image'] as String,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.5,
+                                  height: isSmallScreen 
+                                      ? screenHeight * 0.25 
+                                      : screenHeight * 0.35,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.05,
+                            SizedBox(height: isSmallScreen ? 15 : 25),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text(
+                                data['title'] as String,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineLarge
+                                    ?.copyWith(
+                                      fontSize: isSmallScreen ? 22 : 28,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            Text(
-                              data['title'] as String,
-                              style: Theme.of(context).textTheme.headlineLarge,
-                              textAlign: TextAlign.center,
+                            SizedBox(height: isSmallScreen ? 8 : 12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text(
+                                data['subtitle'] as String,
+                                key: ValueKey(data['subtitle']),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontSize: isSmallScreen ? 14 : 16,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.01,
-                            ),
-                            Text(
-                              data['subtitle'] as String,
-                              key: ValueKey(data['subtitle']),
-                              style: Theme.of(context).textTheme.headlineSmall,
-                              textAlign: TextAlign.center,
-                            ),
-                            const Spacer(),
                           ],
                         ),
                       );
@@ -115,9 +129,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.05,
+                    vertical: isSmallScreen ? 10 : 20,
                   ),
                   child: Column(
                     children: [
@@ -131,9 +145,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           expansionFactor: 3,
                         ),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.05,
-                      ),
+                      SizedBox(height: isSmallScreen ? 15 : 25),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         transitionBuilder: (child, animation) {
@@ -142,54 +154,44 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: child,
                           );
                         },
-                        child:
-                            onLastPage
-                                ? OnboardingButton(
-                                  text: "Get Started",
-                                  isPrimary: true,
-                                  width: double.infinity,
-                                  onPressed: () {
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (context) => RegisterPage(),
-                                      ),
-                                    );
-                                  },
-                                )
-                                : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    OnboardingButton(
-                                      text: "Skip",
-                                      isPrimary: false,
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.35,
-                                      onPressed: () {
-                                        _controller.jumpToPage(
-                                          onboardingData.length - 1,
-                                        );
-                                      },
+                        child: onLastPage
+                            ? OnboardingButton(
+                                text: "Get Started",
+                                isPrimary: true,
+                                width: double.infinity,
+                                onPressed: () {
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => const RegisterPage(),
                                     ),
-                                    OnboardingButton(
-                                      text: "Continue",
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.35,
-                                      isPrimary: true,
-                                      isIconButton: true,
-                                      onPressed: () {
-                                        _controller.nextPage(
-                                          duration: const Duration(
-                                            milliseconds: 200,
-                                          ),
-                                          curve: Curves.easeInOut,
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  OnboardingButton(
+                                    text: "Skip",
+                                    isPrimary: false,
+                                    width: screenWidth * 0.4,
+                                    onPressed: () {
+                                      _controller.jumpToPage(onboardingData.length - 1);
+                                    },
+                                  ),
+                                  OnboardingButton(
+                                    text: "Continue",
+                                    width: screenWidth * 0.4,
+                                    isPrimary: true,
+                                    isIconButton: true,
+                                    onPressed: () {
+                                      _controller.nextPage(
+                                        duration: const Duration(milliseconds: 200),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                       ),
                     ],
                   ),
