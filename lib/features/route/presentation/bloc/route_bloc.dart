@@ -5,8 +5,6 @@ import 'package:latlong2/latlong.dart';
 
 abstract class RouteEvent {
   const RouteEvent();
-
-  @override
   List<Object> get props => [];
 }
 
@@ -32,7 +30,6 @@ class CalculateRoute extends RouteEvent {
 abstract class RouteState {
   const RouteState();
 
-  @override
   List<Object> get props => [];
 }
 
@@ -84,3 +81,4 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     }
   }
 }
+
