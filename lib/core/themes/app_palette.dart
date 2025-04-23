@@ -7,6 +7,7 @@ class AppPallete {
   static const Color greyColor = Colors.grey;
   static const Color whiteColor = Colors.white;
   static const Color successColor = Colors.green;
+  final bottomNavColor = Colors.grey[100];
 
   static const Color transparentColor = Colors.transparent;
 
@@ -30,5 +31,7 @@ class AppPallete {
   static const Color darkIconColor = Color(0xFFB0B0B0);
   static const Color darkCardColor = Color(0xFF1F1F1F);
   static const Color darkBackgroundColor = Color(0xFF121212);
+
+  static var redColor;
 }
 

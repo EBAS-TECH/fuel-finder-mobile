@@ -217,10 +217,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
+   /*  if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-    }
+    } */
   }
 }
 

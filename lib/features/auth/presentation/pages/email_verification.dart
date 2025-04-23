@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
-import 'package:fuel_finder/features/auth/presentation/pages/widgets/auth_footer.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/widgets/code_input_container.dart';
+import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
 
 class EmailVerification extends StatefulWidget {
   const EmailVerification({super.key});
@@ -39,7 +38,11 @@ class _EmailVerificationState extends State<EmailVerification> {
             width: MediaQuery.of(context).size.width * 0.65,
             child: ElevatedButton(
               style: ButtonStyle(),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => HomePage()));
+              },
               child: Text("Verify Account"),
             ),
           ),
@@ -60,4 +63,3 @@ class _EmailVerificationState extends State<EmailVerification> {
     );
   }
 }
-
