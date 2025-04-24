@@ -1,0 +1,24 @@
+import 'package:fuel_finder/features/auth/domain/entities/user_entity.dart';
+import 'package:fuel_finder/features/auth/domain/repositories/auth_repository.dart';
+
+class SignupUsecase {
+  final AuthRepository authRepository;
+
+  SignupUsecase({required this.authRepository});
+  Future<UserEntity> call(
+    String firstName,
+    String lastName,
+    String userName,
+    String email,
+    String password,
+  ) {
+    return authRepository.signUp(
+      firstName,
+      lastName,
+      userName,
+      email,
+      password,
+    );
+  }
+}
+
