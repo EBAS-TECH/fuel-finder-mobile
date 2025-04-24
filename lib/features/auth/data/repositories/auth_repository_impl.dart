@@ -31,13 +31,13 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<void> verifyEmail(String userId, String token) {
-    return authRemoteDataSource.veriyEmail(userId);
+  Future<void> verifyEmail(String userId, String token) async {
+    return await authRemoteDataSource.veriyEmail(userId, token);
   }
 
   @override
-  Future<void> logOut() {
-    return authRemoteDataSource.logOut();
+  Future<void> logOut() async {
+    return await authRemoteDataSource.logOut();
   }
 }
 

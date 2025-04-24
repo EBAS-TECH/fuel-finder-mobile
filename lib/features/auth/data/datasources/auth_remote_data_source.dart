@@ -29,7 +29,7 @@ class AuthRemoteDataSource {
       debugPrint("SIGNUP RESPONSE: ${jsonDecode(response.body)}");
       return jsonDecode(response.body);
     } catch (e) {
-       throw Exception("SIGN UP FAILED: $e");
+      throw Exception("SIGN UP FAILED: $e");
     }
   }
 
@@ -44,7 +44,6 @@ class AuthRemoteDataSource {
       return jsonDecode(response.body);
     } catch (e) {
       throw Exception("SIGN IN FAILED: $e");
-      
     }
   }
 
@@ -57,9 +56,12 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<void> veriyEmail(String userId) async {
+  Future<void> veriyEmail(String userId, String token) async {
     try {
-      final response = http.post(Uri.parse("$baseUrl/verify/$userId"));
+      final response = http.post(
+        Uri.parse("$baseUrl/verify/$userId"),
+        body: jsonEncode({"token": token}),
+      );
       debugPrint(jsonDecode(response.toString()));
     } catch (e) {
       debugPrint(e.toString());

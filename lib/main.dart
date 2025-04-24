@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/injection_container.dart';
 import 'package:fuel_finder/core/themes/app_theme.dart';
+import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/onboarding/onboarding_page.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
@@ -27,6 +28,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => sl<AuthBloc>()),
         BlocProvider(create: (_) => sl<GeolocationBloc>()),
         BlocProvider(create: (_) => sl<RouteBloc>()),
       ],
@@ -42,3 +44,4 @@ class MainApp extends StatelessWidget {
     );
   }
 }
+

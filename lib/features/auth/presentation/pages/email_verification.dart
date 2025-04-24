@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:fuel_finder/features/auth/presentation/pages/widgets/code_input_container.dart';
+import 'package:fuel_finder/features/auth/presentation/widgets/code_input_container.dart';
 import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
 
 class EmailVerification extends StatefulWidget {

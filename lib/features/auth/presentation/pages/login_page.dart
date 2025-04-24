@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
-import 'package:fuel_finder/features/auth/presentation/pages/widgets/auth_footer.dart';
+import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
