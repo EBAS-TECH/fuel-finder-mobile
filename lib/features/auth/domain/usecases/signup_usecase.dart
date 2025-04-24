@@ -11,6 +11,7 @@ class SignupUsecase {
     String userName,
     String email,
     String password,
+    String role,
   ) {
     return authRepository.signUp(
       firstName,
@@ -18,6 +19,7 @@ class SignupUsecase {
       userName,
       email,
       password,
+      role,
     );
   }
 }

@@ -7,8 +7,10 @@ abstract class AuthRepository {
     String userName,
     String email,
     String password,
+    String role,
   );
   Future<UserEntity> signIn(String userName, String password);
   Future<void> logOut();
+  Future<void> verifyEmail(String userId, String token);
 }
 
