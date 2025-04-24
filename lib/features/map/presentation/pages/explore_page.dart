@@ -389,3 +389,4 @@ class TrackLocationButton extends StatelessWidget {
     );
   }
 }
+
