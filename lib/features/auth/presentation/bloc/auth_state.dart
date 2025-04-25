@@ -6,9 +6,15 @@ class AuthLoading extends AuthState {}
 
 class AuthSuccess extends AuthState {
   final String message;
-  String? userId;
 
-  AuthSuccess({required this.message, this.userId});
+  AuthSuccess({required this.message});
+}
+
+class AuthVerifyEmail extends AuthState {
+  final String message;
+  final String userId;
+
+  AuthVerifyEmail({required this.message, required this.userId});
 }
 
 class AuthFailure extends AuthState {
@@ -16,4 +22,3 @@ class AuthFailure extends AuthState {
 
   AuthFailure({required this.error});
 }
-

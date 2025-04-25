@@ -55,14 +55,6 @@ class _ExplorePageState extends State<ExplorePage>
       _routePoints = [];
     });
   }
-
-  void _setAsDestination(LatLng latLng) {
-    setState(() {
-      latitude = _selectedLocation?.latitude;
-      longitude = _selectedLocation?.longitude;
-    });
-  }
-
   double getZoomLevel(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     if (width > 1200) return 14.5;
@@ -98,12 +90,6 @@ class _ExplorePageState extends State<ExplorePage>
         getZoomLevel(context),
       );
     }
-  }
-
-  void _showRouteInformation() {
-    setState(() {
-      _showRouteInfo = true;
-    });
   }
 
   void _hideRouteInformation() {

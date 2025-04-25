@@ -1,5 +1,4 @@
 import 'package:fuel_finder/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:fuel_finder/features/auth/domain/entities/user_entity.dart';
 import 'package:fuel_finder/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
@@ -7,7 +6,7 @@ class AuthRepositoryImpl extends AuthRepository {
 
   AuthRepositoryImpl({required this.authRemoteDataSource});
   @override
-  Future<UserEntity> signIn(String userName, String password) {
+  Future<Map<String,dynamic>> signIn(String userName, String password) {
     return authRemoteDataSource.signIn(userName, password);
   }
 
@@ -31,7 +30,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<void> verifyEmail(String? userId, String token) async {
+  Future<void> verifyEmail(String userId, String token) async {
     return await authRemoteDataSource.verifyEmail(userId, token);
   }
 

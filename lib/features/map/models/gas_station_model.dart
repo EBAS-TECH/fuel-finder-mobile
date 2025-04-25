@@ -22,8 +22,8 @@ class GasStation {
 
     return GasStation(
       name: name,
-      lat: (lat as num?)?.toDouble() ?? 0.0,
-      lng: (lon as num?)?.toDouble() ?? 0.0,
+      lat: (lat as num?)?.toDouble() ?? 7.967534,
+      lng: (lon as num?)?.toDouble() ?? 37.731074,
     );
   }
 }

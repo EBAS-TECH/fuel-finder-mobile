@@ -1,8 +1,11 @@
 abstract class Failure {}
 
 class ServerFailure extends Failure {}
+
 class NetworkFailure extends Failure {}
+
 class ParsingFailure extends Failure {}
+
 class UnknownFailure extends Failure {}
 
 abstract class AppException implements Exception {
@@ -11,25 +14,26 @@ abstract class AppException implements Exception {
 }
 
 class ServerException extends AppException {
-  ServerException(String message) : super(message);
+  ServerException(super.message);
 }
 
 class NetworkException extends AppException {
-  NetworkException(String message) : super(message);
+  NetworkException(super.message);
 }
 
 class ParsingException extends AppException {
-  ParsingException(String message) : super(message);
+  ParsingException(super.message);
 }
 
 class ConnectionException extends AppException {
-  ConnectionException(String message) : super(message);
+  ConnectionException(super.message);
 }
 
 class BadRequestException extends AppException {
-  BadRequestException(String message) : super(message);
+  BadRequestException(super.message);
 }
 
 class UnknownException extends AppException {
-  UnknownException(String message) : super(message);
+  UnknownException(super.message);
 }
+

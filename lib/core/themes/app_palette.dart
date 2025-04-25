@@ -6,7 +6,7 @@ class AppPallete {
   static const Color errorColor = Colors.redAccent;
   static const Color greyColor = Colors.grey;
   static const Color whiteColor = Colors.white;
-  static const Color successColor = Colors.green;
+  static const Color bgColor = Color(0xFFE7E7E7);
   final bottomNavColor = Colors.grey[100];
 
   static const Color transparentColor = Colors.transparent;

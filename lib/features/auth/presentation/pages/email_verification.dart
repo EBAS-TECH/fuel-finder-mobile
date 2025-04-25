@@ -10,7 +10,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 
 class EmailVerification extends StatefulWidget {
   final String email;
-  final String? userId;
+  final String userId;
   const EmailVerification({
     super.key,
     required this.email,
@@ -69,8 +69,8 @@ class _EmailVerificationState extends State<EmailVerification> {
                   fieldHeight: 50,
                   fieldWidth: 40,
                   activeFillColor: Colors.white,
-                  activeColor: Colors.blue,
-                  selectedColor: Colors.blue,
+                  activeColor: AppPallete.primaryColor,
+                  selectedColor: AppPallete.primaryColor,
                   inactiveColor: Colors.grey,
                 ),
               ),

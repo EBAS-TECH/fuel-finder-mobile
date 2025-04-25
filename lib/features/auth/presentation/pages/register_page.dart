@@ -60,10 +60,10 @@ class _RegisterPageState extends State<RegisterPage> {
     final buttonVerticalPadding = isSmallScreen ? 14.0 : 16.0;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is AuthVerifyEmail) {
             debugPrint(state.message);
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -259,7 +259,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       "Already have an account? ",
                       "Login",
                       LoginPage(),
-                      false,
+                      true,
                     ),
                     SizedBox(height: sectionSpacing / 2),
                   ],

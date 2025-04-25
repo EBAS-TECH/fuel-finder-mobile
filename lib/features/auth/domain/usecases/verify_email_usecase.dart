@@ -4,7 +4,7 @@ class VerifyEmailUsecase {
   final AuthRepository authRepository;
 
   VerifyEmailUsecase({required this.authRepository});
-  Future<void> call(String? userId, String token) {
+  Future<void> call(String userId, String token) {
     return authRepository.verifyEmail(userId, token);
   }
 }

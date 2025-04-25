@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
-import 'package:fuel_finder/features/auth/data/models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRemoteDataSource {
-  final String baseUrl = "http://192.168.70.147:5001/api/auth";
+  final String baseUrl = "http://192.168.70.107:5001/api/auth";
+
   Future<Map<String, dynamic>> signUp(
     String firstName,
     String lastName,
@@ -26,38 +26,62 @@ class AuthRemoteDataSource {
         }),
         headers: {"Content-Type": "application/json"},
       );
-      debugPrint("SIGNUP RESPONSE: ${jsonDecode(response.body)}");
-      return jsonDecode(response.body);
+
+      final responseData = jsonDecode(response.body);
+      debugPrint("SIGNUP RESPONSE: $responseData");
+
+      if (response.statusCode != 201) {
+        final errorMsg = responseData['error'] ?? 'Registration failed';
+        throw errorMsg;
+      }
+
+      return responseData;
     } catch (e) {
-      debugPrint(e.toString());
-      throw Exception("SIGN UP FAILED: $e");
+      debugPrint("Signup error: $e");
+      throw e.toString();
     }
   }
 
-  Future<UserModel> signIn(String userName, String password) async {
+  Future<Map<String, dynamic>> signIn(String userName, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         body: jsonEncode({"username": userName, "password": password}),
         headers: {"Content-Type": "application/json"},
       );
-      debugPrint("LOGIN RESPONSE: ${jsonDecode(response.body)}");
-      return jsonDecode(response.body);
+
+      final responseData = jsonDecode(response.body);
+      debugPrint("LOGIN RESPONSE: $responseData");
+
+      if (response.statusCode != 200) {
+        final errorMsg = responseData['error'] ?? 'Invalid credentials';
+        throw errorMsg;
+      }
+
+      return responseData;
     } catch (e) {
-      throw Exception("SIGN IN FAILED: $e");
+      debugPrint("Login error: $e");
+      throw 'Invalid credentials';
     }
   }
 
   Future<void> logOut() async {
     try {
-      final response = http.post(Uri.parse("$baseUrl/logout"));
-      debugPrint(jsonDecode(response.toString()));
+      final response = await http.post(
+        Uri.parse("$baseUrl/logout"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode != 200) {
+        throw 'Logout failed';
+      }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Logout error: $e");
+      throw e.toString();
     }
   }
 
-  Future<void> verifyEmail(String? userId, String token) async {
+  Future<void> verifyEmail(String userId, String token) async {
     try {
       final response = await http.put(
         Uri.parse("$baseUrl/verify/$userId"),
@@ -68,12 +92,9 @@ class AuthRemoteDataSource {
       final responseBody = json.decode(response.body);
       debugPrint("Verification response: $responseBody");
 
-      if (response.statusCode == 200) {
-        return;
-      } else {
-        final errorMessage =
-            responseBody["message"] ?? "Email verification failed";
-        throw errorMessage;
+      if (response.statusCode != 200) {
+        final errorMsg = responseBody["message"] ?? "Email verification failed";
+        throw errorMsg;
       }
     } catch (e) {
       debugPrint("Verification error: $e");
