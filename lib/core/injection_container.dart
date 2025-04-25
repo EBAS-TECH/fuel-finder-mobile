@@ -11,6 +11,11 @@ import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart
 import 'package:fuel_finder/features/route/data/datasources/osrm_data_source.dart';
 import 'package:fuel_finder/features/route/data/repositories/route_repository.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
+import 'package:fuel_finder/features/user/data/datasources/user_remote_data_source.dart';
+import 'package:fuel_finder/features/user/data/repositories/user_repository_impl.dart';
+import 'package:fuel_finder/features/user/domain/repositories/user_repository.dart';
+import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
+import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt sl = GetIt.instance;
@@ -39,6 +44,17 @@ void setUpDependencies() {
       verifyEmailUsecase: sl<VerifyEmailUsecase>(),
       logoutUsecase: sl<LogoutUsecase>(),
     ),
+  );
+
+  sl.registerLazySingleton<UserRemoteDataSource>(() => UserRemoteDataSource());
+  sl.registerLazySingleton<UserRepository>(
+    () => UserRepositoryImpl(userRemoteDataSource: sl<UserRemoteDataSource>()),
+  );
+  sl.registerLazySingleton(
+    () => GetUserByIdUsecase(userRepository: sl<UserRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => UserBloc(getUserByIdUsecase: sl<GetUserByIdUsecase>()),
   );
 
   sl.registerLazySingleton(() => GeolocationBloc());

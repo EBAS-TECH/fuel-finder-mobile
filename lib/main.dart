@@ -7,6 +7,7 @@ import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/onboarding/onboarding_page.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
+import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
@@ -29,6 +30,7 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<AuthBloc>()),
+        BlocProvider(create: (_) => sl<UserBloc>()),
         BlocProvider(create: (_) => sl<GeolocationBloc>()),
         BlocProvider(create: (_) => sl<RouteBloc>()),
       ],

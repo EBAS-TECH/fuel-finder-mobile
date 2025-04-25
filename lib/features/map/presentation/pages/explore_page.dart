@@ -9,7 +9,8 @@ import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExplorePage extends StatefulWidget {
-  const ExplorePage({super.key});
+  final String userId;
+  const ExplorePage({super.key, required this.userId});
 
   @override
   State<ExplorePage> createState() => _ExplorePageState();

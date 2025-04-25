@@ -15,12 +15,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
-  final List<Widget> _pages = [
-    ExplorePage(),
-    FavoritePage(),
-    PricePage(),
-    ProfilePage(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      ExplorePage(userId: widget.userId),
+      FavoritePage(),
+      PricePage(),
+      ProfilePage(),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
