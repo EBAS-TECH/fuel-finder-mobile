@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool isChecked = false;
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -52,12 +53,11 @@ class _LoginPageState extends State<LoginPage> {
         listener: (context, state) {
           if (state is AuthSuccess) {
             ShowSnackbar.show(context, state.message);
-             Navigator.of(context).pushReplacement(
+            Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => HomePage()),
-            ); 
-          }
-          else if (state is AuthFailure) {
-            ShowSnackbar.show(context, state.error);
+            );
+          } else if (state is AuthFailure) {
+            ShowSnackbar.show(context, state.error, isError: true);
           }
         },
         child: SingleChildScrollView(
@@ -137,7 +137,8 @@ class _LoginPageState extends State<LoginPage> {
                     _buildTextField(
                       controller: _passwordController,
                       label: 'Password',
-                      obscureText: true,
+                      obscureText: _obscurePassword,
+                      isPasswordField: true,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Password is required';
@@ -146,6 +147,11 @@ class _LoginPageState extends State<LoginPage> {
                           return 'Password must be at least 6 characters';
                         }
                         return null;
+                      },
+                      onToggleObscure: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
                       },
                     ),
                     SizedBox(height: sectionSpacing),
@@ -230,7 +236,9 @@ class _LoginPageState extends State<LoginPage> {
     required String label,
     required String? Function(String?) validator,
     bool obscureText = false,
+    bool isPasswordField = false,
     TextInputType keyboardType = TextInputType.text,
+    VoidCallback? onToggleObscure,
   }) {
     return TextFormField(
       controller: controller,
@@ -239,6 +247,15 @@ class _LoginPageState extends State<LoginPage> {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
+        suffixIcon:
+            isPasswordField
+                ? IconButton(
+                  onPressed: onToggleObscure,
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                  ),
+                )
+                : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );

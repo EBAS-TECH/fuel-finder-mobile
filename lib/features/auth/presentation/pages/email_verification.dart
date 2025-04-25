@@ -86,7 +86,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                         MaterialPageRoute(builder: (context) => HomePage()),
                       );
                     } else if (state is AuthFailure) {
-                      ShowSnackbar.show(context, state.error);
+                      ShowSnackbar.show(context, state.error,isError: true);
                     }
                   },
                   builder: (context, state) {

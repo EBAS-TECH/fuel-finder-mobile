@@ -189,7 +189,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           child: Center(
             child: Image.asset(
               imagePath,
-              height: screenHeight * 0.35,
+              height: screenHeight * 0.45,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
             ),

@@ -23,6 +23,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -75,7 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           } else if (state is AuthFailure) {
-            ShowSnackbar.show(context, state.error);
+            ShowSnackbar.show(context, state.error, isError: true);
           }
         },
         child: SingleChildScrollView(
@@ -196,7 +198,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     _buildTextField(
                       controller: _passwordController,
                       label: 'Password',
-                      obscureText: true,
+                      isPasswordField: true,
+                      obscureText: _obscurePassword,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Password is required';
@@ -206,12 +209,18 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
                         return null;
                       },
+                      onToggleObscure: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
                       controller: _confirmPasswordController,
                       label: 'Confirm Password',
-                      obscureText: true,
+                      obscureText: _obscureConfirmPassword,
+                      isPasswordField: true,
                       validator: (value) {
                         if (value != _passwordController.text) {
                           return 'Passwords do not match';
@@ -219,6 +228,11 @@ class _RegisterPageState extends State<RegisterPage> {
                           return 'Password is required';
                         }
                         return null;
+                      },
+                      onToggleObscure: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
                       },
                     ),
                     SizedBox(height: sectionSpacing),
@@ -277,7 +291,9 @@ class _RegisterPageState extends State<RegisterPage> {
     required String label,
     required String? Function(String?) validator,
     bool obscureText = false,
+    bool isPasswordField = false,
     TextInputType keyboardType = TextInputType.text,
+    VoidCallback? onToggleObscure,
   }) {
     return TextFormField(
       controller: controller,
@@ -286,6 +302,15 @@ class _RegisterPageState extends State<RegisterPage> {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
+        suffixIcon:
+            isPasswordField
+                ? IconButton(
+                  onPressed: onToggleObscure,
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                  ),
+                )
+                : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
