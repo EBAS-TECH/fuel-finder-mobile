@@ -4,7 +4,7 @@ import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
-import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
+import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -83,10 +83,10 @@ class _EmailVerificationState extends State<EmailVerification> {
                       ShowSnackbar.show(context, state.message);
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
+                        MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                     } else if (state is AuthFailure) {
-                      ShowSnackbar.show(context, state.error,isError: true);
+                      ShowSnackbar.show(context, state.error, isError: true);
                     }
                   },
                   builder: (context, state) {

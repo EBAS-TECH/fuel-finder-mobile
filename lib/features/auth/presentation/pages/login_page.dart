@@ -51,10 +51,12 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(automaticallyImplyLeading: false),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is AuthLogInSucess) {
             ShowSnackbar.show(context, state.message);
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(
+                builder: (context) => HomePage(userId: state.userId),
+              ),
             );
           } else if (state is AuthFailure) {
             ShowSnackbar.show(context, state.error, isError: true);

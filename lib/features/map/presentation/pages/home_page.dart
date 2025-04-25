@@ -6,7 +6,8 @@ import 'package:fuel_finder/features/map/presentation/pages/profile_page.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/bottom_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userId;
+  const HomePage({super.key, required this.userId});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -35,3 +36,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+

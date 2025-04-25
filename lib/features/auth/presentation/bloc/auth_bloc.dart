@@ -64,7 +64,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final response = await signinUsecase(event.userName, event.password);
-      emit(AuthSuccess(message: "Login successful"));
+      final userId = response["data"]["id"];
+      emit(AuthLogInSucess(message: "Login successful", userId: userId));
     } on SocketException {
       emit(AuthFailure(error: "No Internet connection"));
     } on FormatException {
@@ -103,3 +104,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 }
+
