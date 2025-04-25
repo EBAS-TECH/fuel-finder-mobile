@@ -63,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
       appBar: AppBar(),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSucess) {
+          if (state is AuthSuccess) {
             debugPrint(state.message);
             Navigator.of(context).push(
               MaterialPageRoute(

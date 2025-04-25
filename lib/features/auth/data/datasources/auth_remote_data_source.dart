@@ -4,7 +4,7 @@ import 'package:fuel_finder/features/auth/data/models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRemoteDataSource {
-  final String baseUrl = "http://192.168.70.227:5001/api/auth";
+  final String baseUrl = "http://192.168.70.147:5001/api/auth";
   Future<Map<String, dynamic>> signUp(
     String firstName,
     String lastName,
@@ -61,13 +61,23 @@ class AuthRemoteDataSource {
     try {
       final response = await http.put(
         Uri.parse("$baseUrl/verify/$userId"),
+        headers: {"Content-Type": "application/json"},
         body: jsonEncode({"token": token}),
       );
-      print("Verfying userID: $userId");
-      print(json.decode(response.body));
-     
+
+      final responseBody = json.decode(response.body);
+      debugPrint("Verification response: $responseBody");
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        final errorMessage =
+            responseBody["message"] ?? "Email verification failed";
+        throw errorMessage;
+      }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Verification error: $e");
+      throw e.toString();
     }
   }
 }

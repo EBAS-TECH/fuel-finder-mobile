@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/logout_usecase.dart';
@@ -24,6 +25,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthVerifyEmailEvent>(_onVerifyEmail);
     on<AuthLogOutEvent>(_onLogOut);
   }
+
   Future<void> _onSignUp(AuthSignUpEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -38,16 +40,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       debugPrint(user.toString());
       debugPrint(user["data"]["id"]);
 
-      emit(
-        AuthSucess(
-          message: "Registration sucessful",
-          userId: user["data"]["id"],
-        ),
-      );
-    } catch (e) {
-      emit(AuthFailure(error: e.toString()));
+      emit(AuthSuccess(
+        message: "Registration successful",
+        userId: user["data"]["id"],
+      ));
+    } on SocketException {
+      emit(AuthFailure(error: "No Internet connection."));
+    } on FormatException {
+      emit(AuthFailure(error: "Invalid data format received."));
+    } catch (e, stack) {
+      if (kDebugMode) debugPrintStack(stackTrace: stack);
+      emit(AuthFailure(error: "Sign up failed. ${e.toString()}"));
     }
-    emit(AuthInitial());
   }
 
   Future<void> _onSignIn(AuthSignInEvent event, Emitter<AuthState> emit) async {
@@ -55,36 +59,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await signinUsecase(event.userName, event.password);
       debugPrint(user.toString());
-      emit(AuthSucess(message: "Login sucessful"));
-    } catch (e) {
-      emit(AuthFailure(error: e.toString()));
+      emit(AuthSuccess(message: "Login successful"));
+    } on SocketException {
+      emit(AuthFailure(error: "No Internet connection."));
+    } on FormatException {
+      emit(AuthFailure(error: "Invalid response format."));
+    } catch (e, stack) {
+      if (kDebugMode) debugPrintStack(stackTrace: stack);
+      emit(AuthFailure(error: "Login failed. ${e.toString()}"));
     }
-    emit(AuthInitial());
   }
 
-  Future<void> _onVerifyEmail(
-    AuthVerifyEmailEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-    try {
-      await verifyEmailUsecase(event.userId, event.token);
-      emit(AuthSucess(message: "Email verifcation sucessful"));
-    } catch (e) {
-      emit(AuthFailure(error: e.toString()));
-    }
-    emit(AuthInitial());
+Future<void> _onVerifyEmail(
+  AuthVerifyEmailEvent event,
+  Emitter<AuthState> emit,
+) async {
+  emit(AuthLoading());
+  try {
+    await verifyEmailUsecase(event.userId, event.token);
+    emit(AuthSuccess(message: "Email verification successful"));
+  } on SocketException {
+    emit(AuthFailure(error: "No Internet connection."));
+  } on FormatException {
+    emit(AuthFailure(error: "Invalid response format."));
+  } catch (e) {
+    emit(AuthFailure(error: e.toString()));
   }
+}
 
   Future<void> _onLogOut(AuthLogOutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       await logoutUsecase();
-      emit(AuthSucess(message: "Logout sucessful"));
-    } catch (e) {
-      emit(AuthFailure(error: e.toString()));
+      emit(AuthSuccess(message: "Logout successful"));
+    } on SocketException {
+      emit(AuthFailure(error: "No Internet connection."));
+    } catch (e, stack) {
+      if (kDebugMode) debugPrintStack(stackTrace: stack);
+      emit(AuthFailure(error: "Logout failed. ${e.toString()}"));
     }
-    emit(AuthInitial());
   }
 }
 

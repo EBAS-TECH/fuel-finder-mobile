@@ -4,8 +4,9 @@ import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
-import 'package:fuel_finder/features/auth/presentation/widgets/code_input_container.dart';
+import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class EmailVerification extends StatefulWidget {
   final String email;
@@ -21,7 +22,7 @@ class EmailVerification extends StatefulWidget {
 }
 
 class _EmailVerificationState extends State<EmailVerification> {
-  String _verificationCode = '';
+  final TextEditingController pinController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -57,24 +58,33 @@ class _EmailVerificationState extends State<EmailVerification> {
                 ),
               ),
               SizedBox(height: 32),
-              CodeInputContainer(
-                onCodeComplete: (code) {
-                  setState(() {
-                    _verificationCode = code;
-                  });
-                },
+              PinCodeTextField(
+                appContext: context,
+                length: 6,
+                controller: pinController,
+                keyboardType: TextInputType.number,
+                pinTheme: PinTheme(
+                  shape: PinCodeFieldShape.box,
+                  borderRadius: BorderRadius.circular(5),
+                  fieldHeight: 50,
+                  fieldWidth: 40,
+                  activeFillColor: Colors.white,
+                  activeColor: Colors.blue,
+                  selectedColor: Colors.blue,
+                  inactiveColor: Colors.grey,
+                ),
               ),
               SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
-                    if (state is AuthSucess) {
-                     /*  Navigator.pushReplacement(
+                    if (state is AuthSuccess) {
+                      ShowSnackbar.show(context, state.message);
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => HomePage()),
-                      ); */
-                      ShowSnackbar.show(context, state.message);
+                      );
                     } else if (state is AuthFailure) {
                       ShowSnackbar.show(context, state.error);
                     }
@@ -87,17 +97,25 @@ class _EmailVerificationState extends State<EmailVerification> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed:
-                          _verificationCode.length == 6
-                              ? () {
-                                context.read<AuthBloc>().add(
-                                  AuthVerifyEmailEvent(
-                                    userId: widget.userId,
-                                    token: _verificationCode,
-                                  ),
-                                );
-                              }
-                              : null,
+                      onPressed: () {
+                        final code = pinController.text.trim();
+                        if (code.isEmpty) {
+                          ShowSnackbar.show(
+                            context,
+                            "Please enter the verification code.",
+                          );
+                          return;
+                        }
+
+                        print('Token frontend: $code');
+                        context.read<AuthBloc>().add(
+                          AuthVerifyEmailEvent(
+                            userId: widget.userId,
+                            token: code,
+                          ),
+                        );
+                      },
+
                       child:
                           state is AuthLoading
                               ? CircularProgressIndicator(
