@@ -5,7 +5,7 @@ class SignupUsecase {
   final AuthRepository authRepository;
 
   SignupUsecase({required this.authRepository});
-  Future<UserEntity> call(
+  Future<Map<String,dynamic>> call(
     String firstName,
     String lastName,
     String userName,

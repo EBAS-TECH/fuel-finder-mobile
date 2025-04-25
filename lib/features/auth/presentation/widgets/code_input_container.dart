@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 class CodeInputContainer extends StatefulWidget {
-  const CodeInputContainer({super.key});
+  final Function(String)? onCodeComplete;
+
+  const CodeInputContainer({super.key, this.onCodeComplete});
 
   @override
   State<CodeInputContainer> createState() => _CodeInputContainerState();
 }
 
 class _CodeInputContainerState extends State<CodeInputContainer> {
-  final List<TextEditingController> _controllers =
-      List.generate(5, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(5, (_) => FocusNode());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
   void dispose() {
@@ -30,10 +34,10 @@ class _CodeInputContainerState extends State<CodeInputContainer> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(5, (index) {
+        children: List.generate(6, (index) {
           return Container(
-            width: 50,
-            height: 50,
+            width: 45,
+            height: 45,
             decoration: BoxDecoration(
               color: const Color(0xFFE7E7E7),
               borderRadius: BorderRadius.circular(8),
@@ -49,10 +53,15 @@ class _CodeInputContainerState extends State<CodeInputContainer> {
                 border: InputBorder.none,
               ),
               onChanged: (value) {
-                if (value.isNotEmpty && index < 4) {
+                if (value.isNotEmpty && index < 5) {
                   _focusNodes[index + 1].requestFocus();
                 } else if (value.isEmpty && index > 0) {
                   _focusNodes[index - 1].requestFocus();
+                }
+
+                if (_controllers.every((c) => c.text.isNotEmpty)) {
+                  final code = _controllers.map((c) => c.text).join();
+                  widget.onCodeComplete?.call(code);
                 }
               },
             ),

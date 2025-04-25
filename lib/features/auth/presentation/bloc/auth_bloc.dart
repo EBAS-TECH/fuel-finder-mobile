@@ -36,7 +36,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.role,
       );
       debugPrint(user.toString());
-      emit(AuthSucess(message: "Registration sucessful"));
+      debugPrint(user["data"]["id"]);
+
+      emit(
+        AuthSucess(
+          message: "Registration sucessful",
+          userId: user["data"]["id"],
+        ),
+      );
     } catch (e) {
       emit(AuthFailure(error: e.toString()));
     }
@@ -59,9 +66,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthVerifyEmailEvent event,
     Emitter<AuthState> emit,
   ) async {
-    await verifyEmailUsecase(event.userId, event.token);
     emit(AuthLoading());
     try {
+      await verifyEmailUsecase(event.userId, event.token);
       emit(AuthSucess(message: "Email verifcation sucessful"));
     } catch (e) {
       emit(AuthFailure(error: e.toString()));

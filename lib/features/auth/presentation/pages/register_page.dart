@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/email_verification.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
@@ -36,7 +37,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    _formKey.currentState?.reset();
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.height < 600;
@@ -64,8 +64,15 @@ class _RegisterPageState extends State<RegisterPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSucess) {
+            debugPrint(state.message);
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (content) => EmailVerification()),
+              MaterialPageRoute(
+                builder:
+                    (context) => EmailVerification(
+                      email: _emailController.text.trim(),
+                      userId: state.userId,
+                    ),
+              ),
             );
           } else if (state is AuthFailure) {
             ShowSnackbar.show(context, state.error);
@@ -284,17 +291,26 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void _submitForm() {
-    /*    if (_formKey.currentState!.validate()) {
+  void _submitForm() async {
+    if (_formKey.currentState!.validate()) {
       final firstName = _firstNameController.text.trim();
       final lastName = _lastNameController.text.trim();
       final username = _usernameController.text.trim();
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-    }  */
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => EmailVerification()));
+      final role = "DRIVER";
+
+      context.read<AuthBloc>().add(
+        AuthSignUpEvent(
+          firstName: firstName,
+          lastName: lastName,
+          userName: username,
+          email: email,
+          password: password,
+          role: role,
+        ),
+      );
+    }
   }
 }
 

@@ -26,7 +26,7 @@ class AuthSignInEvent extends AuthEvent {
 }
 
 class AuthVerifyEmailEvent extends AuthEvent {
-  final String userId;
+  final String? userId;
   final String token;
 
   AuthVerifyEmailEvent({required this.userId, required this.token});

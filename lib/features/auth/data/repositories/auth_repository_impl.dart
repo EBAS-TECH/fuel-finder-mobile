@@ -12,7 +12,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<UserEntity> signUp(
+  Future<Map<String,dynamic>> signUp(
     String firstName,
     String lastName,
     String userName,
@@ -31,8 +31,8 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<void> verifyEmail(String userId, String token) async {
-    return await authRemoteDataSource.veriyEmail(userId, token);
+  Future<void> verifyEmail(String? userId, String token) async {
+    return await authRemoteDataSource.verifyEmail(userId, token);
   }
 
   @override
