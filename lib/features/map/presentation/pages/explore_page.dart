@@ -135,22 +135,26 @@ class _ExplorePageState extends State<ExplorePage>
             builder: (context, state) {
               if (state is UserSucess) {
                 final user = state.responseData;
-                print(widget.userId);
-                print("user on explore page $user");
                 return Row(
                   children: [
-                    const Icon(Icons.person, color: Colors.white),
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(
+                        user["data"]["profile_pic"] ?? 
+                        'https://avatar.iran.liara.run/public/boy?username=user',
+                      ),
+                      radius: 20,
+                    ),
                     const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Hey There",
                           style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
                         Text(
-                          "${user["first_name"]} ${user["last_name"]}",
-                          style: TextStyle(
+                          "${user["data"]["first_name"]} ${user["data"]["last_name"]}",
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -163,7 +167,12 @@ class _ExplorePageState extends State<ExplorePage>
               }
               return const Row(
                 children: [
-                  Icon(Icons.person, color: Colors.white),
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(
+                      'https://avatar.iran.liara.run/public/boy?username=loading',
+                    ),
+                    radius: 20,
+                  ),
                   SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,14 +197,14 @@ class _ExplorePageState extends State<ExplorePage>
           ),
           actions: [
             Padding(
-              padding: EdgeInsets.only(right: 12.0),
+              padding: const EdgeInsets.only(right: 12.0),
               child: IconButton(
                 onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (context) => SearchPage()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SearchPage()),
+                  );
                 },
-                icon: Icon(Icons.search, color: Colors.white),
+                icon: const Icon(Icons.search, color: Colors.white),
               ),
             ),
           ],
@@ -212,9 +221,9 @@ class _ExplorePageState extends State<ExplorePage>
                     _showRouteInfo = true;
                   });
                 } else if (state is RouteError) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
                 }
               },
               child: BlocBuilder<GeolocationBloc, GeolocationState>(
