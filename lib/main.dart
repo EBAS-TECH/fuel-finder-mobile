@@ -3,27 +3,34 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/injection_container.dart';
 import 'package:fuel_finder/core/themes/app_theme.dart';
+import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
+import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
 import 'package:fuel_finder/features/onboarding/onboarding_page.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  final prefs = await SharedPreferences.getInstance();
+  final tokenService = TokenService(prefs);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Permission.locationWhenInUse.request();
   setUpDependencies();
 
-  runApp(const MainApp());
+  runApp(MainApp(tokenService: tokenService));
 }
 
 class MainApp extends StatelessWidget {
   static final RouteObserver<PageRoute> routeObserver =
       RouteObserver<PageRoute>();
-  const MainApp({super.key});
+  final TokenService tokenService;
+
+  const MainApp({super.key, required this.tokenService});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +46,28 @@ class MainApp extends StatelessWidget {
         theme: AppTheme.lightThemeMode,
         darkTheme: AppTheme.darkThemeMode,
         themeMode: ThemeMode.system,
-        home: const OnboardingPage(),
+        home: FutureBuilder<String?>(
+          future: tokenService.getToken(),
+          builder: (context, snapshot) {
+            final hasToken = snapshot.data != null;
+            final seenOnboarding = tokenService.getSeenOnboarding() ?? false;
+            final userId = tokenService.getUserId();
+
+            if (!seenOnboarding) {
+              return const OnboardingPage();
+            }
+
+            if (hasToken) {
+              if (userId != null) {
+                return HomePage(userId: userId);
+              } else {
+                return const LoginPage();
+              }
+            } else {
+              return const LoginPage();
+            }
+          },
+        ),
         navigatorObservers: [routeObserver],
         debugShowCheckedModeBanner: false,
       ),

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signin_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signup_usecase.dart';
@@ -12,6 +14,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SigninUsecase signinUsecase;
   final VerifyEmailUsecase verifyEmailUsecase;
   final LogoutUsecase logoutUsecase;
+  final TokenService tokenService;
+
+  static const int _minimumLoadingTime = 1500;
 
   String _cleanErrorMessage(dynamic error) {
     String message = error.toString();
@@ -26,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.signinUsecase,
     required this.verifyEmailUsecase,
     required this.logoutUsecase,
+    required this.tokenService,
   }) : super(AuthInitial()) {
     on<AuthSignUpEvent>(_onSignUp);
     on<AuthSignInEvent>(_onSignIn);
@@ -62,9 +68,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onSignIn(AuthSignInEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
+    final stopwatch = Stopwatch()..start();
+
     try {
       final response = await signinUsecase(event.userName, event.password);
-      final userId = response["data"]["id"];
+      final userId = response["user"]["id"];
+      final token = response["token"];
+
+      await tokenService.saveToken(token);
+      await tokenService.saveUserId(userId);
+
+      final elapsed = stopwatch.elapsedMilliseconds;
+      if (elapsed < _minimumLoadingTime) {
+        await Future.delayed(
+          Duration(milliseconds: _minimumLoadingTime - elapsed),
+        );
+      }
+
       emit(AuthLogInSucess(message: "Login successful", userId: userId));
     } on SocketException {
       emit(AuthFailure(error: "No Internet connection"));
@@ -72,6 +92,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthFailure(error: "Invalid data format"));
     } catch (e) {
       emit(AuthFailure(error: _cleanErrorMessage(e)));
+    } finally {
+      stopwatch.stop();
     }
   }
 
@@ -95,10 +117,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogOut(AuthLogOutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await logoutUsecase();
+      await tokenService.clearAll();
       emit(AuthSuccess(message: "Logout successful"));
-    } on SocketException {
-      emit(AuthFailure(error: "No Internet connection"));
     } catch (e) {
       emit(AuthFailure(error: _cleanErrorMessage(e)));
     }

@@ -10,14 +10,16 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<GetUserByIdEvent>(_getUserById);
   }
 
-  Future<Map<String, dynamic>> _getUserById(
+  Future<void> _getUserById(
     GetUserByIdEvent event,
     Emitter<UserState> emit,
   ) async {
+    emit(UserLoading());
     try {
-      final response = getUserByIdUsecase(event.userId);
-      return response;
+      final response = await getUserByIdUsecase(event.userId);
+      emit(UserSucess(response, message: "Sucessfully fetched"));
     } catch (e) {
+      emit(UserFailure(error: e.toString()));
       throw e.toString();
     }
   }

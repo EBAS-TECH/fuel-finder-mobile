@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:fuel_finder/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:fuel_finder/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:fuel_finder/features/auth/domain/repositories/auth_repository.dart';
@@ -17,10 +18,14 @@ import 'package:fuel_finder/features/user/domain/repositories/user_repository.da
 import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final GetIt sl = GetIt.instance;
 
-void setUpDependencies() {
+void setUpDependencies() async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => TokenService(sl()));
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSource());
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authRemoteDataSource: sl<AuthRemoteDataSource>()),
@@ -39,6 +44,7 @@ void setUpDependencies() {
   );
   sl.registerLazySingleton(
     () => AuthBloc(
+      tokenService: sl<TokenService>(),
       signupUsecase: sl<SignupUsecase>(),
       signinUsecase: sl<SigninUsecase>(),
       verifyEmailUsecase: sl<VerifyEmailUsecase>(),
@@ -46,7 +52,9 @@ void setUpDependencies() {
     ),
   );
 
-  sl.registerLazySingleton<UserRemoteDataSource>(() => UserRemoteDataSource());
+  sl.registerLazySingleton<UserRemoteDataSource>(
+    () => UserRemoteDataSource(tokenService: sl()),
+  );
   sl.registerLazySingleton<UserRepository>(
     () => UserRepositoryImpl(userRemoteDataSource: sl<UserRemoteDataSource>()),
   );
@@ -66,4 +74,3 @@ void setUpDependencies() {
   sl.registerLazySingleton(() => RouteRepository);
   sl.registerLazySingleton(() => RouteBloc(sl<RouteRepository>()));
 }
-

@@ -16,6 +16,7 @@ dependencies:
   flutter_map: ^8.1.1
   flutter_native_splash: ^2.4.6
   flutter_polyline_points: ^2.1.0
+  flutter_secure_storage: ^9.2.4
   font_awesome_flutter: ^10.8.0
   geocoding: ^3.0.0
   geolocator: ^14.0.0
@@ -24,6 +25,8 @@ dependencies:
   latlong2: ^0.9.1
   permission_handler: ^12.0.0+1
   pin_code_fields: ^8.0.1
+  shared_preferences: ^2.5.3
+  shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
 
 dev_dependencies:
