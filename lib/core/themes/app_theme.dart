@@ -24,13 +24,13 @@ class AppTheme {
       fontFamily: 'ProductSans',
     ),
     inputDecorationTheme: InputDecorationTheme(
-      errorStyle: const TextStyle(color: AppPallete.errorColor),
+      errorStyle: const TextStyle(color: Colors.red),
       hintStyle: const TextStyle(color: AppPallete.lightHintTextColor),
       contentPadding: const EdgeInsets.all(16),
       enabledBorder: _border(),
       focusedBorder: _border(),
-      errorBorder: _border(AppPallete.errorColor),
-      focusedErrorBorder: _border(AppPallete.errorColor),
+      errorBorder: _border(Colors.redAccent),
+      focusedErrorBorder: _border(AppPallete.greyColor),
     ),
     outlinedButtonTheme: const OutlinedButtonThemeData(
       style: ButtonStyle(
@@ -84,13 +84,13 @@ class AppTheme {
       fontFamily: 'ProductSans',
     ),
     inputDecorationTheme: InputDecorationTheme(
-      errorStyle: const TextStyle(color: AppPallete.errorColor),
+      errorStyle: const TextStyle(color: Colors.red),
       hintStyle: const TextStyle(color: AppPallete.whiteColor),
       contentPadding: const EdgeInsets.all(16),
       enabledBorder: _border(AppPallete.greyColor),
       focusedBorder: _border(AppPallete.greyColor),
-      errorBorder: _border(AppPallete.errorColor),
-      focusedErrorBorder: _border(AppPallete.errorColor),
+      errorBorder: _border(Colors.redAccent),
+      focusedErrorBorder: _border(AppPallete.greyColor),
     ),
     outlinedButtonTheme: const OutlinedButtonThemeData(
       style: ButtonStyle(
@@ -124,4 +124,3 @@ class AppTheme {
     ),
   );
 }
-

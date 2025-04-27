@@ -101,41 +101,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: textFieldSpacing),
-              SizedBox(
-                width: size.width * 0.9,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFEBF9F3),
-                    elevation: 0,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      vertical: buttonVerticalPadding,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        "assets/icons/google.png",
-                        width: size.width * 0.06,
-                        height: size.width * 0.06,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Sign up with Google',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: subtitleFontSize,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               Form(
                 key: _formKey,
                 child: Column(
@@ -338,3 +303,4 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 }
+

@@ -62,117 +62,68 @@ class _LoginPageState extends State<LoginPage> {
             ShowSnackbar.show(context, state.error, isError: true);
           }
         },
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Column(
-            children: [
-              SizedBox(height: sectionSpacing / 2),
-              Text(
-                'Login',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: textFieldSpacing / 2),
-              Text(
-                "Enter your email and password to sign in",
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: subtitleFontSize,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: textFieldSpacing),
-              SizedBox(
-                width: size.width * 0.9,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFEBF9F3),
-                    elevation: 0,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      vertical: buttonVerticalPadding,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 400),
+              child: Column(
+                children: [
+                  Text(
+                    'Login',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        "assets/icons/google.png",
-                        width: size.width * 0.06,
-                        height: size.width * 0.06,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Sign in with Google',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: subtitleFontSize,
-                        ),
-                      ),
-                    ],
+                  SizedBox(height: textFieldSpacing / 2),
+                  Text(
+                    "Enter your email and password to sign in",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: subtitleFontSize,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
-              Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: textFieldSpacing),
-                    _buildTextField(
-                      controller: _userNameController,
-                      label: 'Username',
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Username is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: textFieldSpacing),
-                    _buildTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      obscureText: _obscurePassword,
-                      isPasswordField: true,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Password is required';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
-                      onToggleObscure: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    SizedBox(height: sectionSpacing),
-                    Row(
+                  SizedBox(height: textFieldSpacing),
+                  Form(
+                    key: _formKey,
+                    child: Column(
                       children: [
-                        Checkbox(
-                          checkColor: AppPallete.whiteColor,
-                          activeColor: AppPallete.primaryColor,
-                          value: isChecked,
-                          onChanged:
-                              (value) => {
-                                setState(() {
-                                  isChecked = value ?? false;
-                                }),
-                              },
+                        SizedBox(height: textFieldSpacing),
+                        _buildTextField(
+                          controller: _userNameController,
+                          label: 'Username',
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Username is required';
+                            }
+                            return null;
+                          },
                         ),
-                        Text("Keep me logged in"),
-                        Spacer(),
+                        SizedBox(height: textFieldSpacing),
+                        _buildTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          obscureText: _obscurePassword,
+                          isPasswordField: true,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Password is required';
+                            }
+                            if (value.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                          onToggleObscure: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        SizedBox(height: sectionSpacing),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
                               "Forgot password?",
@@ -182,51 +133,52 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
                         ),
+                        SizedBox(height: sectionSpacing),
+                        SizedBox(
+                          width: double.infinity,
+                          child: BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, state) {
+                              return ElevatedButton(
+                                onPressed: _submitForm,
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: buttonVerticalPadding,
+                                  ),
+                                ),
+                                child:
+                                    state is AuthLoading
+                                        ? CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        )
+                                        : Text(
+                                          'LOGIN',
+                                          style: TextStyle(
+                                            fontSize: subtitleFontSize,
+                                          ),
+                                        ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: textFieldSpacing),
+                        authFooterText(
+                          context,
+                          "Not registerd yet? ",
+                          "Register",
+                          RegisterPage(),
+                          false,
+                        ),
+                        SizedBox(height: sectionSpacing / 2),
                       ],
                     ),
-                    SizedBox(
-                      width: size.width * 0.9,
-                      child: BlocBuilder<AuthBloc, AuthState>(
-                        builder: (context, state) {
-                          return ElevatedButton(
-                            onPressed: _submitForm,
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                vertical: buttonVerticalPadding,
-                              ),
-                            ),
-
-                            child:
-                                state is AuthLoading
-                                    ? CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    )
-                                    : Text(
-                                      'LOGIN',
-                                      style: TextStyle(
-                                        fontSize: subtitleFontSize,
-                                      ),
-                                    ),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(height: textFieldSpacing),
-                    authFooterText(
-                      context,
-                      "Not registerd yet? ",
-                      "Register",
-                      RegisterPage(),
-                      false,
-                    ),
-                    SizedBox(height: sectionSpacing / 2),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
