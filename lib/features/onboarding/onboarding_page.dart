@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
 import 'package:fuel_finder/features/onboarding/widgets/onboarding_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -13,7 +15,21 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _controller = PageController();
+  TokenService? tokenService;
   bool onLastPage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTokenService();
+  }
+
+  Future<void> _initTokenService() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      tokenService = TokenService(prefs);
+    });
+  }
 
   @override
   void dispose() {
@@ -124,7 +140,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 text: "Get Started",
                                 isPrimary: true,
                                 width: double.infinity,
-                                onPressed: () {
+                                onPressed: () async {
+                                //await tokenService?.setSeenOnboarding(true);
+                                  print("Sucessfully saved");
                                   Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
                                       builder: (context) => const LoginPage(),
