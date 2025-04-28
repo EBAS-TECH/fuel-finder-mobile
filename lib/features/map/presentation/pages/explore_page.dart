@@ -139,8 +139,8 @@ class _ExplorePageState extends State<ExplorePage>
                   children: [
                     CircleAvatar(
                       backgroundImage: NetworkImage(
-                        user["data"]["profile_pic"] ?? 
-                        'https://avatar.iran.liara.run/public/boy?username=user',
+                        user["data"]["profile_pic"] ??
+                            'https://avatar.iran.liara.run/public/boy?username=user',
                       ),
                       radius: 20,
                     ),
@@ -221,9 +221,9 @@ class _ExplorePageState extends State<ExplorePage>
                     _showRouteInfo = true;
                   });
                 } else if (state is RouteError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
               },
               child: BlocBuilder<GeolocationBloc, GeolocationState>(
@@ -244,7 +244,8 @@ class _ExplorePageState extends State<ExplorePage>
                     child: FlutterMap(
                       mapController: mapController,
                       options: MapOptions(
-                        initialCenter: userLocation ?? const LatLng(0, 0),
+                        initialCenter:
+                            userLocation ?? const LatLng(9.01, 38.75),
                         initialZoom: zoomLevel,
                         maxZoom: 18,
                         minZoom: 8,
@@ -402,6 +403,24 @@ class _ExplorePageState extends State<ExplorePage>
                 ),
               ),
           ],
+        ),
+        bottomNavigationBar: BlocBuilder<GeolocationBloc, GeolocationState>(
+          builder: (context, state) {
+            final isLoading =
+                (state is GeolocationLoading || state is GeolocationInitial);
+            return isLoading
+                ? AnimatedOpacity(
+                  opacity: isLoading ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 800),
+                  child: const LinearProgressIndicator(
+                    backgroundColor: Colors.white,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppPallete.primaryColor,
+                    ),
+                  ),
+                )
+                : const SizedBox.shrink();
+          },
         ),
       ),
     );

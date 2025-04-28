@@ -17,7 +17,6 @@ class FavoritesShimmer extends StatelessWidget {
       elevation: 3,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      
     );
   }
 }

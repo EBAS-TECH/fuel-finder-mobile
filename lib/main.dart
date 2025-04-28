@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fuel_finder/core/injection_container.dart';
 import 'package:fuel_finder/core/themes/app_theme.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
@@ -16,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   final prefs = await SharedPreferences.getInstance();
   final tokenService = TokenService(prefs);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);

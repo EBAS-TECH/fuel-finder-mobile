@@ -139,7 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                           child: BlocBuilder<AuthBloc, AuthState>(
                             builder: (context, state) {
                               return ElevatedButton(
-                                onPressed: _submitForm,
+                                onPressed: () {
+                                  FocusScope.of(context).unfocus();
+                                  _submitForm();
+                                },
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.symmetric(
                                     vertical: buttonVerticalPadding,
