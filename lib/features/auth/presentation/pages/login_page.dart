@@ -52,7 +52,6 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthLogInSucess) {
-            ShowSnackbar.show(context, state.message);
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => HomePage(userId: state.userId),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/pages/search_page.dart';
+import 'package:fuel_finder/features/map/presentation/widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
@@ -11,7 +12,6 @@ import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExplorePage extends StatefulWidget {
   final String userId;
@@ -89,13 +89,23 @@ class _ExplorePageState extends State<ExplorePage>
     }
   }
 
-  void _centerMapOnUserLocation() {
+  void _centerMapOnUserLocation() async {
+    bool serviceEnabled = await Permission.location.serviceStatus.isEnabled;
+    if (!serviceEnabled) {
+      if (!mounted) return;
+      ShowSnackbar.show(
+        context,
+        "Location Service is diabaled. Please enable GPS",
+      );
+    }
     final state = context.read<GeolocationBloc>().state;
     if (state is GeolocationLoaded) {
       mapController.move(
         LatLng(state.latitude, state.longitude),
         getZoomLevel(context),
       );
+    } else {
+      context.read<GeolocationBloc>().add(FetchUserLocation());
     }
   }
 
@@ -421,41 +431,6 @@ class _ExplorePageState extends State<ExplorePage>
                 )
                 : const SizedBox.shrink();
           },
-        ),
-      ),
-    );
-  }
-}
-
-class TrackLocationButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const TrackLocationButton({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(left: 15, right: 15, top: 20),
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: AppPallete.whiteColor,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: AppPallete.greyColor.withOpacity(0.4),
-              blurRadius: 5.0,
-              spreadRadius: 0.5,
-              offset: const Offset(0, 0),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Icon(
-            FontAwesomeIcons.locationCrosshairs,
-            color: Colors.black87,
-          ),
         ),
       ),
     );

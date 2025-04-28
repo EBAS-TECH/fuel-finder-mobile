@@ -29,6 +29,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     return Scaffold(
       backgroundColor: AppPallete.primaryColor,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Positioned(
