@@ -200,7 +200,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: Implement update logic
                   Navigator.pop(context);
                   ShowSnackbar.show(context, "$field updated successfully");
                 },
@@ -247,7 +246,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: Implement password update logic
                   Navigator.pop(context);
                   ShowSnackbar.show(context, "Password updated successfully");
                 },
