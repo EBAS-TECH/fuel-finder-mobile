@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppPallete {
   static const Color primaryColor = Color(0xFF28B872);
+  static const Color primaryColor70 = Color(0xB328B872);
   static const Color secondaryColor = Color(0xFFF2583E);
   static const Color errorColor = Colors.redAccent;
   static const Color greyColor = Colors.grey;

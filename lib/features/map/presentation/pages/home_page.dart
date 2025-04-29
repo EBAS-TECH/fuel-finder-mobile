@@ -15,22 +15,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
-  late List<Widget> _pages;
+
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _pages = [
       ExplorePage(userId: widget.userId),
-      FavoritePage(),
-      PricePage(),
-      ProfilePage(),
+      const FavoritePage(),
+      const PricePage(),
+      ProfilePage(userId: widget.userId),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: _pages[currentIndex],
       bottomNavigationBar: BottomNavBar(
         currentIndex: currentIndex,
         onTap: (index) {
@@ -39,7 +41,6 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
-      body: IndexedStack(index: currentIndex, children: _pages),
     );
   }
 }
