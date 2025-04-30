@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
+import 'package:fuel_finder/shimmer/favorites_shimmer.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -10,7 +11,7 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoritePageState extends State<FavoritePage> {
-  final List<Map<String, dynamic>> _favorites = [];
+  final List<Map<String, dynamic>> _favorites = [{}, {}];
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,13 @@ class _FavoritePageState extends State<FavoritePage> {
                 ),
               )
               : ListView.builder(
+                // padding: EdgeInsets.all(16),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return FavoritesShimmer();
+                },
+              ),
+      /*  ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _favorites.length,
                 itemBuilder: (context, index) {
@@ -67,7 +75,7 @@ class _FavoritePageState extends State<FavoritePage> {
                     ),
                   );
                 },
-              ),
+              ) */
     );
   }
 }
