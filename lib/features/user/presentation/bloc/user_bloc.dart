@@ -17,10 +17,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final response = await getUserByIdUsecase(event.userId);
-      emit(UserSucess(response, message: "Sucessfully fetched"));
+      if (response['data'] == null) {
+        emit(UserNotFound(message: "User not found"));
+      } else {
+        emit(UserSuccess(response, message: "Successfully fetched"));
+      }
     } catch (e) {
-      emit(UserFailure(error: e.toString()));
-      throw e.toString();
+      if (e.toString().contains("404") || e.toString().contains("not found")) {
+        emit(UserNotFound(message: "User not found"));
+      } else {
+        emit(UserFailure(error: e.toString()));
+      }
     }
   }
 }

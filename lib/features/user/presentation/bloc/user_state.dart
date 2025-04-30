@@ -4,11 +4,17 @@ class UserInitial extends UserState {}
 
 class UserLoading extends UserState {}
 
-class UserSucess extends UserState {
+class UserSuccess extends UserState {
   final String message;
   final Map<String, dynamic> responseData;
 
-  UserSucess(this.responseData, {required this.message});
+  UserSuccess(this.responseData, {required this.message});
+}
+
+class UserNotFound extends UserState {
+  final String message;
+
+  UserNotFound({required this.message});
 }
 
 class UserFailure extends UserState {

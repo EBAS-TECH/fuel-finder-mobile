@@ -78,12 +78,9 @@ class _ExplorePageState extends State<ExplorePage>
       context.read<GeolocationBloc>().add(FetchUserLocation());
     } else if (status.isDenied) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Location permission is required to access your location",
-          ),
-        ),
+      ShowSnackbar.show(
+        context,
+        "Location permission is required to access your location",
       );
     } else if (status.isPermanentlyDenied) {
       openAppSettings();
@@ -96,7 +93,7 @@ class _ExplorePageState extends State<ExplorePage>
       if (!mounted) return;
       ShowSnackbar.show(
         context,
-        "Location Service is diabaled. Please enable GPS",
+        "Location Service is disabled. Please enable GPS",
       );
     }
     final state = context.read<GeolocationBloc>().state;
@@ -147,179 +144,104 @@ class _ExplorePageState extends State<ExplorePage>
           ),
         ],
       ),
-    
-      /* 
-        automaticallyImplyLeading: false,
-        backgroundColor: AppPallete.primaryColor,
-        title: BlocBuilder<UserBloc, UserState>(
-          builder: (context, state) {
-            if (state is UserSucess) {
-              final user = state.responseData;
-              return Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      user["data"]["profile_pic"] ??
-                          'https://avatar.iran.liara.run/public/boy?username=user',
-                    ),
-                    radius: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Hey There",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      Text(
-                        "${user["data"]["first_name"]} ${user["data"]["last_name"]}",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            }
-            return const Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    'https://avatar.iran.liara.run/public/boy?username=user',
-                  ),
-                  radius: 20,
-                ),
-                SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Hey There",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    Text(
-                      "Loading...",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const SearchPage()),
-                );
-              },
-              icon: const Icon(Icons.search, color: Colors.white),
-            ),
-          ),
-        ],
-      ), */
       body: Stack(
         children: [
-          BlocListener<RouteBloc, RouteState>(
+          BlocListener<UserBloc, UserState>(
             listener: (context, state) {
-              if (state is RouteLoaded) {
-                setState(() {
-                  _routePoints = state.route.coordinates;
-                  _distance = state.route.distance;
-                  _duration = state.route.duration;
-                  _showRouteInfo = true;
-                });
-              } else if (state is RouteError) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
+              if (state is UserFailure) {
+                ShowSnackbar.show(context, state.error);
+              } else if (state is UserNotFound) {
+                ShowSnackbar.show(context, "User not found");
               }
             },
-            child: BlocBuilder<GeolocationBloc, GeolocationState>(
-              builder: (context, state) {
-                LatLng? userLocation;
-    
-                if (state is GeolocationLoaded) {
-                  userLocation = LatLng(state.latitude, state.longitude);
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (_routePoints.isEmpty) {
-                      mapController.move(userLocation!, zoomLevel);
-                    }
+            child: BlocListener<RouteBloc, RouteState>(
+              listener: (context, state) {
+                if (state is RouteLoaded) {
+                  setState(() {
+                    _routePoints = state.route.coordinates;
+                    _distance = state.route.distance;
+                    _duration = state.route.duration;
+                    _showRouteInfo = true;
                   });
+                } else if (state is RouteError) {
+                  ShowSnackbar.show(context, state.message);
                 }
-    
-                return GestureDetector(
-                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                  child: FlutterMap(
-                    mapController: mapController,
-                    options: MapOptions(
-                      initialCenter:
-                          userLocation ?? const LatLng(9.01, 38.75),
-                      initialZoom: zoomLevel,
-                      maxZoom: 18,
-                      minZoom: 8,
-                      onTap: _handleMapTap,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate: _mapTypeUrl,
-                        userAgentPackageName: 'com.example.fuel_finder',
-                      ),
-                      if (state is GeolocationLoaded)
-                        MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: userLocation!,
-                              width: 40,
-                              height: 40,
-                              child: Icon(
-                                Icons.location_on,
-                                color: AppPallete.redColor,
-                                size: 40,
-                              ),
-                            ),
-                          ],
-                        ),
-                      if (_selectedLocation != null)
-                        MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: _selectedLocation!,
-                              width: 40,
-                              height: 40,
-                              child: const Icon(
-                                Icons.location_pin,
-                                color: Colors.blue,
-                                size: 40,
-                              ),
-                            ),
-                          ],
-                        ),
-                      if (_routePoints.isNotEmpty)
-                        PolylineLayer(
-                          polylines: [
-                            Polyline(
-                              points: _routePoints,
-                              strokeWidth: 5,
-                              color: Colors.blue,
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                );
               },
+              child: BlocBuilder<GeolocationBloc, GeolocationState>(
+                builder: (context, state) {
+                  LatLng? userLocation;
+
+                  if (state is GeolocationLoaded) {
+                    userLocation = LatLng(state.latitude, state.longitude);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_routePoints.isEmpty) {
+                        mapController.move(userLocation!, zoomLevel);
+                      }
+                    });
+                  }
+
+                  return GestureDetector(
+                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                    child: FlutterMap(
+                      mapController: mapController,
+                      options: MapOptions(
+                        initialCenter:
+                            userLocation ?? const LatLng(9.01, 38.75),
+                        initialZoom: zoomLevel,
+                        maxZoom: 18,
+                        minZoom: 8,
+                        onTap: _handleMapTap,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate: _mapTypeUrl,
+                          userAgentPackageName: 'com.example.fuel_finder',
+                        ),
+                        if (state is GeolocationLoaded)
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: userLocation!,
+                                width: 40,
+                                height: 40,
+                                child: Icon(
+                                  Icons.location_on,
+                                  color: AppPallete.redColor,
+                                  size: 40,
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (_selectedLocation != null)
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: _selectedLocation!,
+                                width: 40,
+                                height: 40,
+                                child: const Icon(
+                                  Icons.location_pin,
+                                  color: Colors.blue,
+                                  size: 40,
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (_routePoints.isNotEmpty)
+                          PolylineLayer(
+                            polylines: [
+                              Polyline(
+                                points: _routePoints,
+                                strokeWidth: 5,
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           Positioned(
@@ -430,15 +352,15 @@ class _ExplorePageState extends State<ExplorePage>
               (state is GeolocationLoading || state is GeolocationInitial);
           return isLoading
               ? AnimatedOpacity(
-                opacity: isLoading ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 800),
-                child: const LinearProgressIndicator(
-                  backgroundColor: Colors.white,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppPallete.primaryColor,
+                  opacity: isLoading ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 800),
+                  child: const LinearProgressIndicator(
+                    backgroundColor: Colors.white,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppPallete.primaryColor,
+                    ),
                   ),
-                ),
-              )
+                )
               : const SizedBox.shrink();
         },
       ),

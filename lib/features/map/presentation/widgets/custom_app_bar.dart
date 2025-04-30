@@ -41,7 +41,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   }
                 },
                 builder: (context, state) {
-                  if (state is UserSucess) {
+                  if (state is UserSuccess) {
                     final user = state.responseData;
                     return Row(
                       children: [
