@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRemoteDataSource {
-  final String baseUrl = "http://192.168.230.14:5001/api/auth";
+  final String baseUrl = "http://192.168.230.179:5001/api/auth";
 
   Future<Map<String, dynamic>> signUp(
     String firstName,
