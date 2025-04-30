@@ -5,8 +5,8 @@ class GetGasStationUsecase {
 
   GetGasStationUsecase({required this.gasRepository});
 
-  Future<Map<String, dynamic>> call(String token) {
-    return gasRepository.getGasStations(token);
+  Future<Map<String, dynamic>> call() {
+    return gasRepository.getGasStations();
   }
 }
 

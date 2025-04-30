@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_bloc.dart';
+import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_event.dart';
+import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_state.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/pages/search_page.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
-import 'package:fuel_finder/features/map/presentation/widgets/track_location_button.dart';
+import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
@@ -28,14 +31,65 @@ class _ExplorePageState extends State<ExplorePage>
   FocusScopeNode focusNode = FocusScopeNode();
   List<LatLng> _routePoints = [];
   LatLng? _selectedLocation;
-  double? latitude;
-  double? longitude;
-  bool _showRouteInfo = false;
   double? _distance;
   double? _duration;
+  bool _showRouteInfo = false;
+  bool _showStationInfo = false;
+  Map<String, dynamic>? _selectedStation;
 
   final String _mapTypeUrl =
       'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLocationPermission();
+    _fetchUserData();
+    _getGasStations();
+  }
+
+  void _checkLocationPermission() async {
+    PermissionStatus status = await Permission.locationWhenInUse.request();
+
+    if (status.isGranted && mounted) {
+      context.read<GeolocationBloc>().add(FetchUserLocation());
+    } else if (status.isDenied && mounted) {
+      ShowSnackbar.show(
+        context,
+        "Location permission is required to access your location",
+      );
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
+
+  void _centerMapOnUserLocation() async {
+    bool serviceEnabled = await Permission.location.serviceStatus.isEnabled;
+    if (!serviceEnabled && mounted) {
+      ShowSnackbar.show(
+        context,
+        "Location Service is disabled. Please enable GPS",
+      );
+      return;
+    }
+    final state = context.read<GeolocationBloc>().state;
+    if (state is GeolocationLoaded) {
+      mapController.move(
+        LatLng(state.latitude, state.longitude),
+        getZoomLevel(context),
+      );
+    } else {
+      context.read<GeolocationBloc>().add(FetchUserLocation());
+    }
+  }
+
+  void _fetchUserData() {
+    context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
+  }
+
+  void _getGasStations() {
+    context.read<GasStationBloc>().add(GetGasStationsEvent());
+  }
 
   void _getRoute() {
     if (_selectedLocation == null) return;
@@ -59,7 +113,29 @@ class _ExplorePageState extends State<ExplorePage>
     setState(() {
       _selectedLocation = latLng;
       _showRouteInfo = false;
+      _showStationInfo = false;
       _routePoints = [];
+    });
+  }
+
+  void _handleStationTap(Map<String, dynamic> station) {
+    setState(() {
+      _selectedStation = station;
+      _selectedLocation = LatLng(
+        double.parse(station['latitude'].toString()),
+        double.parse(station['longitude'].toString()),
+      );
+      _showStationInfo = true;
+      _showRouteInfo = false;
+    });
+  }
+
+  void _hideRouteInformation() {
+    setState(() {
+      _showRouteInfo = false;
+      _showStationInfo = false;
+      _routePoints = [];
+      _selectedLocation = null;
     });
   }
 
@@ -70,65 +146,10 @@ class _ExplorePageState extends State<ExplorePage>
     return 13.5;
   }
 
-  Future<void> _checkLocationPermission() async {
-    PermissionStatus status = await Permission.locationWhenInUse.request();
-
-    if (status.isGranted) {
-      if (!mounted) return;
-      context.read<GeolocationBloc>().add(FetchUserLocation());
-    } else if (status.isDenied) {
-      if (!mounted) return;
-      ShowSnackbar.show(
-        context,
-        "Location permission is required to access your location",
-      );
-    } else if (status.isPermanentlyDenied) {
-      openAppSettings();
-    }
-  }
-
-  void _centerMapOnUserLocation() async {
-    bool serviceEnabled = await Permission.location.serviceStatus.isEnabled;
-    if (!serviceEnabled) {
-      if (!mounted) return;
-      ShowSnackbar.show(
-        context,
-        "Location Service is disabled. Please enable GPS",
-      );
-    }
-    final state = context.read<GeolocationBloc>().state;
-    if (state is GeolocationLoaded) {
-      mapController.move(
-        LatLng(state.latitude, state.longitude),
-        getZoomLevel(context),
-      );
-    } else {
-      context.read<GeolocationBloc>().add(FetchUserLocation());
-    }
-  }
-
-  void _hideRouteInformation() {
-    setState(() {
-      _showRouteInfo = false;
-      _routePoints = [];
-      _selectedLocation = null;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLocationPermission();
-    _fetchUserData();
-  }
-
-  void _fetchUserData() {
-    context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
-  }
-
   @override
   Widget build(BuildContext context) {
     double zoomLevel = getZoomLevel(context);
+
     return Scaffold(
       appBar: CustomAppBar(
         userId: widget.userId,
@@ -162,17 +183,21 @@ class _ExplorePageState extends State<ExplorePage>
                     _distance = state.route.distance;
                     _duration = state.route.duration;
                     _showRouteInfo = true;
+                    _showStationInfo = false;
                   });
                 } else if (state is RouteError) {
                   ShowSnackbar.show(context, state.message);
                 }
               },
               child: BlocBuilder<GeolocationBloc, GeolocationState>(
-                builder: (context, state) {
+                builder: (context, geoState) {
                   LatLng? userLocation;
 
-                  if (state is GeolocationLoaded) {
-                    userLocation = LatLng(state.latitude, state.longitude);
+                  if (geoState is GeolocationLoaded) {
+                    userLocation = LatLng(
+                      geoState.latitude,
+                      geoState.longitude,
+                    );
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (_routePoints.isEmpty) {
                         mapController.move(userLocation!, zoomLevel);
@@ -180,65 +205,118 @@ class _ExplorePageState extends State<ExplorePage>
                     });
                   }
 
-                  return GestureDetector(
-                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                    child: FlutterMap(
-                      mapController: mapController,
-                      options: MapOptions(
-                        initialCenter:
-                            userLocation ?? const LatLng(9.01, 38.75),
-                        initialZoom: zoomLevel,
-                        maxZoom: 18,
-                        minZoom: 8,
-                        onTap: _handleMapTap,
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate: _mapTypeUrl,
-                          userAgentPackageName: 'com.example.fuel_finder',
+                  return BlocBuilder<GasStationBloc, GasStationState>(
+                    builder: (context, gasStationState) {
+                      debugPrint("GasStationState: $gasStationState");
+                      if (gasStationState is GasStationFailure) {
+                        debugPrint(gasStationState.error);
+                      }
+                      List<Marker> gasStationMarkers = [];
+
+                      if (gasStationState is GasStationSucess) {
+                        final stations = gasStationState.gasStation;
+                        debugPrint("GasSations: $stations");
+                        if (stations != null) {
+                          for (var station in stations) {
+                            try {
+                              final lat = station['latitude'];
+                              final lng = station['longitude'];
+                              final parsedLat =
+                                  lat is double
+                                      ? lat
+                                      : double.tryParse(lat.toString());
+                              final parsedLng =
+                                  lng is double
+                                      ? lng
+                                      : double.tryParse(lng.toString());
+
+                              if (parsedLat != null && parsedLng != null) {
+                                gasStationMarkers.add(
+                                  Marker(
+                                    point: LatLng(parsedLat, parsedLng),
+                                    width: 40,
+                                    height: 40,
+                                    child: GestureDetector(
+                                      onTap: () => _handleStationTap(station),
+                                      child: Icon(
+                                        Icons.local_gas_station,
+                                        color: AppPallete.primaryColor,
+                                        size: 30,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              debugPrint('Error creating marker: $e');
+                            }
+                          }
+                        }
+                      }
+
+                      return GestureDetector(
+                        onTap:
+                            () => FocusManager.instance.primaryFocus?.unfocus(),
+                        child: FlutterMap(
+                          mapController: mapController,
+                          options: MapOptions(
+                            initialCenter:
+                                userLocation ?? const LatLng(9.01, 38.75),
+                            initialZoom: zoomLevel,
+                            maxZoom: 18,
+                            minZoom: 3,
+                            onTap: _handleMapTap,
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: _mapTypeUrl,
+                              userAgentPackageName: 'com.example.fuel_finder',
+                            ),
+                            if (geoState is GeolocationLoaded)
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: userLocation!,
+                                    width: 40,
+                                    height: 40,
+                                    child: Icon(
+                                      Icons.location_on,
+                                      color: AppPallete.redColor,
+                                      size: 40,
+                                    ),
+                                  ),
+                                  ...gasStationMarkers,
+                                ],
+                              ),
+                            if (_selectedLocation != null)
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: _selectedLocation!,
+                                    width: 40,
+                                    height: 40,
+                                    child: const Icon(
+                                      Icons.location_pin,
+                                      color: Colors.blue,
+                                      size: 40,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            if (_routePoints.isNotEmpty)
+                              PolylineLayer(
+                                polylines: [
+                                  Polyline(
+                                    points: _routePoints,
+                                    strokeWidth: 5,
+                                    color: Colors.blue,
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
-                        if (state is GeolocationLoaded)
-                          MarkerLayer(
-                            markers: [
-                              Marker(
-                                point: userLocation!,
-                                width: 40,
-                                height: 40,
-                                child: Icon(
-                                  Icons.location_on,
-                                  color: AppPallete.redColor,
-                                  size: 40,
-                                ),
-                              ),
-                            ],
-                          ),
-                        if (_selectedLocation != null)
-                          MarkerLayer(
-                            markers: [
-                              Marker(
-                                point: _selectedLocation!,
-                                width: 40,
-                                height: 40,
-                                child: const Icon(
-                                  Icons.location_pin,
-                                  color: Colors.blue,
-                                  size: 40,
-                                ),
-                              ),
-                            ],
-                          ),
-                        if (_routePoints.isNotEmpty)
-                          PolylineLayer(
-                            polylines: [
-                              Polyline(
-                                points: _routePoints,
-                                strokeWidth: 5,
-                                color: Colors.blue,
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               ),
@@ -286,84 +364,116 @@ class _ExplorePageState extends State<ExplorePage>
               bottom: 0,
               left: 0,
               right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Route Information',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: _hideRouteInformation,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Icon(Icons.directions_car, color: Colors.blue),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Distance: ${(_distance! / 1000).toStringAsFixed(2)} KM',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.timer, color: Colors.blue),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Duration: ${(_duration! / 60).toStringAsFixed(2)} Minutes',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              child: _buildRouteInfoCard(),
+            ),
+          if (_showStationInfo && _selectedStation != null)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildStationInfoCard(),
             ),
         ],
       ),
       bottomNavigationBar: BlocBuilder<GeolocationBloc, GeolocationState>(
         builder: (context, state) {
           final isLoading =
-              (state is GeolocationLoading || state is GeolocationInitial);
+              state is GeolocationLoading || state is GeolocationInitial;
           return isLoading
-              ? AnimatedOpacity(
-                  opacity: isLoading ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 800),
-                  child: const LinearProgressIndicator(
-                    backgroundColor: Colors.white,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppPallete.primaryColor,
-                    ),
-                  ),
-                )
+              ? const LinearProgressIndicator(
+                backgroundColor: Colors.white,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppPallete.primaryColor,
+                ),
+              )
               : const SizedBox.shrink();
         },
       ),
+    );
+  }
+
+  Widget _buildRouteInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCardHeader('Route Information'),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.directions_car, color: Colors.blue),
+              const SizedBox(width: 10),
+              Text('Distance: ${(_distance! / 1000).toStringAsFixed(2)} KM'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.timer, color: Colors.blue),
+              const SizedBox(width: 10),
+              Text('Duration: ${(_duration! / 60).toStringAsFixed(2)} Minutes'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStationInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCardHeader(_selectedStation!['en_name'] ?? 'Gas Station'),
+          const SizedBox(height: 10),
+          Text(_selectedStation!['address'] ?? 'No address provided'),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.location_on, color: Colors.blue),
+              const SizedBox(width: 10),
+              Text('Lat: ${_selectedStation!['latitude'].toStringAsFixed(4)}'),
+              const SizedBox(width: 20),
+              Text('Lng: ${_selectedStation!['longitude'].toStringAsFixed(4)}'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _getRoute,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppPallete.primaryColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Show Route'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardHeader(String title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _hideRouteInformation,
+        ),
+      ],
     );
   }
 }

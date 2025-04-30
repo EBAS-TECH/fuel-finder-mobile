@@ -1,4 +1,4 @@
 abstract class GasRepository {
-  Future<Map<String, dynamic>> getGasStations(String token);
+  Future<Map<String, dynamic>> getGasStations();
 }
 

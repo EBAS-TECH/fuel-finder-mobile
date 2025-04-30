@@ -17,16 +17,23 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
   ) async {
     emit(GasStationLoading());
     try {
-      final response = await getGasStationUsecase(event.token);
-      if (response["data"] == null) {
+      final response = await getGasStationUsecase();
+      if (response is! Map<String, dynamic>) {
+        throw Exception('Invalid response format');
+      }
+      
+      final data = response['data'];
+      if (data == null) {
         emit(GasStationNull(message: "No gas stations found"));
-      } else if (response["data"] != null) {
+      } else if (data is List) {
         emit(
           GasStationSucess(
             message: "Gas stations fetched",
-            gasStation: response["data"],
+            gasStation: List<Map<String, dynamic>>.from(data),
           ),
         );
+      } else {
+        throw Exception('Unexpected data format: ${data.runtimeType}');
       }
     } catch (e) {
       emit(GasStationFailure(error: e.toString()));

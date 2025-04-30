@@ -6,8 +6,8 @@ class GasStationRepositoryImpl extends GasRepository {
 
   GasStationRepositoryImpl({required this.gasStationRemoteDataSource});
   @override
-  Future<Map<String, dynamic>> getGasStations(String token) {
-    return gasStationRemoteDataSource.getGasStations(token);
+  Future<Map<String, dynamic>> getGasStations() {
+    return gasStationRemoteDataSource.getGasStations();
   }
 }
 

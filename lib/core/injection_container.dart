@@ -8,6 +8,11 @@ import 'package:fuel_finder/features/auth/domain/usecases/signin_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:fuel_finder/features/gas_station/data/datasources/gas_station_remote_data_source.dart';
+import 'package:fuel_finder/features/gas_station/data/repositories/gas_station_repository_impl.dart';
+import 'package:fuel_finder/features/gas_station/domain/repositories/gas_repository.dart';
+import 'package:fuel_finder/features/gas_station/domain/usecases/get_gas_station_usecase.dart';
+import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/route/data/datasources/osrm_data_source.dart';
 import 'package:fuel_finder/features/route/data/repositories/route_repository.dart';
@@ -26,6 +31,9 @@ void setUpDependencies() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => TokenService(sl()));
+
+  // Auth
+
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSource());
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authRemoteDataSource: sl<AuthRemoteDataSource>()),
@@ -52,6 +60,8 @@ void setUpDependencies() async {
     ),
   );
 
+  // User
+
   sl.registerLazySingleton<UserRemoteDataSource>(
     () => UserRemoteDataSource(tokenService: sl()),
   );
@@ -65,7 +75,12 @@ void setUpDependencies() async {
     () => UserBloc(getUserByIdUsecase: sl<GetUserByIdUsecase>()),
   );
 
+  // Geo Location
+
   sl.registerLazySingleton(() => GeolocationBloc());
+
+  // Route
+
   sl.registerLazySingleton(() => Dio());
   sl.registerLazySingleton(<RouteRepository>() => OSRMDataSource(sl<Dio>()));
   sl.registerLazySingleton<RouteRepository>(
@@ -73,4 +88,22 @@ void setUpDependencies() async {
   );
   sl.registerLazySingleton(() => RouteRepository);
   sl.registerLazySingleton(() => RouteBloc(sl<RouteRepository>()));
+
+  // Gas Stations
+
+  sl.registerLazySingleton(
+    () => GasStationRemoteDataSource(tokenService: sl()),
+  );
+  sl.registerLazySingleton<GasRepository>(
+    () => GasStationRepositoryImpl(
+      gasStationRemoteDataSource: sl<GasStationRemoteDataSource>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => GetGasStationUsecase(gasRepository: sl<GasRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => GasStationBloc(getGasStationUsecase: sl<GetGasStationUsecase>()),
+  );
 }
+

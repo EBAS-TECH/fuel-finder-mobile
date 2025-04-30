@@ -6,7 +6,7 @@ class GasStationLoading extends GasStationState {}
 
 class GasStationSucess extends GasStationState {
   final String message;
-  final Map<String, dynamic> gasStation;
+  final List<Map<String, dynamic>> gasStation;
 
   GasStationSucess({required this.message, required this.gasStation});
 }
