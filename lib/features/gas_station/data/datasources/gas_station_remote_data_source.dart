@@ -5,15 +5,19 @@ import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:http/http.dart' as http;
 
 class GasStationRemoteDataSource {
-  final String baseUrl = "http://192.168.230.179:5001/api";
+  final String baseUrl = "http://192.168.230.254:5001/api";
   final TokenService tokenService;
 
   GasStationRemoteDataSource({required this.tokenService});
-  Future<Map<String, dynamic>> getGasStations() async {
+  Future<Map<String, dynamic>> getGasStations(
+    String latitude,
+    String longitude,
+  ) async {
     final token = await tokenService.getAuthToken();
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/station'),
+      final response = await http.post(
+        Uri.parse('$baseUrl/station/near-station'),
+        body: jsonEncode({"latitude": latitude, "longitude": longitude}),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

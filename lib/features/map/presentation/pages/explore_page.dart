@@ -45,7 +45,6 @@ class _ExplorePageState extends State<ExplorePage>
     super.initState();
     _checkLocationPermission();
     _fetchUserData();
-    _getGasStations();
   }
 
   void _checkLocationPermission() async {
@@ -78,6 +77,7 @@ class _ExplorePageState extends State<ExplorePage>
         LatLng(state.latitude, state.longitude),
         getZoomLevel(context),
       );
+      _getGasStations(state.latitude, state.longitude);
     } else {
       context.read<GeolocationBloc>().add(FetchUserLocation());
     }
@@ -87,8 +87,13 @@ class _ExplorePageState extends State<ExplorePage>
     context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
   }
 
-  void _getGasStations() {
-    context.read<GasStationBloc>().add(GetGasStationsEvent());
+  void _getGasStations(double latitude, double longitude) {
+    context.read<GasStationBloc>().add(
+      GetGasStationsEvent(
+        latitude: latitude.toString(),
+        longitude: longitude.toString(),
+      ),
+    );
   }
 
   void _getRoute() {
@@ -175,150 +180,159 @@ class _ExplorePageState extends State<ExplorePage>
                 ShowSnackbar.show(context, "User not found");
               }
             },
-            child: BlocListener<RouteBloc, RouteState>(
+            child: BlocListener<GeolocationBloc, GeolocationState>(
               listener: (context, state) {
-                if (state is RouteLoaded) {
-                  setState(() {
-                    _routePoints = state.route.coordinates;
-                    _distance = state.route.distance;
-                    _duration = state.route.duration;
-                    _showRouteInfo = true;
-                    _showStationInfo = false;
-                  });
-                } else if (state is RouteError) {
-                  ShowSnackbar.show(context, state.message);
+                if (state is GeolocationLoaded) {
+                  // When we get the location, fetch gas stations
+                  _getGasStations(state.latitude, state.longitude);
                 }
               },
-              child: BlocBuilder<GeolocationBloc, GeolocationState>(
-                builder: (context, geoState) {
-                  LatLng? userLocation;
-
-                  if (geoState is GeolocationLoaded) {
-                    userLocation = LatLng(
-                      geoState.latitude,
-                      geoState.longitude,
-                    );
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_routePoints.isEmpty) {
-                        mapController.move(userLocation!, zoomLevel);
-                      }
+              child: BlocListener<RouteBloc, RouteState>(
+                listener: (context, state) {
+                  if (state is RouteLoaded) {
+                    setState(() {
+                      _routePoints = state.route.coordinates;
+                      _distance = state.route.distance;
+                      _duration = state.route.duration;
+                      _showRouteInfo = true;
+                      _showStationInfo = false;
                     });
+                  } else if (state is RouteError) {
+                    ShowSnackbar.show(context, state.message);
                   }
+                },
+                child: BlocBuilder<GeolocationBloc, GeolocationState>(
+                  builder: (context, geoState) {
+                    LatLng? userLocation;
 
-                  return BlocBuilder<GasStationBloc, GasStationState>(
-                    builder: (context, gasStationState) {
-                      debugPrint("GasStationState: $gasStationState");
-                      if (gasStationState is GasStationFailure) {
-                        debugPrint(gasStationState.error);
-                      }
-                      List<Marker> gasStationMarkers = [];
+                    if (geoState is GeolocationLoaded) {
+                      userLocation = LatLng(
+                        geoState.latitude,
+                        geoState.longitude,
+                      );
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_routePoints.isEmpty) {
+                          mapController.move(userLocation!, zoomLevel);
+                        }
+                      });
+                    }
 
-                      if (gasStationState is GasStationSucess) {
-                        final stations = gasStationState.gasStation;
-                        debugPrint("GasSations: $stations");
-                        if (stations != null) {
-                          for (var station in stations) {
-                            try {
-                              final lat = station['latitude'];
-                              final lng = station['longitude'];
-                              final parsedLat =
-                                  lat is double
-                                      ? lat
-                                      : double.tryParse(lat.toString());
-                              final parsedLng =
-                                  lng is double
-                                      ? lng
-                                      : double.tryParse(lng.toString());
+                    return BlocBuilder<GasStationBloc, GasStationState>(
+                      builder: (context, gasStationState) {
+                        debugPrint("GasStationState: $gasStationState");
+                        if (gasStationState is GasStationFailure) {
+                          debugPrint(gasStationState.error);
+                        }
+                        List<Marker> gasStationMarkers = [];
 
-                              if (parsedLat != null && parsedLng != null) {
-                                gasStationMarkers.add(
-                                  Marker(
-                                    point: LatLng(parsedLat, parsedLng),
-                                    width: 40,
-                                    height: 40,
-                                    child: GestureDetector(
-                                      onTap: () => _handleStationTap(station),
-                                      child: Icon(
-                                        Icons.local_gas_station,
-                                        color: AppPallete.primaryColor,
-                                        size: 30,
+                        if (gasStationState is GasStationSucess) {
+                          final stations = gasStationState.gasStation;
+                          debugPrint("GasStations: $stations");
+                          if (stations != null) {
+                            for (var station in stations) {
+                              try {
+                                final lat = station['latitude'];
+                                final lng = station['longitude'];
+                                final parsedLat =
+                                    lat is double
+                                        ? lat
+                                        : double.tryParse(lat.toString());
+                                final parsedLng =
+                                    lng is double
+                                        ? lng
+                                        : double.tryParse(lng.toString());
+
+                                if (parsedLat != null && parsedLng != null) {
+                                  gasStationMarkers.add(
+                                    Marker(
+                                      point: LatLng(parsedLat, parsedLng),
+                                      width: 40,
+                                      height: 40,
+                                      child: GestureDetector(
+                                        onTap: () => _handleStationTap(station),
+                                        child: Icon(
+                                          Icons.local_gas_station,
+                                          color: AppPallete.primaryColor,
+                                          size: 30,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                }
+                              } catch (e) {
+                                debugPrint('Error creating marker: $e');
                               }
-                            } catch (e) {
-                              debugPrint('Error creating marker: $e');
                             }
                           }
                         }
-                      }
 
-                      return GestureDetector(
-                        onTap:
-                            () => FocusManager.instance.primaryFocus?.unfocus(),
-                        child: FlutterMap(
-                          mapController: mapController,
-                          options: MapOptions(
-                            initialCenter:
-                                userLocation ?? const LatLng(9.01, 38.75),
-                            initialZoom: zoomLevel,
-                            maxZoom: 18,
-                            minZoom: 3,
-                            onTap: _handleMapTap,
-                          ),
-                          children: [
-                            TileLayer(
-                              urlTemplate: _mapTypeUrl,
-                              userAgentPackageName: 'com.example.fuel_finder',
+                        return GestureDetector(
+                          onTap:
+                              () =>
+                                  FocusManager.instance.primaryFocus?.unfocus(),
+                          child: FlutterMap(
+                            mapController: mapController,
+                            options: MapOptions(
+                              initialCenter:
+                                  userLocation ?? const LatLng(9.01, 38.75),
+                              initialZoom: zoomLevel,
+                              maxZoom: 18,
+                              minZoom: 3,
+                              onTap: _handleMapTap,
                             ),
-                            if (geoState is GeolocationLoaded)
-                              MarkerLayer(
-                                markers: [
-                                  Marker(
-                                    point: userLocation!,
-                                    width: 40,
-                                    height: 40,
-                                    child: Icon(
-                                      Icons.location_on,
-                                      color: AppPallete.redColor,
-                                      size: 40,
-                                    ),
-                                  ),
-                                  ...gasStationMarkers,
-                                ],
+                            children: [
+                              TileLayer(
+                                urlTemplate: _mapTypeUrl,
+                                userAgentPackageName: 'com.example.fuel_finder',
                               ),
-                            if (_selectedLocation != null)
-                              MarkerLayer(
-                                markers: [
-                                  Marker(
-                                    point: _selectedLocation!,
-                                    width: 40,
-                                    height: 40,
-                                    child: const Icon(
-                                      Icons.location_pin,
+                              if (geoState is GeolocationLoaded)
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: userLocation!,
+                                      width: 40,
+                                      height: 40,
+                                      child: Icon(
+                                        Icons.location_on,
+                                        color: AppPallete.redColor,
+                                        size: 40,
+                                      ),
+                                    ),
+                                    ...gasStationMarkers,
+                                  ],
+                                ),
+                              if (_selectedLocation != null)
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: _selectedLocation!,
+                                      width: 40,
+                                      height: 40,
+                                      child: const Icon(
+                                        Icons.location_pin,
+                                        color: Colors.blue,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (_routePoints.isNotEmpty)
+                                PolylineLayer(
+                                  polylines: [
+                                    Polyline(
+                                      points: _routePoints,
+                                      strokeWidth: 5,
                                       color: Colors.blue,
-                                      size: 40,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            if (_routePoints.isNotEmpty)
-                              PolylineLayer(
-                                polylines: [
-                                  Polyline(
-                                    points: _routePoints,
-                                    strokeWidth: 5,
-                                    color: Colors.blue,
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+                                  ],
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ),

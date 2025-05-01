@@ -17,11 +17,14 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
   ) async {
     emit(GasStationLoading());
     try {
-      final response = await getGasStationUsecase();
+      final response = await getGasStationUsecase(
+        event.latitude,
+        event.longitude,
+      );
       if (response is! Map<String, dynamic>) {
         throw Exception('Invalid response format');
       }
-      
+
       final data = response['data'];
       if (data == null) {
         emit(GasStationNull(message: "No gas stations found"));
