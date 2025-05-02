@@ -25,7 +25,7 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final MapController mapController = MapController();
   List<LatLng> _routePoints = [];
   LatLng? _selectedLocation;
@@ -74,7 +74,44 @@ class _ExplorePageState extends State<ExplorePage>
   void _zoomToLocation(double latitude, double longitude) {
     if (!mounted) return;
 
-    mapController.move(LatLng(latitude, longitude), getZoomLevel(context));
+    final target = LatLng(latitude, longitude);
+    final zoom = getZoomLevel(context);
+
+    final animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    final curveAnimation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeInOut,
+    );
+
+    final startCenter = mapController.camera.center;
+    final startZoom = mapController.camera.zoom;
+
+    animationController.addListener(() {
+      if (!mounted) return;
+      final progress = curveAnimation.value;
+      final newLat =
+          startCenter.latitude +
+          (target.latitude - startCenter.latitude) * progress;
+      final newLng =
+          startCenter.longitude +
+          (target.longitude - startCenter.longitude) * progress;
+      final newZoom = startZoom + (zoom - startZoom) * progress;
+
+      mapController.move(LatLng(newLat, newLng), newZoom);
+    });
+
+    animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animationController.dispose();
+      }
+    });
+
+    animationController.forward();
+
     setState(() {
       _initialZoomDone = true;
     });
@@ -141,6 +178,7 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double zoomLevel = getZoomLevel(context);
 
     return Scaffold(
@@ -237,41 +275,15 @@ class _ExplorePageState extends State<ExplorePage>
         }
       },
       builder: (context, geoState) {
-        LatLng? userLocation;
-        if (geoState is GeolocationLoaded) {
-          userLocation = LatLng(geoState.latitude, geoState.longitude);
-        }
+        final userLocation =
+            geoState is GeolocationLoaded
+                ? LatLng(geoState.latitude, geoState.longitude)
+                : null;
 
         return BlocBuilder<GasStationBloc, GasStationState>(
+          buildWhen: (previous, current) => previous != current,
           builder: (context, gasStationState) {
-            List<Marker> gasStationMarkers = [];
-
-            if (gasStationState is GasStationSucess) {
-              final stations = gasStationState.gasStation;
-              if (stations != null) {
-                for (var station in stations) {
-                  final lat = double.tryParse(station['latitude'].toString());
-                  final lng = double.tryParse(station['longitude'].toString());
-                  if (lat != null && lng != null) {
-                    gasStationMarkers.add(
-                      Marker(
-                        point: LatLng(lat, lng),
-                        width: 40,
-                        height: 40,
-                        child: GestureDetector(
-                          onTap: () => _handleStationTap(station),
-                          child: const Icon(
-                            Icons.local_gas_station,
-                            color: AppPallete.primaryColor,
-                            size: 30,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                }
-              }
-            }
+            final gasStationMarkers = _buildGasStationMarkers(gasStationState);
 
             return FlutterMap(
               mapController: mapController,
@@ -282,6 +294,7 @@ class _ExplorePageState extends State<ExplorePage>
                 minZoom: 3,
               ),
               children: [
+                // Simplified TileLayer without custom tileBuilder
                 TileLayer(
                   urlTemplate: _mapTypeUrl,
                   userAgentPackageName: 'com.example.fuel_finder',
@@ -309,11 +322,7 @@ class _ExplorePageState extends State<ExplorePage>
                         point: _selectedLocation!,
                         width: 40,
                         height: 40,
-                        child: const Icon(
-                          Icons.location_pin,
-                          color: Colors.blue,
-                          size: 40,
-                        ),
+                        child: SizedBox(),
                       ),
                     ],
                   ),
@@ -323,7 +332,7 @@ class _ExplorePageState extends State<ExplorePage>
                       Polyline(
                         points: _routePoints,
                         strokeWidth: 5,
-                        color: Colors.blue,
+                        color: Colors.blueAccent,
                       ),
                     ],
                   ),
@@ -335,14 +344,46 @@ class _ExplorePageState extends State<ExplorePage>
     );
   }
 
+  List<Marker> _buildGasStationMarkers(GasStationState state) {
+    if (state is! GasStationSucess) return [];
+
+    final stations = state.gasStation;
+    if (stations == null) return [];
+
+    return stations
+        .map((station) {
+          final lat = double.tryParse(station['latitude'].toString());
+          final lng = double.tryParse(station['longitude'].toString());
+
+          if (lat == null || lng == null) return null;
+
+          return Marker(
+            point: LatLng(lat, lng),
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              onTap: () => _handleStationTap(station),
+              child: const Icon(
+                Icons.local_gas_station,
+                color: AppPallete.primaryColor,
+                size: 30,
+              ),
+            ),
+          );
+        })
+        .whereType<Marker>()
+        .toList();
+  }
+
   void _showGasStationsBottomSheet(List<Map<String, dynamic>> stations) {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(16),
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: Column(
             children: [
               const Text(
@@ -469,5 +510,8 @@ class _ExplorePageState extends State<ExplorePage>
       ],
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 

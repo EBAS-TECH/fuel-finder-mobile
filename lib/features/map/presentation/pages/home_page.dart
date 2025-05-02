@@ -22,7 +22,10 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pages = [
-      ExplorePage(userId: widget.userId),
+      ExplorePage(
+        key: ValueKey('explore_${widget.userId}'),
+        userId: widget.userId,
+      ),
       const FavoritePage(),
       const PricePage(),
       ProfilePage(userId: widget.userId),
