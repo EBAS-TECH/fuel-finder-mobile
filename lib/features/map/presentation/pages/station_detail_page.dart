@@ -171,64 +171,6 @@ class _StationDetailPageState extends State<StationDetailPage> {
                 ),
               ),
             ),
-
-            /* Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child:
-                        ),
-                     
-                      ],
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Row(
-                      children: [
-                      
-                        const SizedBox(width: 12),
-
-                        if (isSuggestion) ...[
-                          const SizedBox(width: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppPallete.primaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.thumb_up,
-                                  size: 16,
-                                  color: AppPallete.primaryColor,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Suggested',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppPallete.primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                  ],
-                ), */
             const SizedBox(height: 24),
 
             const Text(
