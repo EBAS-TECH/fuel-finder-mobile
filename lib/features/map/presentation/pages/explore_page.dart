@@ -6,7 +6,9 @@ import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_e
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_state.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/pages/search_page.dart';
+import 'package:fuel_finder/features/map/presentation/pages/station_detail_page.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
+import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/explore_build_cards.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
@@ -294,7 +296,6 @@ class _ExplorePageState extends State<ExplorePage>
                 minZoom: 3,
               ),
               children: [
-                // Simplified TileLayer without custom tileBuilder
                 TileLayer(
                   urlTemplate: _mapTypeUrl,
                   userAgentPackageName: 'com.example.fuel_finder',
@@ -352,8 +353,15 @@ class _ExplorePageState extends State<ExplorePage>
 
     return stations
         .map((station) {
-          final lat = double.tryParse(station['latitude'].toString());
-          final lng = double.tryParse(station['longitude'].toString());
+          final stationData = station["data"] ?? station;
+          final lat =
+              stationData['latitude'] != null
+                  ? double.tryParse(stationData['latitude'].toString())
+                  : null;
+          final lng =
+              stationData['longitude'] != null
+                  ? double.tryParse(stationData['longitude'].toString())
+                  : null;
 
           if (lat == null || lng == null) return null;
 
@@ -363,9 +371,12 @@ class _ExplorePageState extends State<ExplorePage>
             height: 40,
             child: GestureDetector(
               onTap: () => _handleStationTap(station),
-              child: const Icon(
+              child: Icon(
                 Icons.local_gas_station,
-                color: AppPallete.primaryColor,
+                color:
+                    station['suggestion'] == true
+                        ? AppPallete.primaryColor
+                        : AppPallete.secondaryColor,
                 size: 30,
               ),
             ),
@@ -376,11 +387,45 @@ class _ExplorePageState extends State<ExplorePage>
   }
 
   void _showGasStationsBottomSheet(List<Map<String, dynamic>> stations) {
+    final geoState = context.read<GeolocationBloc>().state;
+    LatLng? userLocation;
+
+    if (geoState is GeolocationLoaded) {
+      userLocation = LatLng(geoState.latitude, geoState.longitude);
+    }
+
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (context) {
+        final stationsWithDistance =
+            userLocation != null
+                ? stations.map((station) {
+                  final stationData = station["data"] ?? station;
+                  final lat =
+                      stationData['latitude'] != null
+                          ? double.tryParse(stationData['latitude'].toString())
+                          : null;
+                  final lng =
+                      stationData['longitude'] != null
+                          ? double.tryParse(stationData['longitude'].toString())
+                          : null;
+
+                  double distance = -1;
+                  if (lat != null && lng != null) {
+                    distance = calculateDistance(
+                      userLocation!.latitude,
+                      userLocation!.longitude,
+                      lat,
+                      lng,
+                    );
+                  }
+
+                  return {...station, 'distance': distance};
+                }).toList()
+                : stations;
+
         return Container(
           padding: const EdgeInsets.all(16),
           height: MediaQuery.of(context).size.height * 0.5,
@@ -393,36 +438,108 @@ class _ExplorePageState extends State<ExplorePage>
               const SizedBox(height: 10),
               Expanded(
                 child: ListView.builder(
-                  itemCount: stations.length,
+                  itemCount: stationsWithDistance.length,
                   itemBuilder: (context, index) {
-                    final station = stations[index];
+                    final station = stationsWithDistance[index];
+                    final isSuggestion = station['suggestion'] == true;
+                    final distance = station['distance'] as double?;
+
                     return Card(
+                      color: Colors.grey.shade50,
                       child: ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.local_gas_station,
-                          color: Colors.orange,
+                          color:
+                              isSuggestion
+                                  ? AppPallete.primaryColor
+                                  : Colors.orange,
                         ),
-                        title: Text(station['en_name'] ?? 'Gas Station'),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(station['name'] ?? 'Gas Station'),
+                            if (isSuggestion)
+                              Row(
+                                children: [
+                                  Icon(Icons.info_outline, size: 10),
+                                  Text(
+                                    "Suggested",
+                                    style: TextStyle(fontSize: 10),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              '${(station['distance'] ?? 0).toStringAsFixed(1)} km away',
-                            ),
-                            Text(station['address'] ?? ''),
+                            if (station['averageRate'] != null)
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 16,
+                                        ),
+                                        Text(' ${station['averageRate']}'),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 2),
+
+                                  if (distance != null && distance >= 0)
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on,
+                                          color: Colors.red,
+                                          size: 12,
+                                        ),
+                                        Text(
+                                          '${distance.toStringAsFixed(1)} km away',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  Spacer(),
+                                  Row(
+                                    children: [
+                                      if (station['available_fuel'] != null)
+                                        Text(
+                                          '${station['available_fuel'].join(', ')}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppPallete.primaryColor,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
-                        trailing: const Icon(Icons.chevron_right),
                         onTap: () {
                           Navigator.pop(context);
                           _handleStationTap(station);
-                          mapController.move(
-                            LatLng(
-                              double.parse(station['latitude'].toString()),
-                              double.parse(station['longitude'].toString()),
-                            ),
-                            getZoomLevel(context),
-                          );
+                          if (station['latitude'] != null &&
+                              station['longitude'] != null) {
+                            _animatedMoveToLocation(
+                              LatLng(
+                                double.parse(station['latitude'].toString()),
+                                double.parse(station['longitude'].toString()),
+                              ),
+                            );
+                          }
                         },
                       ),
                     );
@@ -478,7 +595,7 @@ class _ExplorePageState extends State<ExplorePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCardHeader(_selectedStation!['en_name'] ?? 'Gas Station'),
+          _buildCardHeader(_selectedStation!['name'] ?? 'Gas Station'),
           const SizedBox(height: 10),
           Text(_selectedStation!['address'] ?? 'No address provided'),
           const SizedBox(height: 10),
@@ -489,6 +606,22 @@ class _ExplorePageState extends State<ExplorePage>
               foregroundColor: Colors.white,
             ),
             child: const Text('Show Route'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          StationDetailPage(station: _selectedStation!),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppPallete.primaryColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('More'),
           ),
         ],
       ),
@@ -509,6 +642,46 @@ class _ExplorePageState extends State<ExplorePage>
         ),
       ],
     );
+  }
+
+  void _animatedMoveToLocation(LatLng target) {
+    if (!mounted) return;
+
+    final zoom = getZoomLevel(context);
+    final animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    final curveAnimation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeInOut,
+    );
+
+    final startCenter = mapController.camera.center;
+    final startZoom = mapController.camera.zoom;
+
+    animationController.addListener(() {
+      if (!mounted) return;
+      final progress = curveAnimation.value;
+      final newLat =
+          startCenter.latitude +
+          (target.latitude - startCenter.latitude) * progress;
+      final newLng =
+          startCenter.longitude +
+          (target.longitude - startCenter.longitude) * progress;
+      final newZoom = startZoom + (zoom - startZoom) * progress;
+
+      mapController.move(LatLng(newLat, newLng), newZoom);
+    });
+
+    animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animationController.dispose();
+      }
+    });
+
+    animationController.forward();
   }
 
   @override
