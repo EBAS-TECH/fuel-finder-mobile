@@ -61,126 +61,124 @@ class _LoginPageState extends State<LoginPage> {
             ShowSnackbar.show(context, state.error, isError: true);
           }
         },
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 400),
-              child: Column(
-                children: [
-                  Text(
-                    'Login',
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontSize: titleFontSize,
-                      fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Column(
+            children: [
+              Image.asset(
+                "assets/images/logo.png",
+                width: MediaQuery.of(context).size.width * 0.5,
+              ),
+              Text(
+                'Login',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: textFieldSpacing / 2),
+              Text(
+                "Enter your email and password to sign in",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: subtitleFontSize,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: textFieldSpacing),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    SizedBox(height: textFieldSpacing),
+                    _buildTextField(
+                      controller: _userNameController,
+                      label: 'Username',
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Username is required';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                  SizedBox(height: textFieldSpacing / 2),
-                  Text(
-                    "Enter your email and password to sign in",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: subtitleFontSize,
+                    SizedBox(height: textFieldSpacing),
+                    _buildTextField(
+                      controller: _passwordController,
+                      label: 'Password',
+                      obscureText: _obscurePassword,
+                      isPasswordField: true,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Password is required';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                      onToggleObscure: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: textFieldSpacing),
-                  Form(
-                    key: _formKey,
-                    child: Column(
+                    SizedBox(height: sectionSpacing),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        SizedBox(height: textFieldSpacing),
-                        _buildTextField(
-                          controller: _userNameController,
-                          label: 'Username',
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Username is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: textFieldSpacing),
-                        _buildTextField(
-                          controller: _passwordController,
-                          label: 'Password',
-                          obscureText: _obscurePassword,
-                          isPasswordField: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Password is required';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                          onToggleObscure: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        SizedBox(height: sectionSpacing),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              "Forgot password?",
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppPallete.primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: sectionSpacing),
-                        SizedBox(
-                          width: double.infinity,
-                          child: BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              return ElevatedButton(
-                                onPressed: () {
-                                  FocusScope.of(context).unfocus();
-                                  _submitForm();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: buttonVerticalPadding,
-                                  ),
-                                ),
-                                child:
-                                    state is AuthLoading
-                                        ? CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        )
-                                        : Text(
-                                          'LOGIN',
-                                          style: TextStyle(
-                                            fontSize: subtitleFontSize,
-                                          ),
-                                        ),
-                              );
-                            },
+                        Text(
+                          "Forgot password?",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppPallete.primaryColor,
                           ),
                         ),
-                        SizedBox(height: textFieldSpacing),
-                        authFooterText(
-                          context,
-                          "Not registerd yet? ",
-                          "Register",
-                          RegisterPage(),
-                          false,
-                        ),
-                        SizedBox(height: sectionSpacing / 2),
                       ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: sectionSpacing),
+                    SizedBox(
+                      width: double.infinity,
+                      child: BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          return ElevatedButton(
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                              _submitForm();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                vertical: buttonVerticalPadding,
+                              ),
+                            ),
+                            child:
+                                state is AuthLoading
+                                    ? CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    )
+                                    : Text(
+                                      'LOGIN',
+                                      style: TextStyle(
+                                        fontSize: subtitleFontSize,
+                                      ),
+                                    ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: textFieldSpacing),
+                    authFooterText(
+                      context,
+                      "Not registerd yet? ",
+                      "Register",
+                      RegisterPage(),
+                      false,
+                    ),
+                    SizedBox(height: sectionSpacing / 2),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

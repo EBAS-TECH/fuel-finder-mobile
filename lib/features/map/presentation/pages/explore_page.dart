@@ -27,7 +27,7 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+    with TickerProviderStateMixin {
   final MapController mapController = MapController();
   List<LatLng> _routePoints = [];
   LatLng? _selectedLocation;
@@ -181,7 +181,6 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     double zoomLevel = getZoomLevel(context);
 
     return Scaffold(
@@ -581,15 +580,6 @@ class _ExplorePageState extends State<ExplorePage>
               Text('Duration: ${(_duration! / 60).toStringAsFixed(2)} Minutes'),
             ],
           ),
-          /*  const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: _hideRouteInformation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppPallete.primaryColor,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Close Route'),
-          ), */
         ],
       ),
     );
@@ -837,7 +827,6 @@ class _ExplorePageState extends State<ExplorePage>
 
       mapController.move(LatLng(newLat, newLng), newZoom);
     });
-
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animationController.dispose();
@@ -846,8 +835,5 @@ class _ExplorePageState extends State<ExplorePage>
 
     animationController.forward();
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
