@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/features/map/presentation/pages/explore_page.dart';
-import 'package:fuel_finder/features/map/presentation/pages/favorite_page.dart';
+import 'package:fuel_finder/features/favorite/presentation/pages/favorite_page.dart';
 import 'package:fuel_finder/features/map/presentation/pages/price_page.dart';
 import 'package:fuel_finder/features/map/presentation/pages/profile_page.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/bottom_nav_bar.dart';

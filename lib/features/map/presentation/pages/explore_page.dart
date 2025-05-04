@@ -284,13 +284,6 @@ class _ExplorePageState extends State<ExplorePage>
                 routePoints: _routePoints,
               ),
             ),
-          if (_isCalculatingRoute)
-            const Positioned(
-              bottom: 150,
-              left: 0,
-              right: 0,
-              child: Center(child: CircularProgressIndicator()),
-            ),
         ],
       ),
       bottomNavigationBar: BlocBuilder<GeolocationBloc, GeolocationState>(

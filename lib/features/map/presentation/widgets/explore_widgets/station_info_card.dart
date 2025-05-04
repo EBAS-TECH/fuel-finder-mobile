@@ -22,13 +22,13 @@ class StationInfoCard extends StatelessWidget {
   });
 
   String _formatDistance(double? meters) {
-    if (meters == null) return 'Calculating...';
+    if (meters == null) return 'Loading...';
     if (meters < 1000) return '${meters.toStringAsFixed(0)} m';
     return '${(meters / 1000).toStringAsFixed(1)} km';
   }
 
   String _formatDuration(double? seconds) {
-    if (seconds == null) return 'Calculating...';
+    if (seconds == null) return 'Loading...';
     if (seconds < 60) return '${seconds.toStringAsFixed(0)} sec';
     if (seconds < 3600) return '${(seconds / 60).toStringAsFixed(0)} min';
     return '${(seconds / 3600).toStringAsFixed(1)} hr';
@@ -308,3 +308,4 @@ class StationInfoCard extends StatelessWidget {
     );
   }
 }
+

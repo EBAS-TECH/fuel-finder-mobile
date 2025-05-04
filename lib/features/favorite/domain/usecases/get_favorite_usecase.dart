@@ -4,7 +4,7 @@ class GetFavoriteUsecase {
   final FavoriteRepository favoriteRepository;
 
   GetFavoriteUsecase({required this.favoriteRepository});
-  Future<Map<String, dynamic>> call(String token) {
+  Future<Map<String, dynamic>> call() {
     return favoriteRepository.getFavorite();
   }
 }

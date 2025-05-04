@@ -8,6 +8,13 @@ import 'package:fuel_finder/features/auth/domain/usecases/signin_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:fuel_finder/features/favorite/data/datasources/favorite_remote_data_source.dart';
+import 'package:fuel_finder/features/favorite/data/repositories/favorite_repository_impl.dart';
+import 'package:fuel_finder/features/favorite/domain/repositories/favorite_repository.dart';
+import 'package:fuel_finder/features/favorite/domain/usecases/get_favorite_usecase.dart';
+import 'package:fuel_finder/features/favorite/domain/usecases/remove_favorite_usecase.dart';
+import 'package:fuel_finder/features/favorite/domain/usecases/set_favorite_usecase.dart';
+import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:fuel_finder/features/gas_station/data/datasources/gas_station_remote_data_source.dart';
 import 'package:fuel_finder/features/gas_station/data/repositories/gas_station_repository_impl.dart';
 import 'package:fuel_finder/features/gas_station/domain/repositories/gas_repository.dart';
@@ -104,6 +111,32 @@ void setUpDependencies() async {
   );
   sl.registerLazySingleton(
     () => GasStationBloc(getGasStationUsecase: sl<GetGasStationUsecase>()),
+  );
+
+  // Favorites
+
+  sl.registerLazySingleton(() => FavoriteRemoteDataSource(tokenService: sl()));
+
+  sl.registerLazySingleton<FavoriteRepository>(
+    () => FavoriteRepositoryImpl(
+      favoriteRemoteDataSource: sl<FavoriteRemoteDataSource>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => SetFavoriteUsecase(favoriteRepository: sl<FavoriteRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => RemoveFavoriteUsecase(favoriteRepository: sl<FavoriteRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => GetFavoriteUsecase(favoriteRepository: sl<FavoriteRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => FavoriteBloc(
+      setFavoriteUsecase: sl<SetFavoriteUsecase>(),
+      removeFavoriteUsecase: sl<RemoveFavoriteUsecase>(),
+      getFavoriteUsecase: sl<GetFavoriteUsecase>(),
+    ),
   );
 }
 
