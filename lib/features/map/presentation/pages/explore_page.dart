@@ -243,25 +243,33 @@ class _ExplorePageState extends State<ExplorePage>
             },
             child: _buildMap(zoomLevel),
           ),
-          Positioned(
-            bottom: 50,
-            right: 15,
-            child: TrackLocationButton(onTap: _centerMapOnUserLocation),
-          ),
-          Positioned(
-            bottom: 120,
-            right: 25,
-            child: FloatingActionButton(
-              backgroundColor: AppPallete.primaryColor,
-              onPressed: () {
-                final state = context.read<GasStationBloc>().state;
-                if (state is GasStationSucess) {
-                  _showGasStationsBottomSheet(state.gasStation ?? []);
-                }
-              },
-              child: const Icon(Icons.local_gas_station_rounded),
+          if (_showStationInfo && _selectedStation != null)
+            Positioned(
+              bottom: 120,
+              right: 15,
+              child: TrackLocationButton(onTap: _centerMapOnUserLocation),
             ),
-          ),
+          if (!(_showStationInfo && _selectedStation != null))
+            Positioned(
+              bottom: 50,
+              right: 15,
+              child: TrackLocationButton(onTap: _centerMapOnUserLocation),
+            ),
+          if (!(_showStationInfo && _selectedStation != null))
+            Positioned(
+              bottom: 120,
+              right: 25,
+              child: FloatingActionButton(
+                backgroundColor: AppPallete.primaryColor,
+                onPressed: () {
+                  final state = context.read<GasStationBloc>().state;
+                  if (state is GasStationSucess) {
+                    _showGasStationsBottomSheet(state.gasStation ?? []);
+                  }
+                },
+                child: const Icon(Icons.local_gas_station_rounded),
+              ),
+            ),
           if (_showStationInfo && _selectedStation != null)
             Positioned(
               bottom: 0,
@@ -339,12 +347,27 @@ class _ExplorePageState extends State<ExplorePage>
                     markers: [
                       Marker(
                         point: userLocation,
-                        width: 40,
-                        height: 40,
-                        child: Icon(
-                          Icons.location_on,
-                          color: AppPallete.redColor,
-                          size: 40,
+                        width: 20,
+                        height: 20,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppPallete.primaryColor.withOpacity(0.2),
+                            border: Border.all(
+                              color: AppPallete.primaryColor,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: AppPallete.primaryColor,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                       ...gasStationMarkers,
