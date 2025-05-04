@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
-import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
-import 'package:latlong2/latlong.dart';
 
 class GasStationBottomSheet extends StatefulWidget {
   final List<Map<String, dynamic>> stations;
@@ -55,7 +51,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      height: MediaQuery.of(context).size.height * 0.6,
+      height: MediaQuery.of(context).size.height * 0.55,
       child: Column(
         children: [
           const Text(
@@ -65,12 +61,15 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
           const SizedBox(height: 10),
           TabBar(
             controller: _tabController,
+            labelColor: AppPallete.primaryColor,
+            unselectedLabelColor: Colors.grey,
             tabs: const [
               Tab(text: 'All'),
               Tab(text: 'Petrol'),
               Tab(text: 'Diesel'),
             ],
           ),
+          const SizedBox(height: 5),
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -87,11 +86,8 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
   }
 
   Widget _buildStationList(List<Map<String, dynamic>> stations) {
-    final geoState = context.read<GeolocationBloc>().state;
-    LatLng? userLocation;
-
-    if (geoState is GeolocationLoaded) {
-      userLocation = LatLng(geoState.latitude, geoState.longitude);
+    if (stations.isEmpty) {
+      return const Center(child: Text('No stations found'));
     }
 
     return ListView.builder(
@@ -99,16 +95,6 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
       itemBuilder: (context, index) {
         final station = stations[index];
         final isSuggestion = station['suggestion'] == true;
-        final distance = station['distance'] as double?;
-        final duration = station['duration'] as double?;
-        final lat =
-            station['latitude'] != null
-                ? double.tryParse(station['latitude'].toString())
-                : null;
-        final lng =
-            station['longitude'] != null
-                ? double.tryParse(station['longitude'].toString())
-                : null;
 
         return Card(
           color: Colors.grey.shade50,
@@ -122,10 +108,10 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
               children: [
                 Text(station['name'] ?? 'Gas Station'),
                 if (isSuggestion)
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.info_outline, size: 10),
-                      Text("Suggested", style: TextStyle(fontSize: 10)),
+                      const Icon(Icons.info_outline, size: 10),
+                      const Text("Suggested", style: TextStyle(fontSize: 10)),
                     ],
                   ),
               ],
@@ -153,59 +139,26 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                           ],
                         ),
                       ),
-                      const SizedBox(width: 2),
-                      if (distance != null && distance >= 0)
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on,
-                              color: Colors.red,
-                              size: 12,
-                            ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          if (station['available_fuel'] != null)
                             Text(
-                              '${distance.toStringAsFixed(1)} km',
-                              style: const TextStyle(fontSize: 12),
+                              '${station['available_fuel'].join(', ')}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppPallete.primaryColor,
+                              ),
                             ),
-                            if (duration != null) ...[
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.timer,
-                                color: Colors.blue,
-                                size: 12,
-                              ),
-                              Text(
-                                '${(duration / 60).toStringAsFixed(0)} min',
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          ],
-                        ),
+                        ],
+                      ),
                     ],
-                  ),
-                if (station['available_fuel'] != null)
-                  Text(
-                    '${station['available_fuel'].join(', ')}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppPallete.primaryColor,
-                    ),
                   ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
               widget.onStationTap(station);
-              if (lat != null && lng != null) {
-                context.read<RouteBloc>().add(
-                  CalculateRoute(
-                    waypoints: [userLocation!, LatLng(lat, lng)],
-                    profile: 'driving',
-                    steps: true,
-                    overview: 'full',
-                    geometries: 'polyline',
-                  ),
-                );
-              }
             },
           ),
         );

@@ -5,7 +5,7 @@ import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:http/http.dart' as http;
 
 class GasStationRemoteDataSource {
-  final String baseUrl = "http://192.168.230.191:5001/api";
+  final String baseUrl = "http://192.168.230.122:5001/api";
   final TokenService tokenService;
 
   GasStationRemoteDataSource({required this.tokenService});

@@ -6,9 +6,7 @@ import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_e
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_state.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/pages/search_page.dart';
-import 'package:fuel_finder/features/map/presentation/pages/station_detail_page.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
-import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/explore_build_cards.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
@@ -17,6 +15,8 @@ import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/gas_station_bottom_sheet.dart';
+import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/station_info_card.dart';
 
 class ExplorePage extends StatefulWidget {
   final String userId;
@@ -27,16 +27,17 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final MapController mapController = MapController();
   List<LatLng> _routePoints = [];
   LatLng? _selectedLocation;
   double? _distance;
   double? _duration;
-  bool _showRouteInfo = false;
   bool _showStationInfo = false;
   Map<String, dynamic>? _selectedStation;
   bool _initialZoomDone = false;
+  bool _isCalculatingRoute = false;
+  bool _showRouteOnMap = false;
 
   final String _mapTypeUrl =
       'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
@@ -135,10 +136,10 @@ class _ExplorePageState extends State<ExplorePage>
   void _getRoute(LatLng destination) {
     final state = context.read<GeolocationBloc>().state;
     if (state is GeolocationLoaded) {
-      final userLocation = LatLng(state.latitude, state.longitude);
       setState(() {
-        _selectedLocation = destination;
+        _isCalculatingRoute = true;
       });
+      final userLocation = LatLng(state.latitude, state.longitude);
       context.read<RouteBloc>().add(
         CalculateRoute(
           waypoints: [userLocation, destination],
@@ -151,23 +152,46 @@ class _ExplorePageState extends State<ExplorePage>
     }
   }
 
-  void _handleStationTap(Map<String, dynamic> station) {
+  void _showRoute() {
     setState(() {
-      _selectedStation = station;
-      _selectedLocation = LatLng(
-        double.parse(station['latitude'].toString()),
-        double.parse(station['longitude'].toString()),
-      );
-      _showStationInfo = true;
-      _showRouteInfo = false;
+      _showRouteOnMap = true;
     });
+    if (_selectedLocation != null) {
+      _getRoute(_selectedLocation!);
+    }
   }
 
-  void _hideRouteInformation() {
+  void _handleStationTap(Map<String, dynamic> station) {
+    final lat =
+        station['latitude'] != null
+            ? double.tryParse(station['latitude'].toString())
+            : null;
+    final lng =
+        station['longitude'] != null
+            ? double.tryParse(station['longitude'].toString())
+            : null;
+
+    if (lat != null && lng != null) {
+      setState(() {
+        _selectedStation = station;
+        _selectedLocation = LatLng(lat, lng);
+        _showStationInfo = true;
+        _routePoints = [];
+        _showRouteOnMap = false;
+        _distance = null;
+        _duration = null;
+        _isCalculatingRoute = true;
+      });
+      _animatedMoveToLocation(LatLng(lat, lng));
+      _getRoute(LatLng(lat, lng));
+    }
+  }
+
+  void _hideStationInfo() {
     setState(() {
-      _showRouteInfo = false;
       _showStationInfo = false;
       _routePoints = [];
+      _showRouteOnMap = false;
       _selectedLocation = null;
     });
   }
@@ -181,6 +205,7 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     double zoomLevel = getZoomLevel(context);
 
     return Scaffold(
@@ -204,25 +229,27 @@ class _ExplorePageState extends State<ExplorePage>
             listener: (context, state) {
               if (state is RouteLoaded) {
                 setState(() {
-                  _routePoints = state.route.coordinates;
+                  _routePoints = _showRouteOnMap ? state.route.coordinates : [];
                   _distance = state.route.distance;
                   _duration = state.route.duration;
-                  _showRouteInfo = true;
-                  _showStationInfo = false;
+                  _isCalculatingRoute = false;
                 });
               } else if (state is RouteError) {
+                setState(() {
+                  _isCalculatingRoute = false;
+                });
                 ShowSnackbar.show(context, state.message);
               }
             },
             child: _buildMap(zoomLevel),
           ),
           Positioned(
-            bottom: 20,
+            bottom: 50,
             right: 15,
             child: TrackLocationButton(onTap: _centerMapOnUserLocation),
           ),
           Positioned(
-            bottom: 90,
+            bottom: 120,
             right: 25,
             child: FloatingActionButton(
               backgroundColor: AppPallete.primaryColor,
@@ -235,19 +262,26 @@ class _ExplorePageState extends State<ExplorePage>
               child: const Icon(Icons.local_gas_station_rounded),
             ),
           ),
-          if (_showRouteInfo && _routePoints.isNotEmpty)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildRouteInfoCard(),
-            ),
           if (_showStationInfo && _selectedStation != null)
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: _buildStationInfoCard(),
+              child: StationInfoCard(
+                station: _selectedStation!,
+                onClose: _hideStationInfo,
+                onShowRoute: _showRoute,
+                distance: _distance,
+                duration: _duration,
+                routePoints: _routePoints,
+              ),
+            ),
+          if (_isCalculatingRoute)
+            const Positioned(
+              bottom: 150,
+              left: 0,
+              right: 0,
+              child: Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
@@ -323,11 +357,11 @@ class _ExplorePageState extends State<ExplorePage>
                         point: _selectedLocation!,
                         width: 40,
                         height: 40,
-                        child: SizedBox(),
+                        child: const SizedBox(),
                       ),
                     ],
                   ),
-                if (_routePoints.isNotEmpty)
+                if (_showRouteOnMap && _routePoints.isNotEmpty)
                   PolylineLayer(
                     polylines: [
                       Polyline(
@@ -387,413 +421,16 @@ class _ExplorePageState extends State<ExplorePage>
   }
 
   void _showGasStationsBottomSheet(List<Map<String, dynamic>> stations) {
-    final geoState = context.read<GeolocationBloc>().state;
-    LatLng? userLocation;
-
-    if (geoState is GeolocationLoaded) {
-      userLocation = LatLng(geoState.latitude, geoState.longitude);
-    }
-
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        final stationsWithDistance =
-            userLocation != null
-                ? stations.map((station) {
-                  final stationData = station["data"] ?? station;
-                  final lat =
-                      stationData['latitude'] != null
-                          ? double.tryParse(stationData['latitude'].toString())
-                          : null;
-                  final lng =
-                      stationData['longitude'] != null
-                          ? double.tryParse(stationData['longitude'].toString())
-                          : null;
-
-                  double distance = -1;
-                  if (lat != null && lng != null) {
-                    distance = calculateDistance(
-                      userLocation!.latitude,
-                      userLocation!.longitude,
-                      lat,
-                      lng,
-                    );
-                  }
-
-                  return {...station, 'distance': distance};
-                }).toList()
-                : stations;
-
-        return Container(
-          padding: const EdgeInsets.all(16),
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: Column(
-            children: [
-              const Text(
-                'Nearby Gas Stations',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: stationsWithDistance.length,
-                  itemBuilder: (context, index) {
-                    final station = stationsWithDistance[index];
-                    final isSuggestion = station['suggestion'] == true;
-                    final distance = station['distance'] as double?;
-                    final lat =
-                        station['latitude'] != null
-                            ? double.tryParse(station['latitude'].toString())
-                            : null;
-                    final lng =
-                        station['longitude'] != null
-                            ? double.tryParse(station['longitude'].toString())
-                            : null;
-
-                    return Card(
-                      color: Colors.grey.shade50,
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.local_gas_station,
-                          color:
-                              isSuggestion
-                                  ? AppPallete.primaryColor
-                                  : Colors.orange,
-                        ),
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(station['name'] ?? 'Gas Station'),
-                            if (isSuggestion)
-                              Row(
-                                children: [
-                                  Icon(Icons.info_outline, size: 10),
-                                  Text(
-                                    "Suggested",
-                                    style: TextStyle(fontSize: 10),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (station['averageRate'] != null)
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      color: Colors.grey.shade300,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 16,
-                                        ),
-                                        Text(' ${station['averageRate']}'),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 2),
-
-                                  if (distance != null && distance >= 0)
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.location_on,
-                                          color: Colors.red,
-                                          size: 12,
-                                        ),
-                                        Text(
-                                          '${distance.toStringAsFixed(1)} km away',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  Spacer(),
-                                  Row(
-                                    children: [
-                                      if (station['available_fuel'] != null)
-                                        Text(
-                                          '${station['available_fuel'].join(', ')}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppPallete.primaryColor,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _handleStationTap(station);
-                          if (lat != null && lng != null) {
-                            _animatedMoveToLocation(LatLng(lat, lng));
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+        return GasStationBottomSheet(
+          stations: stations,
+          onStationTap: _handleStationTap,
         );
       },
-    );
-  }
-
-  Widget _buildRouteInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCardHeader('Route Information'),
-          Row(
-            children: [
-              const Icon(Icons.directions_car, color: Colors.blue),
-              const SizedBox(width: 10),
-              Text('Distance: ${(_distance! / 1000).toStringAsFixed(2)} KM'),
-            ],
-          ),
-          Row(
-            children: [
-              const Icon(Icons.timer, color: Colors.blue),
-              const SizedBox(width: 10),
-              Text('Duration: ${(_duration! / 60).toStringAsFixed(2)} Minutes'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStationInfoCard() {
-    final station = _selectedStation!;
-    final stationData = station['data'] ?? station;
-    final name = stationData['name'] ?? 'Gas Station';
-    final averageRate = stationData['averageRate']?.toString() ?? 'Not rated';
-    final fuels =
-        (stationData['available_fuel'] as List<dynamic>?)?.join(', ') ??
-        'No fuel info';
-    final distance =
-        stationData['distance'] != null
-            ? '${(stationData['distance'] as double).toStringAsFixed(1)} km'
-            : 'Distance unknown';
-    final isSuggested = stationData['suggestion'] == true;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: _hideRouteInformation,
-                child: const Icon(Icons.close, size: 22),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 18),
-                  const SizedBox(width: 4),
-                  Text(averageRate),
-                ],
-              ),
-
-              const SizedBox(width: 16),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, color: Colors.blue, size: 18),
-                  const SizedBox(width: 4),
-                  Text(distance),
-                ],
-              ),
-
-              if (isSuggested) ...[
-                const SizedBox(width: 16),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.thumb_up,
-                      color: AppPallete.primaryColor,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 4),
-                    const Text('Suggested'),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "This suggestion is made based on the station\'s ratings and user votes",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            duration: const Duration(seconds: 3),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Icon(
-                        Icons.info_outline,
-                        color: Colors.grey,
-                        size: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(
-                Icons.local_gas_station,
-                color: Colors.orange,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text('$fuels available'),
-            ],
-          ),
-          const Divider(),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    if (_selectedLocation != null) {
-                      _getRoute(_selectedLocation!);
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.route,
-                        color: AppPallete.primaryColor,
-                        size: 22,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Show route',
-                        style: TextStyle(
-                          color: AppPallete.primaryColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Colors.grey[400],
-                        size: 22,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => StationDetailPage(station: station),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: Colors.black87,
-                        size: 22,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'More details',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Colors.grey[400],
-                        size: 22,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCardHeader(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: _hideRouteInformation,
-        ),
-      ],
     );
   }
 
@@ -827,6 +464,7 @@ class _ExplorePageState extends State<ExplorePage>
 
       mapController.move(LatLng(newLat, newLng), newZoom);
     });
+
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animationController.dispose();
@@ -835,5 +473,8 @@ class _ExplorePageState extends State<ExplorePage>
 
     animationController.forward();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 

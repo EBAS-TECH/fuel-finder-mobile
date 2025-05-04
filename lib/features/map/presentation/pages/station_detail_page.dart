@@ -4,7 +4,9 @@ import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dar
 
 class StationDetailPage extends StatefulWidget {
   final Map<String, dynamic> station;
-  const StationDetailPage({super.key, required this.station});
+  final double? distance;
+  final double? duration;
+  const StationDetailPage({super.key, required this.station, this.distance, this.duration});
 
   @override
   State<StationDetailPage> createState() => _StationDetailPageState();
