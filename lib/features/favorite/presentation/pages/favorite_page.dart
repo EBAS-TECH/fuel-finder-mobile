@@ -44,7 +44,6 @@ class _FavoritePageState extends State<FavoritePage> {
                 ),
               )
               : ListView.builder(
-                // padding: EdgeInsets.all(16),
                 itemCount: 10,
                 itemBuilder: (context, index) {
                   return FavoritesShimmer();
