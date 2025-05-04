@@ -35,6 +35,7 @@ class FuelPriceBloc extends Bloc<FuelPriceEvent, FuelPriceState> {
             message: "Price fetched successfully",
           ),
         );
+        print("Fuel Price Data: ${response["data"]}");
       }
     } on SocketException {
       emit(FuelPriceFailure(error: "No Internet connection"));

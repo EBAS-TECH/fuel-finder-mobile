@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_bloc.dart';
+import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_event.dart';
+import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 
 class PricePage extends StatefulWidget {
@@ -10,24 +14,15 @@ class PricePage extends StatefulWidget {
 }
 
 class _PricePageState extends State<PricePage> {
-  final List<FuelPrice> fuelPrices = [
-    FuelPrice(
-      type: 'Benzene',
-      price: '112.67 Br/L',
-      since: 'March 2024',
-      effectiveUntil: 'September 2024',
-      source: 'Ministry of Mines and Petroleum',
-      icon: Icons.local_gas_station,
-    ),
-    FuelPrice(
-      type: 'Diesel',
-      price: '112.67 Br/L',
-      since: 'March 2024',
-      effectiveUntil: 'September 2024',
-      source: 'Ministry of Mines and Petroleum',
-      icon: Icons.local_gas_station,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _getFuelPrices();
+  }
+
+  void _getFuelPrices() {
+    context.read<FuelPriceBloc>().add(GetFuelPricesEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,52 +31,77 @@ class _PricePageState extends State<PricePage> {
 
     return Scaffold(
       appBar: CustomAppBar(title: "Fuel Prices", centerTitle: true),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isLargeScreen ? 24 : 16,
-              vertical: 16,
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isLargeScreen)
-                    _buildLargeLayout(theme)
-                  else
-                    _buildMobileLayout(theme),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-          );
+      body: BlocBuilder<FuelPriceBloc, FuelPriceState>(
+        builder: (context, state) {
+          if (state is FuelPriceLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: AppPallete.primaryColor),
+            );
+          } else if (state is FuelPriceFailure) {
+            return Center(child: _buildErrorState("Failed to get prices"));
+          } else if (state is FuelPriceSucess) {
+            final fuelPrices = state.fuelPrices['data'] as List;
+            return _buildFuelPriceLayout(theme, isLargeScreen, fuelPrices);
+          }
+          return const Center(child: Text('No data available'));
         },
       ),
     );
   }
 
-  Widget _buildMobileLayout(ThemeData theme) {
+  Widget _buildFuelPriceLayout(
+    ThemeData theme,
+    bool isLargeScreen,
+    List<dynamic> fuelPrices,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isLargeScreen ? 24 : 16,
+            vertical: 16,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isLargeScreen)
+                  _buildLargeLayout(theme, fuelPrices)
+                else
+                  _buildMobileLayout(theme, fuelPrices),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileLayout(ThemeData theme, List<dynamic> fuelPrices) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: fuelPrices.map((fuel) => _buildFuelCard(fuel, theme)).toList(),
     );
   }
 
-  Widget _buildLargeLayout(ThemeData theme) {
+  Widget _buildLargeLayout(ThemeData theme, List<dynamic> fuelPrices) {
     return Wrap(
       spacing: 16,
       runSpacing: 16,
       alignment: WrapAlignment.center,
       children:
-          fuelPrices.map((fuel) {
-            return SizedBox(width: 400, child: _buildFuelCard(fuel, theme));
-          }).toList(),
+          fuelPrices
+              .map(
+                (fuel) =>
+                    SizedBox(width: 400, child: _buildFuelCard(fuel, theme)),
+              )
+              .toList(),
     );
   }
 
-  Widget _buildFuelCard(FuelPrice fuel, ThemeData theme) {
+  Widget _buildFuelCard(Map<String, dynamic> fuel, ThemeData theme) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -94,19 +114,23 @@ class _PricePageState extends State<PricePage> {
           children: [
             Row(
               children: [
-                Icon(fuel.icon, color: AppPallete.primaryColor, size: 32),
+                Icon(
+                  Icons.local_gas_station,
+                  color: AppPallete.primaryColor,
+                  size: 32,
+                ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      fuel.type,
+                      fuel['fuel_type'],
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      fuel.price,
+                      '${fuel['price']} Br/L',
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: AppPallete.primaryColor,
                       ),
@@ -125,8 +149,8 @@ class _PricePageState extends State<PricePage> {
                   Flexible(
                     child: _buildInfoItem(
                       Icons.calendar_today,
-                      'Since',
-                      fuel.since,
+                      'Last updated',
+                      _formatDate(fuel['updated_at']),
                       theme,
                     ),
                   ),
@@ -138,8 +162,8 @@ class _PricePageState extends State<PricePage> {
                   Flexible(
                     child: _buildInfoItem(
                       Icons.event_available,
-                      'Effective until',
-                      fuel.effectiveUntil,
+                      'Created at',
+                      _formatDate(fuel['created_at']),
                       theme,
                     ),
                   ),
@@ -149,7 +173,12 @@ class _PricePageState extends State<PricePage> {
             const SizedBox(height: 12),
             const Divider(thickness: 0.8),
             const SizedBox(height: 12),
-            _buildInfoItem(Icons.source, 'Source', fuel.source, theme),
+            _buildInfoItem(
+              Icons.business,
+              'Source',
+              'Ministry of Mines and Petroleum',
+              theme,
+            ),
           ],
         ),
       ),
@@ -187,23 +216,40 @@ class _PricePageState extends State<PricePage> {
       ],
     );
   }
-}
 
-class FuelPrice {
-  final String type;
-  final String price;
-  final String since;
-  final String effectiveUntil;
-  final String source;
-  final IconData icon;
+  String _formatDate(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
 
-  FuelPrice({
-    required this.type,
-    required this.price,
-    required this.since,
-    required this.effectiveUntil,
-    required this.source,
-    required this.icon,
-  });
+  Widget _buildErrorState(String error) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.error, size: 80, color: Colors.red),
+        const SizedBox(height: 16),
+        Text(
+          "Error loading favorites",
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          error,
+          style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(onPressed: _getFuelPrices, child: const Text("Retry")),
+      ],
+    );
+  }
 }
 

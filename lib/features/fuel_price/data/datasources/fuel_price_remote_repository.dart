@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class FuelPriceRemoteRepository {
-  final String baseUrl = "http://192.168.230.213:5001/api";
+  final String baseUrl = "http://192.168.230.196:5001/api";
   final TokenService tokenService;
   FuelPriceRemoteRepository({required this.tokenService});
   Future<Map<String, dynamic>> getFuelPrice() async {
