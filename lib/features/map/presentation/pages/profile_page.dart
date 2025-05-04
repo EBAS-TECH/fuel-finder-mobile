@@ -79,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
         } else if (state is UserLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is UserFailure) {
-          return _buildErrorState(state.error);
+          return _buildErrorState("Failed to get profile information");
         }
         return const Center(child: Icon(Icons.person, size: 80));
       },
@@ -106,14 +106,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     icon: Icons.person,
                     label: "First Name",
                     value: user["first_name"] ?? 'Not provided',
-                    onEdit: () => _editField("First Name", user["first_name"] ?? ''),
+                    onEdit:
+                        () =>
+                            _editField("First Name", user["first_name"] ?? ''),
                   ),
                   const Divider(),
                   _buildInfoRow(
                     icon: Icons.person_outline,
                     label: "Last Name",
                     value: user["last_name"] ?? 'Not provided',
-                    onEdit: () => _editField("Last Name", user["last_name"] ?? ''),
+                    onEdit:
+                        () => _editField("Last Name", user["last_name"] ?? ''),
                   ),
                   const Divider(),
                   _buildInfoRow(
@@ -133,8 +136,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           );
-        } else if (state is UserFailure) {
-          return _buildErrorCard(state.error);
         }
         return const Card(
           child: Padding(
@@ -218,10 +219,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 16),
             Text(
               "No profile information",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -249,10 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _fetchUserData,
-          child: const Text("Retry"),
-        ),
+        ElevatedButton(onPressed: _fetchUserData, child: const Text("Retry")),
       ],
     );
   }
@@ -268,10 +263,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 16),
             Text(
               "Error loading profile data",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.red[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.red[600]),
             ),
             const SizedBox(height: 8),
             Text(
@@ -297,71 +289,73 @@ class _ProfilePageState extends State<ProfilePage> {
   void _editField(String field, String currentValue) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Edit $field"),
-        content: TextField(
-          controller: TextEditingController(text: currentValue),
-          decoration: InputDecoration(hintText: "Enter new $field"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+      builder:
+          (context) => AlertDialog(
+            title: Text("Edit $field"),
+            content: TextField(
+              controller: TextEditingController(text: currentValue),
+              decoration: InputDecoration(hintText: "Enter new $field"),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ShowSnackbar.show(context, "$field updated successfully");
+                },
+                child: const Text("Save"),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ShowSnackbar.show(context, "$field updated successfully");
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
     );
   }
 
   void _editPassword() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Change Password"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: "Current Password",
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Change Password"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: "Current Password",
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  obscureText: true,
+                  decoration: const InputDecoration(hintText: "New Password"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: "Confirm New Password",
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              obscureText: true,
-              decoration: const InputDecoration(hintText: "New Password"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: "Confirm New Password",
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ShowSnackbar.show(context, "Password updated successfully");
+                },
+                child: const Text("Save"),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ShowSnackbar.show(context, "Password updated successfully");
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
     );
   }
 }

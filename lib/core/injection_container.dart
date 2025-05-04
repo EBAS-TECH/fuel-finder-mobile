@@ -15,6 +15,11 @@ import 'package:fuel_finder/features/favorite/domain/usecases/get_favorite_useca
 import 'package:fuel_finder/features/favorite/domain/usecases/remove_favorite_usecase.dart';
 import 'package:fuel_finder/features/favorite/domain/usecases/set_favorite_usecase.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:fuel_finder/features/fuel_price/data/datasources/fuel_price_remote_repository.dart';
+import 'package:fuel_finder/features/fuel_price/data/repositories/fuel_price_repository_impl.dart';
+import 'package:fuel_finder/features/fuel_price/domain/repositories/fuel_price_repository.dart';
+import 'package:fuel_finder/features/fuel_price/domain/usecases/get_fuel_price_usecase.dart';
+import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_bloc.dart';
 import 'package:fuel_finder/features/gas_station/data/datasources/gas_station_remote_data_source.dart';
 import 'package:fuel_finder/features/gas_station/data/repositories/gas_station_repository_impl.dart';
 import 'package:fuel_finder/features/gas_station/domain/repositories/gas_repository.dart';
@@ -137,6 +142,21 @@ void setUpDependencies() async {
       removeFavoriteUsecase: sl<RemoveFavoriteUsecase>(),
       getFavoriteUsecase: sl<GetFavoriteUsecase>(),
     ),
+  );
+
+  // Fuel Prices
+
+  sl.registerLazySingleton(() => FuelPriceRemoteRepository(tokenService: sl()));
+  sl.registerLazySingleton<FuelPriceRepository>(
+    () => FuelPriceRepositoryImpl(
+      fuelPriceRemoteRepository: sl<FuelPriceRemoteRepository>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => GetFuelPriceUsecase(fuelPriceRepository: sl<FuelPriceRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => FuelPriceBloc(getFuelPriceUsecase: sl<GetFuelPriceUsecase>()),
   );
 }
 

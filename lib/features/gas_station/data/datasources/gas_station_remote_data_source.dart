@@ -5,7 +5,7 @@ import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:http/http.dart' as http;
 
 class GasStationRemoteDataSource {
-  final String baseUrl = "http://192.168.230.213:5001/api";
+  final String baseUrl = "http://192.168.230.196:5001/api";
   final TokenService tokenService;
 
   GasStationRemoteDataSource({required this.tokenService});
@@ -24,7 +24,7 @@ class GasStationRemoteDataSource {
         },
       );
       final responseData = jsonDecode(response.body);
-      debugPrint("ResponseData: $responseData");
+      debugPrint("Gas Station ResponseData: $responseData");
       return responseData;
     } catch (e) {
       throw e.toString();

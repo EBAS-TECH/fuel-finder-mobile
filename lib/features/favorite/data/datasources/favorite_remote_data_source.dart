@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class FavoriteRemoteDataSource {
-  final baseurl = "http://localhost:5001/api";
+  final baseurl = "http://192.168.230.196:5001/api";
   final TokenService tokenService;
   FavoriteRemoteDataSource({required this.tokenService});
 
@@ -50,17 +50,15 @@ class FavoriteRemoteDataSource {
   Future<Map<String, dynamic>> getFavorites() async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http.delete(
+      final response = await http.get(
         Uri.parse('$baseurl/favorite/user'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
-      if (response.statusCode != 201) {
-        throw 'Failed to get favorites: ${response.body}';
-      }
       final responseData = jsonDecode(response.body);
+      print("Favorite ResponseData: $responseData");
       return responseData;
     } catch (e) {
       throw 'Failed to get favorite: ${e.toString()}';
