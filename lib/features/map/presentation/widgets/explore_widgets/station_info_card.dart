@@ -42,7 +42,6 @@ class StationInfoCard extends StatelessWidget {
         (stationData['available_fuel'] as List<dynamic>?)?.join(', ') ??
         'No fuel info';
 
-    // Simplified view when route is shown
     if (routePoints.isNotEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -120,7 +119,6 @@ class StationInfoCard extends StatelessWidget {
       );
     }
 
-    // Full view when no route is shown
     final averageRate = stationData['averageRate']?.toString() ?? 'Not rated';
     final isSuggested = stationData['suggestion'] == true;
 
@@ -310,3 +308,4 @@ class StationInfoCard extends StatelessWidget {
     );
   }
 }
+
