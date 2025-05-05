@@ -5,8 +5,8 @@ class GetFeedBackUsecase {
 
   GetFeedBackUsecase({required this.feedBackRepository});
 
-  Future<Map<String, dynamic>> call(String stationId, String userId) async {
-    return feedBackRepository.getFeedBackByStationAndUser(stationId, userId);
+  Future<Map<String, dynamic>> call(String stationId) async {
+    return feedBackRepository.getFeedBackByStationAndUser(stationId);
   }
 }
 

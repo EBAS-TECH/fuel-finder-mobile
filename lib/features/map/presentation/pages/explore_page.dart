@@ -38,6 +38,7 @@ class _ExplorePageState extends State<ExplorePage>
   bool _initialZoomDone = false;
   bool _isCalculatingRoute = false;
   bool _showRouteOnMap = false;
+  late AnimationController _animationController;
 
   final String _mapTypeUrl =
       'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
@@ -45,6 +46,10 @@ class _ExplorePageState extends State<ExplorePage>
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
     _checkLocationPermission();
     _fetchUserData();
   }
@@ -80,20 +85,17 @@ class _ExplorePageState extends State<ExplorePage>
     final target = LatLng(latitude, longitude);
     final zoom = getZoomLevel(context);
 
-    final animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
+    _animationController.reset();
 
     final curveAnimation = CurvedAnimation(
-      parent: animationController,
+      parent: _animationController,
       curve: Curves.easeInOut,
     );
 
     final startCenter = mapController.camera.center;
     final startZoom = mapController.camera.zoom;
 
-    animationController.addListener(() {
+    _animationController.addListener(() {
       if (!mounted) return;
       final progress = curveAnimation.value;
       final newLat =
@@ -107,13 +109,7 @@ class _ExplorePageState extends State<ExplorePage>
       mapController.move(LatLng(newLat, newLng), newZoom);
     });
 
-    animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController.dispose();
-      }
-    });
-
-    animationController.forward();
+    _animationController.forward();
 
     setState(() {
       _initialZoomDone = true;
@@ -426,7 +422,7 @@ class _ExplorePageState extends State<ExplorePage>
                 color:
                     station['suggestion'] == true
                         ? AppPallete.primaryColor
-                        : AppPallete.secondaryColor,
+                        : Colors.orange,
                 size: 30,
               ),
             ),
@@ -454,20 +450,18 @@ class _ExplorePageState extends State<ExplorePage>
     if (!mounted) return;
 
     final zoom = getZoomLevel(context);
-    final animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
+
+    _animationController.reset();
 
     final curveAnimation = CurvedAnimation(
-      parent: animationController,
+      parent: _animationController,
       curve: Curves.easeInOut,
     );
 
     final startCenter = mapController.camera.center;
     final startZoom = mapController.camera.zoom;
 
-    animationController.addListener(() {
+    _animationController.addListener(() {
       if (!mounted) return;
       final progress = curveAnimation.value;
       final newLat =
@@ -481,16 +475,16 @@ class _ExplorePageState extends State<ExplorePage>
       mapController.move(LatLng(newLat, newLng), newZoom);
     });
 
-    animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController.dispose();
-      }
-    });
+    _animationController.forward();
+  }
 
-    animationController.forward();
+  @override
+  void dispose() {
+    _animationController.dispose();
+    mapController.dispose();
+    super.dispose();
   }
 
   @override
   bool get wantKeepAlive => true;
 }
-

@@ -95,66 +95,115 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
       itemBuilder: (context, index) {
         final station = stations[index];
         final isSuggestion = station['suggestion'] == true;
+        final fuels = station['available_fuel'] as List<dynamic>? ?? [];
+        final fuelsText = fuels.join(', ');
 
         return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
           color: Colors.grey.shade50,
           child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
             leading: Icon(
               Icons.local_gas_station,
               color: isSuggestion ? AppPallete.primaryColor : Colors.orange,
             ),
             title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(station['name'] ?? 'Gas Station'),
+                Expanded(
+                  child: Text(
+                    station['name'] ?? 'Gas Station',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
                 if (isSuggestion)
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.info_outline, size: 10),
+                      const Icon(Icons.info_outline, size: 12),
+                      const SizedBox(width: 4),
                       const Text("Suggested", style: TextStyle(fontSize: 10)),
                     ],
                   ),
               ],
             ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (station['averageRate'] != null)
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.grey.shade300,
+                      if (station['averageRate'] != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey.shade300,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${station['averageRate']}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                              size: 16,
-                            ),
-                            Text(' ${station['averageRate']}'),
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          if (station['available_fuel'] != null)
-                            Text(
-                              '${station['available_fuel'].join(', ')}',
-                              style: TextStyle(
-                                fontSize: 12,
+                      if (fuels.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: AppPallete.primaryColor.withOpacity(0.1),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.local_gas_station,
+                                size: 14,
                                 color: AppPallete.primaryColor,
                               ),
-                            ),
-                        ],
-                      ),
+                              const SizedBox(width: 4),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                ),
+                                child: Text(
+                                  fuelsText,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppPallete.primaryColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
-              ],
+                ],
+              ),
             ),
             onTap: () {
               Navigator.pop(context);
@@ -172,4 +221,3 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
     super.dispose();
   }
 }
-

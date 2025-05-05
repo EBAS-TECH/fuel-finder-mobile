@@ -38,7 +38,7 @@ class RouteRepositoryImpl implements RouteRepository {
       );
       return RouteModel.fromJson(response);
     } catch (e) {
-      throw Exception('Failed to get route: $e');
+      throw ('Failed to get route please check you internet connection');
     }
   }
 }

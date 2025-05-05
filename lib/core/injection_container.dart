@@ -15,6 +15,12 @@ import 'package:fuel_finder/features/favorite/domain/usecases/get_favorite_useca
 import 'package:fuel_finder/features/favorite/domain/usecases/remove_favorite_usecase.dart';
 import 'package:fuel_finder/features/favorite/domain/usecases/set_favorite_usecase.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:fuel_finder/features/feedback/data/datasources/feed_back_remote_datasource.dart';
+import 'package:fuel_finder/features/feedback/data/repositories/feed_back_repository_impl.dart';
+import 'package:fuel_finder/features/feedback/domain/repositories/feed_back_repository.dart';
+import 'package:fuel_finder/features/feedback/domain/usecases/create_feed_back_usecase.dart';
+import 'package:fuel_finder/features/feedback/domain/usecases/get_feed_back_usecase.dart';
+import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_bloc.dart';
 import 'package:fuel_finder/features/fuel_price/data/datasources/fuel_price_remote_repository.dart';
 import 'package:fuel_finder/features/fuel_price/data/repositories/fuel_price_repository_impl.dart';
 import 'package:fuel_finder/features/fuel_price/domain/repositories/fuel_price_repository.dart';
@@ -158,5 +164,25 @@ void setUpDependencies() async {
   sl.registerLazySingleton(
     () => FuelPriceBloc(getFuelPriceUsecase: sl<GetFuelPriceUsecase>()),
   );
-}
 
+  // Feedbacks
+
+  sl.registerLazySingleton(() => FeedBackRemoteDatasource(tokenService: sl()));
+  sl.registerLazySingleton<FeedBackRepository>(
+    () => FeedBackRepositoryImpl(
+      feedBackRemoteDatasource: sl<FeedBackRemoteDatasource>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => CreateFeedBackUsecase(feedBackRepository: sl<FeedBackRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => GetFeedBackUsecase(feedBackRepository: sl<FeedBackRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => FeedBackBloc(
+      createFeedBackUsecase: sl<CreateFeedBackUsecase>(),
+      getFeedBackUsecase: sl<GetFeedBackUsecase>(),
+    ),
+  );
+}

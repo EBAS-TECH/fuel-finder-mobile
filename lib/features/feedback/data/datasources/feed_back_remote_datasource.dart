@@ -4,7 +4,7 @@ import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:http/http.dart' as http;
 
 class FeedBackRemoteDatasource {
-  final String baseUrl = 'http://localhost:5001/api';
+  final String baseUrl = 'http://192.168.230.150:5001/api';
   final TokenService tokenService;
 
   FeedBackRemoteDatasource({required this.tokenService});
@@ -16,7 +16,7 @@ class FeedBackRemoteDatasource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http.post(
+      await http.post(
         Uri.parse('$baseUrl/feedback'),
         body: jsonEncode({
           "station_id": stationId,
@@ -28,9 +28,6 @@ class FeedBackRemoteDatasource {
           'Authorization': 'Bearer $token',
         },
       );
-      if (response.statusCode != 201) {
-        throw 'Failed to create feedback: ${response.body}';
-      }
     } catch (e) {
       throw 'Failed to create feedback: ${e.toString()}';
     }
@@ -38,11 +35,11 @@ class FeedBackRemoteDatasource {
 
   Future<Map<String, dynamic>> getFeedBackByStationAndUser(
     String stationId,
-    String userId,
   ) async {
     try {
-      final token = tokenService.getAuthToken();
-      final response = await http.post(
+      final userId = tokenService.getUserId();
+      final token = await tokenService.getAuthToken();
+      final response = await http.get(
         Uri.parse('$baseUrl/feedback/station/$stationId/user/$userId'),
         headers: {
           'Content-Type': 'application/json',
@@ -58,4 +55,3 @@ class FeedBackRemoteDatasource {
     }
   }
 }
-

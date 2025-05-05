@@ -31,12 +31,27 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
   ) async {
     emit(FeedBackLoading());
     try {
-      await createFeedBackUsecase(event.stationId, event.rating, event.comment);
-      emit(FeedBackSucess(message: "Create feedback successfully"));
+      if (event.rating < 1 && event.comment.isEmpty) {
+        emit(FeedBackFailure(error: "Please provide a rating or comment"));
+        return;
+      }
+
+      await createFeedBackUsecase(
+        event.stationId,
+        event.rating,
+        event.comment.trim().isEmpty ? "" : event.comment.trim(),
+      );
+      final updatedFeedback = await getFeedBackUsecase(event.stationId);
+      emit(
+        FeedBackSucess(
+          message: "Feedback submitted successfully!",
+          feedback: updatedFeedback,
+        ),
+      );
     } on SocketException {
       emit(FeedBackFailure(error: "No Internet connection"));
     } on FormatException {
-      emit(FeedBackFailure(error: "Invalid"));
+      emit(FeedBackFailure(error: "Invalid data format"));
     } catch (e) {
       emit(FeedBackFailure(error: _cleanErrorMessage(e)));
     }
@@ -48,9 +63,11 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
   ) async {
     emit(FeedBackLoading());
     try {
-      final response = await getFeedBackUsecase(event.stationId, event.userId);
+      final response = await getFeedBackUsecase(event.stationId);
       if (response['data'] == null) {
-        emit(FeedBackFailure(error: "Favorite not found"));
+        emit(
+          FeedBackFetchSucess(feedback: response, message: "No feedback found"),
+        );
       } else {
         emit(
           FeedBackFetchSucess(
@@ -64,8 +81,16 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
     } on FormatException {
       emit(FeedBackFailure(error: "Invalid"));
     } catch (e) {
-      emit(FeedBackFailure(error: _cleanErrorMessage(e)));
+      if (e.toString().contains("404") || e.toString().contains("not found")) {
+        emit(
+          FeedBackFetchSucess(
+            feedback: {'data': null},
+            message: "No feedback found",
+          ),
+        );
+      } else {
+        emit(FeedBackFailure(error: _cleanErrorMessage(e)));
+      }
     }
   }
 }
-

@@ -13,11 +13,9 @@ class FeedBackRepositoryImpl extends FeedBackRepository {
   @override
   Future<Map<String, dynamic>> getFeedBackByStationAndUser(
     String stationId,
-    String userId,
   ) {
     return feedBackRemoteDatasource.getFeedBackByStationAndUser(
-      stationId,
-      userId,
+      stationId
     );
   }
 }

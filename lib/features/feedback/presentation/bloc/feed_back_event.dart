@@ -14,11 +14,6 @@ class CreateFeedBackEvent extends FeedBackEvent {
 
 class GetFeedBackByStationAndUserEvent extends FeedBackEvent {
   final String stationId;
-  final String userId;
 
-  GetFeedBackByStationAndUserEvent({
-    required this.stationId,
-    required this.userId,
-  });
+  GetFeedBackByStationAndUserEvent({required this.stationId});
 }
-

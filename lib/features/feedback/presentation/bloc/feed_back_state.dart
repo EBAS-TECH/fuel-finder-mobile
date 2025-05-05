@@ -6,8 +6,12 @@ class FeedBackLoading extends FeedBackState {}
 
 class FeedBackSucess extends FeedBackState {
   final String message;
+  final Map<String, dynamic>? feedback;
 
-  FeedBackSucess({required this.message});
+  FeedBackSucess({required this.message, this.feedback});
+
+  @override
+  List<Object?> get props => [message, feedback];
 }
 
 class FeedBackFetchSucess extends FeedBackState {
@@ -22,4 +26,3 @@ class FeedBackFailure extends FeedBackState {
 
   FeedBackFailure({required this.error});
 }
-

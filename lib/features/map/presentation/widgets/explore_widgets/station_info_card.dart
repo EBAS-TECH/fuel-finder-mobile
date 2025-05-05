@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:fuel_finder/features/map/presentation/pages/station_detail_page.dart';
+import 'package:fuel_finder/features/feedback/presentation/pages/station_detail_page.dart';
 
 class StationInfoCard extends StatelessWidget {
   final Map<String, dynamic> station;
@@ -79,17 +79,20 @@ class StationInfoCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
               children: [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.location_on, color: Colors.blue, size: 18),
                     const SizedBox(width: 4),
                     Text(_formatDistance(distance)),
                   ],
                 ),
-                const SizedBox(width: 16),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
                       Icons.access_time_filled,
@@ -158,25 +161,28 @@ class StationInfoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.star, color: Colors.amber, size: 18),
                   const SizedBox(width: 4),
                   Text(averageRate),
                 ],
               ),
-              const SizedBox(width: 16),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.location_on, color: Colors.blue, size: 18),
                   const SizedBox(width: 4),
                   Text(_formatDistance(distance)),
                 ],
               ),
-              const SizedBox(width: 16),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
                     Icons.access_time_filled,
@@ -187,9 +193,9 @@ class StationInfoCard extends StatelessWidget {
                   Text(_formatDuration(duration)),
                 ],
               ),
-              if (isSuggested) ...[
-                const SizedBox(width: 16),
+              if (isSuggested)
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text('Suggested'),
                     const SizedBox(width: 4),
@@ -217,7 +223,6 @@ class StationInfoCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -308,4 +313,3 @@ class StationInfoCard extends StatelessWidget {
     );
   }
 }
-

@@ -8,6 +8,7 @@ import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_bloc.dart';
 import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_bloc.dart';
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_bloc.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
@@ -48,6 +49,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<GasStationBloc>()),
         BlocProvider(create: (_) => sl<FavoriteBloc>()),
         BlocProvider(create: (_) => sl<FuelPriceBloc>()),
+        BlocProvider(create: (_) => sl<FeedBackBloc>()),
       ],
       child: MaterialApp(
         title: 'Fuel Finder',
@@ -82,4 +84,3 @@ class MainApp extends StatelessWidget {
     );
   }
 }
-

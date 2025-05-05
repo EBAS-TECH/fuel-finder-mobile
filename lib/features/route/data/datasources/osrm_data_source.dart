@@ -34,8 +34,7 @@ class OSRMDataSource {
       return response.data;
     } else {
       print("routeResponse: $response");
-      throw Exception('Failed to load route: ${response.statusCode}');
+      throw ('Failed to load route}');
     }
   }
 }
-
