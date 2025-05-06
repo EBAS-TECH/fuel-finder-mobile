@@ -211,6 +211,15 @@ class _LoginPageState extends State<LoginPage> {
                 )
                 : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        errorStyle: TextStyle(height: 0),
       ),
     );
   }
@@ -226,4 +235,3 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 }
-

@@ -64,9 +64,9 @@ class _FavoritePageState extends State<FavoritePage> {
 
   void _removeFavorite(String stationId) {
     context.read<FavoriteBloc>().add(RemoveFavoriteEvent(stationId: stationId));
-    /* Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       _fetchFavorites();
-    }); */
+    });
   }
 
   @override

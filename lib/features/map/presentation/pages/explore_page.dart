@@ -38,7 +38,7 @@ class _ExplorePageState extends State<ExplorePage>
   bool _initialZoomDone = false;
   bool _isCalculatingRoute = false;
   bool _showRouteOnMap = false;
-  late AnimationController _animationController;
+  AnimationController? _animationController;
 
   final String _mapTypeUrl =
       'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
@@ -46,12 +46,15 @@ class _ExplorePageState extends State<ExplorePage>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
     _checkLocationPermission();
     _fetchUserData();
+  }
+
+  @override
+  void dispose() {
+    _animationController?.dispose();
+    mapController.dispose();
+    super.dispose();
   }
 
   void _checkLocationPermission() async {
@@ -85,17 +88,21 @@ class _ExplorePageState extends State<ExplorePage>
     final target = LatLng(latitude, longitude);
     final zoom = getZoomLevel(context);
 
-    _animationController.reset();
+    _animationController?.dispose();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
 
     final curveAnimation = CurvedAnimation(
-      parent: _animationController,
+      parent: _animationController!,
       curve: Curves.easeInOut,
     );
 
     final startCenter = mapController.camera.center;
     final startZoom = mapController.camera.zoom;
 
-    _animationController.addListener(() {
+    _animationController!.addListener(() {
       if (!mounted) return;
       final progress = curveAnimation.value;
       final newLat =
@@ -109,7 +116,14 @@ class _ExplorePageState extends State<ExplorePage>
       mapController.move(LatLng(newLat, newLng), newZoom);
     });
 
-    _animationController.forward();
+    _animationController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _animationController?.dispose();
+        _animationController = null;
+      }
+    });
+
+    _animationController!.forward();
 
     setState(() {
       _initialZoomDone = true;
@@ -378,7 +392,7 @@ class _ExplorePageState extends State<ExplorePage>
                     polylines: [
                       Polyline(
                         points: _routePoints,
-                        strokeWidth: 5,
+                        strokeWidth: 2.5,
                         color: Colors.blueAccent,
                       ),
                     ],
@@ -422,7 +436,7 @@ class _ExplorePageState extends State<ExplorePage>
                 color:
                     station['suggestion'] == true
                         ? AppPallete.primaryColor
-                        : Colors.orange,
+                        : AppPallete.secondaryColor,
                 size: 30,
               ),
             ),
@@ -450,18 +464,22 @@ class _ExplorePageState extends State<ExplorePage>
     if (!mounted) return;
 
     final zoom = getZoomLevel(context);
-
-    _animationController.reset();
+    
+    _animationController?.dispose();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
 
     final curveAnimation = CurvedAnimation(
-      parent: _animationController,
+      parent: _animationController!,
       curve: Curves.easeInOut,
     );
 
     final startCenter = mapController.camera.center;
     final startZoom = mapController.camera.zoom;
 
-    _animationController.addListener(() {
+    _animationController!.addListener(() {
       if (!mounted) return;
       final progress = curveAnimation.value;
       final newLat =
@@ -475,14 +493,14 @@ class _ExplorePageState extends State<ExplorePage>
       mapController.move(LatLng(newLat, newLng), newZoom);
     });
 
-    _animationController.forward();
-  }
+    _animationController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _animationController?.dispose();
+        _animationController = null;
+      }
+    });
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    mapController.dispose();
-    super.dispose();
+    _animationController!.forward();
   }
 
   @override

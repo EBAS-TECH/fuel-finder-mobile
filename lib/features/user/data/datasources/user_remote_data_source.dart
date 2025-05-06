@@ -4,7 +4,7 @@ import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:http/http.dart' as http;
 
 class UserRemoteDataSource {
-  final String baseUrl = "http://192.168.230.150:5001/api/user";
+  final String baseUrl = "https://fuel-backend-1uy6.onrender.com/api/user";
   final TokenService tokenService;
 
   UserRemoteDataSource({required this.tokenService});

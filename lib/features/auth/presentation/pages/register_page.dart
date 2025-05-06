@@ -277,6 +277,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 )
                 : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        errorStyle: TextStyle(height: 0),
       ),
     );
   }
@@ -303,4 +312,3 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 }
-

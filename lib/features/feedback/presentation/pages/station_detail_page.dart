@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_event.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_bloc.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_event.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_state.dart';
@@ -63,6 +65,11 @@ class _StationDetailPageState extends State<StationDetailPage> {
     final stationData = widget.station["data"] ?? widget.station;
     _isFavorite = stationData['isFavorite'] == true;
     _fetchFeedBack();
+    _checkFavoriteStatus();
+  }
+
+  void _checkFavoriteStatus() {
+    context.read<FavoriteBloc>().add(GetFavoritesEvent());
   }
 
   void _fetchFeedBack() {
@@ -141,6 +148,17 @@ class _StationDetailPageState extends State<StationDetailPage> {
       _userRating = _originalRating;
       _commentController.text = _originalComment;
     });
+  }
+
+  void _toggleFavorite() {
+    final stationId = widget.station["id"];
+    if (_isFavorite) {
+      context.read<FavoriteBloc>().add(
+        RemoveFavoriteEvent(stationId: stationId),
+      );
+    } else {
+      context.read<FavoriteBloc>().add(SetFavoriteEvent(stationId: stationId));
+    }
   }
 
   @override
@@ -462,3 +480,4 @@ class _StationDetailPageState extends State<StationDetailPage> {
     );
   }
 }
+
