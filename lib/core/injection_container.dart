@@ -39,6 +39,7 @@ import 'package:fuel_finder/features/user/data/datasources/user_remote_data_sour
 import 'package:fuel_finder/features/user/data/repositories/user_repository_impl.dart';
 import 'package:fuel_finder/features/user/domain/repositories/user_repository.dart';
 import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
+import 'package:fuel_finder/features/user/domain/usecases/update_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -90,7 +91,13 @@ void setUpDependencies() async {
     () => GetUserByIdUsecase(userRepository: sl<UserRepository>()),
   );
   sl.registerLazySingleton(
-    () => UserBloc(getUserByIdUsecase: sl<GetUserByIdUsecase>()),
+    () => UpdateUserByIdUsecase(userRepository: sl<UserRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => UserBloc(
+      getUserByIdUsecase: sl<GetUserByIdUsecase>(),
+      updateUserByIdUsecase: sl<UpdateUserByIdUsecase>(),
+    ),
   );
 
   // Geo Location
@@ -186,3 +193,4 @@ void setUpDependencies() async {
     ),
   );
 }
+

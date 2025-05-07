@@ -9,5 +9,20 @@ class UserRepositoryImpl extends UserRepository {
   Future<Map<String, dynamic>> getUserById(String userId) {
     return userRemoteDataSource.getUserById(userId);
   }
+
+  @override
+  Future<Map<String, dynamic>> updateUserById(
+    String userId,
+    String firstName,
+    String lastName,
+    String userName,
+  ) {
+    return userRemoteDataSource.updateUserById(
+      userId,
+      firstName,
+      lastName,
+      userName,
+    );
+  }
 }
 

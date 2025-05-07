@@ -31,5 +31,39 @@ class UserRemoteDataSource {
       throw 'Failed to fetch user: ${e.toString()}';
     }
   }
+
+  Future<Map<String, dynamic>> updateUserById(
+    String userId,
+    String firstName,
+    String lastName,
+    String userName,
+  ) async {
+    try {
+      final token = await tokenService.getAuthToken();
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/$userId'),
+        body: jsonEncode({
+          "first_name": firstName,
+          "last_name": lastName,
+          "username": userName,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        print(response.body);
+        throw 'Failed to update user: ${response.statusCode}';
+      }
+
+      final responseData = jsonDecode(response.body);
+      return responseData;
+    } catch (e) {
+      throw 'Failed to update user: ${e.toString()}';
+    }
+  }
 }
 

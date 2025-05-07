@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 
 class AuthRemoteDataSource {
   final String baseUrl = "https://fuel-finder-backend.onrender.com/api/auth";
@@ -25,20 +26,34 @@ class AuthRemoteDataSource {
           "role": role,
         }),
         headers: {"Content-Type": "application/json"},
-      );
+      ).timeout(const Duration(seconds: 30));
 
       final responseData = jsonDecode(response.body);
-      debugPrint("SIGNUP RESPONSE: $responseData");
 
-      if (response.statusCode != 201) {
-        final errorMsg = responseData['error'] ?? 'Registration failed';
-        throw errorMsg;
+      switch (response.statusCode) {
+        case 201:
+          return responseData;
+        case 400:
+          throw BadRequestException(message: responseData['error']);
+        case 401:
+          throw UnAuthorizedException(message: responseData['error']);
+        case 404:
+          throw NotFoundException(message: responseData['error']);
+        case 409:
+          throw ConflictException(message: responseData['error']);
+        case 500:
+          throw ServerErrorException(message: responseData['error']);
+        default:
+          throw FetchDataException(
+            message: 'Error occurred while communicating with server',
+          );
       }
-
-      return responseData;
+    } on http.ClientException catch (e) {
+      throw FetchDataException(message: e.message);
+    } on FormatException catch (_) {
+      throw FormatException(message: 'Invalid response format');
     } catch (e) {
-      debugPrint("Signup error: $e");
-      throw e.toString();
+      throw ExceptionHandler.handleError(e);
     }
   }
 
@@ -48,20 +63,32 @@ class AuthRemoteDataSource {
         Uri.parse('$baseUrl/login'),
         body: jsonEncode({"username": userName, "password": password}),
         headers: {"Content-Type": "application/json"},
-      );
+      ).timeout(const Duration(seconds: 30));
 
       final responseData = jsonDecode(response.body);
-      debugPrint("LOGIN RESPONSE: $responseData");
 
-      if (response.statusCode != 200) {
-        final errorMsg = responseData['error'] ?? 'Invalid credentials';
-        throw errorMsg;
+      switch (response.statusCode) {
+        case 200:
+          return responseData;
+        case 400:
+          throw BadRequestException(message: responseData['error']);
+        case 401:
+          throw UnAuthorizedException(message: responseData['error']);
+        case 404:
+          throw NotFoundException(message: responseData['error']);
+        case 500:
+          throw ServerErrorException(message: responseData['error']);
+        default:
+          throw FetchDataException(
+            message: 'Error occurred while communicating with server',
+          );
       }
-
-      return responseData;
+    } on http.ClientException catch (e) {
+      throw FetchDataException(message: e.message);
+    } on FormatException catch (_) {
+      throw FormatException(message: 'Invalid response format');
     } catch (e) {
-      debugPrint("Login error: $e");
-      throw 'Invalid credentials';
+      throw ExceptionHandler.handleError(e);
     }
   }
 
@@ -70,14 +97,13 @@ class AuthRemoteDataSource {
       final response = await http.post(
         Uri.parse("$baseUrl/logout"),
         headers: {"Content-Type": "application/json"},
-      );
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200) {
-        throw 'Logout failed';
+        throw FetchDataException(message: 'Logout failed');
       }
     } catch (e) {
-      debugPrint("Logout error: $e");
-      throw e.toString();
+      throw ExceptionHandler.handleError(e);
     }
   }
 
@@ -87,18 +113,28 @@ class AuthRemoteDataSource {
         Uri.parse("$baseUrl/verify/$userId"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"token": token}),
-      );
+      ).timeout(const Duration(seconds: 30));
 
       final responseBody = json.decode(response.body);
-      debugPrint("Verification response: $responseBody");
 
-      if (response.statusCode != 200) {
-        final errorMsg = responseBody["message"] ?? "Email verification failed";
-        throw errorMsg;
+      switch (response.statusCode) {
+        case 200:
+          return;
+        case 400:
+          throw BadRequestException(message: responseBody['message']);
+        case 401:
+          throw UnAuthorizedException(message: responseBody['message']);
+        case 404:
+          throw NotFoundException(message: responseBody['message']);
+        case 500:
+          throw ServerErrorException(message: responseBody['message']);
+        default:
+          throw FetchDataException(
+            message: 'Error occurred while verifying email',
+          );
       }
     } catch (e) {
-      debugPrint("Verification error: $e");
-      throw e.toString();
+      throw ExceptionHandler.handleError(e);
     }
   }
 }

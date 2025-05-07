@@ -1,6 +1,5 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signin_usecase.dart';
@@ -17,14 +16,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final TokenService tokenService;
 
   static const int _minimumLoadingTime = 1500;
-
-  String _cleanErrorMessage(dynamic error) {
-    String message = error.toString();
-    if (message.startsWith('Exception: ')) {
-      message = message.substring('Exception: '.length);
-    }
-    return message;
-  }
 
   AuthBloc({
     required this.signupUsecase,
@@ -57,12 +48,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           userId: user["data"]["id"],
         ),
       );
-    } on SocketException {
-      emit(AuthFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(AuthFailure(error: "Invalid data format"));
     } catch (e) {
-      emit(AuthFailure(error: _cleanErrorMessage(e)));
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
     }
   }
 
@@ -86,12 +74,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
 
       emit(AuthLogInSucess(message: "Login successful", userId: userId));
-    } on SocketException {
-      emit(AuthFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(AuthFailure(error: "Invalid data format"));
     } catch (e) {
-      emit(AuthFailure(error: _cleanErrorMessage(e)));
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
     } finally {
       stopwatch.stop();
     }
@@ -105,22 +90,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await verifyEmailUsecase(event.userId, event.token);
       emit(AuthSuccess(message: "Email verification successful"));
-    } on SocketException {
-      emit(AuthFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(AuthFailure(error: "Invalid verification code"));
     } catch (e) {
-      emit(AuthFailure(error: _cleanErrorMessage(e)));
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
     }
   }
 
   Future<void> _onLogOut(AuthLogOutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
+      await logoutUsecase();
       await tokenService.clearAll();
       emit(AuthSuccess(message: "Logout successful"));
     } catch (e) {
-      emit(AuthFailure(error: _cleanErrorMessage(e)));
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
     }
   }
 }
