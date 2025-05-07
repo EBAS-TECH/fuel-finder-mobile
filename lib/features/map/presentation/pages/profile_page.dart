@@ -35,12 +35,23 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Log Out'),
-            content: const Text('Are you sure you want to log out?'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'Log Out',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: const Text(
+              'Are you sure you want to log out of your account?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppPallete.primaryColor),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -66,7 +77,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: "Profile",
+        title: "My Profile",
         centerTitle: true,
         actions: [
           IconButton(
@@ -83,7 +94,9 @@ class _ProfilePageState extends State<ProfilePage> {
         },
         builder: (context, state) {
           if (state is UserLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: AppPallete.primaryColor),
+            );
           } else if (state is UserSuccess) {
             final user = state.responseData["data"];
             if (user == null) {
@@ -93,7 +106,9 @@ class _ProfilePageState extends State<ProfilePage> {
           } else if (state is UserFailure) {
             return _buildErrorState(state.error);
           }
-          return const Center(child: Icon(Icons.person, size: 80));
+          return const Center(
+            child: Icon(Icons.person, size: 80, color: AppPallete.primaryColor),
+          );
         },
       ),
     );
@@ -101,14 +116,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildProfileContent(Map<String, dynamic> user, BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
+          const SizedBox(height: 10),
           _buildProfileHeader(user),
           const SizedBox(height: 24),
           _buildUserInfoCard(user),
           const SizedBox(height: 24),
           _buildLogoutButton(context),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -118,11 +135,21 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         Container(
-          width: 120,
-          height: 120,
+          width: 130,
+          height: 130,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppPallete.primaryColor, width: 3),
+            border: Border.all(
+              color: AppPallete.primaryColor.withOpacity(0.2),
+              width: 4,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
           ),
           child: ClipOval(
             child: Image.network(
@@ -130,28 +157,42 @@ class _ProfilePageState extends State<ProfilePage> {
                   'https://avatar.iran.liara.run/public/boy?username=user',
               fit: BoxFit.cover,
               errorBuilder:
-                  (context, error, stackTrace) =>
-                      const Icon(Icons.person, size: 60),
+                  (context, error, stackTrace) => Container(
+                    color: Colors.grey[200],
+                    child: const Icon(
+                      Icons.person,
+                      size: 60,
+                      color: Colors.grey,
+                    ),
+                  ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         Text(
           "${user["first_name"] ?? 'No name'} ${user["last_name"] ?? ''}",
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           user["email"] ?? 'No email',
           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
         ),
-        const SizedBox(height: 8),
-        Chip(
-          label: Text(
-            user["role"]?.toString().toUpperCase() ?? 'USER',
-            style: const TextStyle(color: Colors.white),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppPallete.primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppPallete.primaryColor.withOpacity(0.3)),
           ),
-          backgroundColor: AppPallete.primaryColor,
+          child: Text(
+            user["role"]?.toString().toUpperCase() ?? 'USER',
+            style: TextStyle(
+              color: AppPallete.primaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );
@@ -159,20 +200,26 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildUserInfoCard(Map<String, dynamic> user) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             _buildInfoItem(
-              icon: Icons.person,
+              icon: Icons.person_outline,
               label: "Username",
               value: user["username"] ?? 'Not provided',
             ),
-            const Divider(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
+            ),
             _buildInfoItem(
-              icon: Icons.calendar_today,
+              icon: Icons.calendar_today_outlined,
               label: "Member Since",
               value:
                   user["created_at"] != null
@@ -181,11 +228,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       ).toLocal().toString().split(' ')[0]
                       : 'Unknown',
             ),
-            const Divider(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
+            ),
             _buildInfoItem(
-              icon: Icons.verified,
+              icon: Icons.verified_outlined,
               label: "Account Status",
               value: user["verified"] == true ? "Verified" : "Not Verified",
+              isVerified: user["verified"] == true,
             ),
           ],
         ),
@@ -197,11 +248,16 @@ class _ProfilePageState extends State<ProfilePage> {
     required IconData icon,
     required String label,
     required String value,
+    bool isVerified = false,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppPallete.primaryColor, size: 24),
+        Icon(
+          icon,
+          color: isVerified ? Colors.green : AppPallete.primaryColor,
+          size: 24,
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -209,14 +265,15 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
+                  color: isVerified ? Colors.green : AppPallete.textPrimary,
                 ),
               ),
             ],
@@ -229,15 +286,16 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildLogoutButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
-        icon: const Icon(Icons.logout, color: Colors.white),
-        label: const Text('Log Out', style: TextStyle(color: Colors.white)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+      child: OutlinedButton.icon(
+        icon: const Icon(Icons.logout, color: Colors.redAccent),
+        label: const Text('Log Out', style: TextStyle(color: Colors.redAccent)),
+        style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          side: const BorderSide(color: Colors.redAccent),
+          backgroundColor: Colors.redAccent.withOpacity(0.05),
         ),
         onPressed: () => _handleLogOut(context),
       ),
@@ -246,38 +304,49 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildErrorState(String error) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 60, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            "Error loading profile",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 60,
+              color: Colors.redAccent.withOpacity(0.8),
             ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
+            const SizedBox(height: 20),
+            Text(
+              "Error loading profile",
+              style: TextStyle(
+                fontSize: 18,
+                color: AppPallete.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
               error,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _fetchUserData,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppPallete.primaryColor,
-              foregroundColor: Colors.white,
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _fetchUserData,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppPallete.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text("Try Again"),
             ),
-            child: const Text("Retry"),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

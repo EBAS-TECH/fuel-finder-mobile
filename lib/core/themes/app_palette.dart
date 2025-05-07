@@ -9,6 +9,7 @@ class AppPallete {
   static const Color whiteColor = Colors.white;
   static const Color bgColor = Color(0xFFE7E7E7);
   final bottomNavColor = Colors.grey[100];
+  static const Color textPrimary = Color(0xFF1C1C1E);
 
   static const Color transparentColor = Colors.transparent;
 

@@ -74,9 +74,9 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildStationList(_allStations),
-                _buildStationList(_petrolStations),
-                _buildStationList(_dieselStations),
+                _buildStationList(_allStations, showAllFuels: true),
+                _buildStationList(_petrolStations, fuelType: 'PETROL'),
+                _buildStationList(_dieselStations, fuelType: 'DIESEL'),
               ],
             ),
           ),
@@ -85,7 +85,11 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
     );
   }
 
-  Widget _buildStationList(List<Map<String, dynamic>> stations) {
+  Widget _buildStationList(
+    List<Map<String, dynamic>> stations, {
+    bool showAllFuels = false,
+    String? fuelType,
+  }) {
     if (stations.isEmpty) {
       return const Center(child: Text('No stations found'));
     }
@@ -96,7 +100,18 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
         final station = stations[index];
         final isSuggestion = station['suggestion'] == true;
         final fuels = station['available_fuel'] as List<dynamic>? ?? [];
-        final fuelsText = fuels.join(', ');
+        final displayedFuels =
+            showAllFuels
+                ? fuels
+                : fuels
+                    .where(
+                      (fuel) => fuel.toString().toUpperCase().contains(
+                        fuelType ?? '',
+                      ),
+                    )
+                    .toList();
+
+        final fuelsText = displayedFuels.join(', ');
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -164,7 +179,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                             ],
                           ),
                         ),
-                      if (fuels.isNotEmpty)
+                      if (displayedFuels.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -221,3 +236,4 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
     super.dispose();
   }
 }
+
