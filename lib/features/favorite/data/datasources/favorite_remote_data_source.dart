@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class FavoriteRemoteDataSource {
-  final baseurl = "https://fuel-backend-1uy6.onrender.com/api";
+  final baseurl = "https://fuel-finder-backend.onrender.com/api";
   final TokenService tokenService;
   FavoriteRemoteDataSource({required this.tokenService});
 

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_event.dart';
+import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_state.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_bloc.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_event.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_state.dart';
@@ -156,8 +157,14 @@ class _StationDetailPageState extends State<StationDetailPage> {
       context.read<FavoriteBloc>().add(
         RemoveFavoriteEvent(stationId: stationId),
       );
+      setState(() {
+        _isFavorite = false;
+      });
     } else {
       context.read<FavoriteBloc>().add(SetFavoriteEvent(stationId: stationId));
+      setState(() {
+        _isFavorite = true;
+      });
     }
   }
 
@@ -170,314 +177,329 @@ class _StationDetailPageState extends State<StationDetailPage> {
     final availableFuel = stationData['available_fuel'] as List<dynamic>?;
     final averageRate = stationData['averageRate']?.toString() ?? '0';
 
-    return Scaffold(
-      appBar: CustomAppBar(title: "Fuel Station Details", centerTitle: true),
-      body: BlocConsumer<FeedBackBloc, FeedBackState>(
-        listener: (context, state) {
-          if (state is FeedBackSucess) {
-            ShowSnackbar.show(context, state.message);
+    return BlocListener<FavoriteBloc, FavoriteState>(
+      listener: (context, state) {
+        if (state is FavoriteSucess) {
+          ShowSnackbar.show(context, state.message);
+        } else if (state is FavoriteFailure) {
+          setState(() {
+            _isFavorite = !_isFavorite;
+          });
+          ShowSnackbar.show(context, state.error, isError: true);
+        }
+      },
+      child: Scaffold(
+        appBar: CustomAppBar(title: "Fuel Station Details", centerTitle: true),
+        body: BlocConsumer<FeedBackBloc, FeedBackState>(
+          listener: (context, state) {
+            if (state is FeedBackSucess) {
+              ShowSnackbar.show(context, state.message);
 
-            if (state.feedback != null && state.feedback!['data'] != null) {
-              final feedbackData = state.feedback!['data'];
-              setState(() {
-                _hasExistingFeedback = true;
-                _userRating = feedbackData['rating'] ?? 0;
-                _commentController.text = feedbackData['comment'] ?? '';
-                _isEditing = false;
-              });
+              if (state.feedback != null && state.feedback!['data'] != null) {
+                final feedbackData = state.feedback!['data'];
+                setState(() {
+                  _hasExistingFeedback = true;
+                  _userRating = feedbackData['rating'] ?? 0;
+                  _commentController.text = feedbackData['comment'] ?? '';
+                  _isEditing = false;
+                });
+              }
+            } else if (state is FeedBackFailure) {
+              ShowSnackbar.show(
+                context,
+                "Failed to submit feedback",
+                isError: true,
+              );
             }
-          } else if (state is FeedBackFailure) {
-            ShowSnackbar.show(
-              context,
-              "Failed to submit feedback",
-              isError: true,
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is FeedBackFetchSucess) {
-            final feedbackData = state.feedback['data'];
-            if (feedbackData != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!_hasExistingFeedback) {
-                  setState(() {
-                    _hasExistingFeedback = true;
-                    _userRating = feedbackData['rating'] ?? 0;
-                    _commentController.text = feedbackData['comment'] ?? '';
-                    _originalRating = _userRating;
-                    _originalComment = _commentController.text;
-                  });
-                }
-              });
-            } else {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (_hasExistingFeedback) {
-                  setState(() {
-                    _hasExistingFeedback = false;
-                    _isEditing = false;
-                    _userRating = 0;
-                    _commentController.clear();
-                  });
-                }
-              });
+          },
+          builder: (context, state) {
+            if (state is FeedBackFetchSucess) {
+              final feedbackData = state.feedback['data'];
+              if (feedbackData != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!_hasExistingFeedback) {
+                    setState(() {
+                      _hasExistingFeedback = true;
+                      _userRating = feedbackData['rating'] ?? 0;
+                      _commentController.text = feedbackData['comment'] ?? '';
+                      _originalRating = _userRating;
+                      _originalComment = _commentController.text;
+                    });
+                  }
+                });
+              } else {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_hasExistingFeedback) {
+                    setState(() {
+                      _hasExistingFeedback = false;
+                      _isEditing = false;
+                      _userRating = 0;
+                      _commentController.clear();
+                    });
+                  }
+                });
+              }
             }
-          }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Card(
-                  color: Colors.grey.shade50,
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.local_gas_station,
-                      color:
-                          isSuggestion
-                              ? AppPallete.primaryColor
-                              : Colors.orange,
-                    ),
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          station['name'] ?? 'Gas Station',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (isSuggestion)
-                          Row(
-                            children: [
-                              Icon(Icons.info_outline, size: 10),
-                              Text("Suggested", style: TextStyle(fontSize: 10)),
-                            ],
-                          ),
-                      ],
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (station['averageRate'] != null)
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      averageRate,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 2),
-                              Spacer(),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.local_gas_station,
-                                    color: Colors.orange,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    availableFuel?.join(', ') ??
-                                        'No fuel information',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppPallete.primaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        if (distance != null && distance >= 0)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.location_on,
-                                      color: Colors.blue,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${distance.toStringAsFixed(1)} km',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.favorite,
-                                  color: _isFavorite ? Colors.red : Colors.grey,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isFavorite = !_isFavorite;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Your Rating',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_hasExistingFeedback && !_isEditing)
-                      TextButton(
-                        onPressed: _startEditing,
-                        child: const Text('Edit'),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: List.generate(5, (index) {
-                    return GestureDetector(
-                      onTap: () {
-                        if (!_hasExistingFeedback || _isEditing) {
-                          setState(() {
-                            _userRating = index + 1;
-                          });
-                        }
-                      },
-                      child: Icon(
-                        index < _userRating ? Icons.star : Icons.star_border,
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Card(
+                    color: Colors.grey.shade50,
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.local_gas_station,
                         color:
-                            (_hasExistingFeedback && !_isEditing)
-                                ? Colors.amber.withOpacity(0.5)
-                                : Colors.amber,
-                        size: 32,
+                            isSuggestion
+                                ? AppPallete.primaryColor
+                                : Colors.orange,
                       ),
-                    );
-                  }),
-                ),
-                if (_hasExistingFeedback && !_isEditing)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      'You rated this station',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            station['name'] ?? 'Gas Station',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (isSuggestion)
+                            Row(
+                              children: [
+                                Icon(Icons.info_outline, size: 10),
+                                Text(
+                                  "Suggested",
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (station['averageRate'] != null)
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        averageRate,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 2),
+                                Spacer(),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.local_gas_station,
+                                      color: Colors.orange,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      availableFuel?.join(', ') ??
+                                          'No fuel information',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppPallete.primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          if (distance != null && distance >= 0)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        color: Colors.blue,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${distance.toStringAsFixed(1)} km',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.favorite,
+                                    color:
+                                        _isFavorite ? Colors.red : Colors.grey,
+                                  ),
+                                  onPressed: () {
+                                    _toggleFavorite();
+                                  },
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
                     ),
                   ),
-
-                const SizedBox(height: 16),
-
-                const Text(
-                  'Your Comment',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _commentController,
-                  maxLines: 3,
-                  readOnly: _hasExistingFeedback && !_isEditing,
-                  decoration: InputDecoration(
-                    hintText:
-                        (_hasExistingFeedback && !_isEditing)
-                            ? ''
-                            : 'Share your experience...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppPallete.primaryColor),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-                if (!_hasExistingFeedback || _isEditing)
+                  const SizedBox(height: 24),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (_isEditing)
+                      const Text(
+                        'Your Rating',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (_hasExistingFeedback && !_isEditing)
+                        TextButton(
+                          onPressed: _startEditing,
+                          child: const Text('Edit'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: List.generate(5, (index) {
+                      return GestureDetector(
+                        onTap: () {
+                          if (!_hasExistingFeedback || _isEditing) {
+                            setState(() {
+                              _userRating = index + 1;
+                            });
+                          }
+                        },
+                        child: Icon(
+                          index < _userRating ? Icons.star : Icons.star_border,
+                          color:
+                              (_hasExistingFeedback && !_isEditing)
+                                  ? Colors.amber.withOpacity(0.5)
+                                  : Colors.amber,
+                          size: 32,
+                        ),
+                      );
+                    }),
+                  ),
+                  if (_hasExistingFeedback && !_isEditing)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'You rated this station',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    'Your Comment',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _commentController,
+                    maxLines: 3,
+                    readOnly: _hasExistingFeedback && !_isEditing,
+                    decoration: InputDecoration(
+                      hintText:
+                          (_hasExistingFeedback && !_isEditing)
+                              ? ''
+                              : 'Share your experience...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppPallete.primaryColor),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  if (!_hasExistingFeedback || _isEditing)
+                    Row(
+                      children: [
+                        if (_isEditing)
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _cancelEditing,
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                side: BorderSide(color: Colors.grey),
+                              ),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                        if (_isEditing) const SizedBox(width: 16),
                         Expanded(
-                          child: OutlinedButton(
-                            onPressed: _cancelEditing,
-                            style: OutlinedButton.styleFrom(
+                          child: ElevatedButton(
+                            onPressed: _submitFeedback,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppPallete.primaryColor,
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              side: BorderSide(color: Colors.grey),
                             ),
-                            child: const Text('Cancel'),
+                            child: Text(_isEditing ? 'Update' : 'Submit'),
                           ),
                         ),
-                      if (_isEditing) const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _submitFeedback,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppPallete.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(_isEditing ? 'Update' : 'Submit'),
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          );
-        },
+                      ],
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 }
-

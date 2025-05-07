@@ -436,7 +436,7 @@ class _ExplorePageState extends State<ExplorePage>
                 color:
                     station['suggestion'] == true
                         ? AppPallete.primaryColor
-                        : AppPallete.secondaryColor,
+                        : Colors.orange,
                 size: 30,
               ),
             ),
@@ -464,7 +464,7 @@ class _ExplorePageState extends State<ExplorePage>
     if (!mounted) return;
 
     final zoom = getZoomLevel(context);
-    
+
     _animationController?.dispose();
     _animationController = AnimationController(
       vsync: this,
@@ -506,3 +506,4 @@ class _ExplorePageState extends State<ExplorePage>
   @override
   bool get wantKeepAlive => true;
 }
+
