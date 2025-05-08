@@ -1,7 +1,9 @@
 import 'dart:convert';
 
-import 'package:fuel_finder/core/utils/token_services.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
+import 'package:fuel_finder/core/utils/token_services.dart';
 
 class FeedBackRemoteDatasource {
   final String baseUrl = 'https://fuel-finder-backend.onrender.com/api';
@@ -16,7 +18,7 @@ class FeedBackRemoteDatasource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
-      await http.post(
+      final response = await http.post(
         Uri.parse('$baseUrl/feedback'),
         body: jsonEncode({
           "station_id": stationId,
@@ -28,8 +30,11 @@ class FeedBackRemoteDatasource {
           'Authorization': 'Bearer $token',
         },
       );
+
+      _handleResponse(response);
     } catch (e) {
-      throw 'Failed to create feedback: ${e.toString()}';
+      final exception = ExceptionHandler.handleError(e);
+      throw ExceptionHandler.getErrorMessage(exception);
     }
   }
 
@@ -46,12 +51,52 @@ class FeedBackRemoteDatasource {
           'Authorization': 'Bearer $token',
         },
       );
-      if (response.statusCode != 200) {
-        throw 'Error ${response.body}';
-      }
-      return jsonDecode(response.body);
+
+      return _handleResponse(response);
     } catch (e) {
-      throw 'Failed to getFeedback ${e.toString()}';
+      final exception = ExceptionHandler.handleError(e);
+      throw ExceptionHandler.getErrorMessage(exception);
+    }
+  }
+
+  dynamic _handleResponse(http.Response response) {
+    final responseData = jsonDecode(response.body);
+
+    switch (response.statusCode) {
+      case 200:
+      case 201:
+        return responseData;
+      case 400:
+        throw BadRequestException(
+          message: responseData['message'] ?? 'Invalid request',
+        );
+      case 401:
+      case 403:
+        throw UnAuthorizedException(
+          message: responseData['message'] ?? 'Unauthorized access',
+        );
+      case 404:
+        throw NotFoundException(
+          message: responseData['message'] ?? 'Feedback not found',
+        );
+      case 409:
+        throw ConflictException(
+          message: responseData['message'] ?? 'Conflict occurred',
+        );
+      case 422:
+        throw InvalidInputException(
+          message: responseData['message'] ?? 'Invalid input data',
+        );
+      case 500:
+        throw ServerErrorException(
+          message: responseData['message'] ?? 'Server error',
+        );
+      default:
+        throw FetchDataException(
+          message:
+              responseData['message'] ??
+              'Error occurred while communication with server',
+        );
     }
   }
 }

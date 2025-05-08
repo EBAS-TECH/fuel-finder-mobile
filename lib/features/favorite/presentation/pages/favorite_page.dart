@@ -84,13 +84,6 @@ class _FavoritePageState extends State<FavoritePage> {
                   backgroundColor: Colors.green,
                 ),
               );
-            } else if (state is FavoriteFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.error),
-                  backgroundColor: Colors.red,
-                ),
-              );
             }
           },
           builder: (context, state) {
@@ -161,7 +154,7 @@ class _FavoritePageState extends State<FavoritePage> {
             } else if (state is FavoriteLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is FavoriteFailure) {
-              return _buildErrorState(state.error);
+              return _buildErrorState("Failed to get favorites");
             }
             return _buildEmptyFavorite(context);
           },

@@ -1,6 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/update_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
@@ -25,16 +25,36 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final response = await getUserByIdUsecase(event.userId);
+
       if (response['data'] == null) {
         emit(UserNotFound(message: "User not found"));
       } else {
         emit(UserSuccess(response, message: "Successfully fetched"));
       }
     } catch (e) {
-      if (e.toString().contains("404") || e.toString().contains("not found")) {
-        emit(UserNotFound(message: "User not found"));
-      } else {
-        emit(UserFailure(error: e.toString()));
+      final exception = ExceptionHandler.handleError(e);
+
+      switch (exception.runtimeType) {
+        case NotFoundException _:
+          emit(UserNotFound(message: exception.message));
+          break;
+        case UnAuthorizedException _:
+          emit(UserUnauthorized(message: exception.message));
+          break;
+        case BadRequestException _:
+          emit(UserValidationError(message: exception.message));
+          break;
+        case SocketException _:
+          emit(UserNetworkError(message: exception.message));
+          break;
+        case TimeoutException _:
+          emit(UserTimeoutError(message: exception.message));
+          break;
+        case ServerErrorException _:
+          emit(UserServerError(message: exception.message));
+          break;
+        default:
+          emit(UserFailure(error: exception.message));
       }
     }
   }
@@ -51,16 +71,39 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         event.lastName,
         event.userName,
       );
+
       if (response['data'] == null) {
         emit(UserNotFound(message: "User not found"));
       } else {
-        emit(UserSuccess(response, message: "Successfully Upadated"));
+        emit(UserSuccess(response, message: "Successfully Updated"));
       }
     } catch (e) {
-      if (e.toString().contains("404") || e.toString().contains("not found")) {
-        emit(UserNotFound(message: "User not found"));
-      } else {
-        emit(UserFailure(error: e.toString()));
+      final exception = ExceptionHandler.handleError(e);
+
+      switch (exception.runtimeType) {
+        case NotFoundException _:
+          emit(UserNotFound(message: exception.message));
+          break;
+        case UnAuthorizedException _:
+          emit(UserUnauthorized(message: exception.message));
+          break;
+        case BadRequestException _:
+          emit(UserValidationError(message: exception.message));
+          break;
+        case ConflictException _:
+          emit(UserConflictError(message: exception.message));
+          break;
+        case SocketException _:
+          emit(UserNetworkError(message: exception.message));
+          break;
+        case TimeoutException _:
+          emit(UserTimeoutError(message: exception.message));
+          break;
+        case ServerErrorException _:
+          emit(UserServerError(message: exception.message));
+          break;
+        default:
+          emit(UserFailure(error: exception.message));
       }
     }
   }

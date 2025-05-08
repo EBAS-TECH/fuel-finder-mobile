@@ -84,3 +84,8 @@ class UnknownException extends AppException {
       );
 }
 
+class NoInternetException extends AppException {
+  NoInternetException({required String message})
+    : super(message: message, prefix: "No internet connection");
+}
+

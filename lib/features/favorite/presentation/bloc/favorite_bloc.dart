@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/features/favorite/domain/usecases/get_favorite_usecase.dart';
 import 'package:fuel_finder/features/favorite/domain/usecases/remove_favorite_usecase.dart';
 import 'package:fuel_finder/features/favorite/domain/usecases/set_favorite_usecase.dart';
@@ -12,14 +11,6 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   final RemoveFavoriteUsecase removeFavoriteUsecase;
   final GetFavoriteUsecase getFavoriteUsecase;
 
-  String _cleanErrorMessage(dynamic error) {
-    String message = error.toString();
-    if (message.startsWith('Exception: ')) {
-      message = message.substring('Exception: '.length);
-    }
-    return message;
-  }
-
   FavoriteBloc({
     required this.setFavoriteUsecase,
     required this.removeFavoriteUsecase,
@@ -29,6 +20,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     on<RemoveFavoriteEvent>(_onRemoveFavorite);
     on<GetFavoritesEvent>(_onGetFavorites);
   }
+
   Future<void> _onSetFavorite(
     SetFavoriteEvent event,
     Emitter<FavoriteState> emit,
@@ -37,12 +29,11 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     try {
       await setFavoriteUsecase(event.stationId);
       emit(FavoriteSucess(message: "Set favorite successfully"));
-    } on SocketException {
-      emit(FavoriteFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(FavoriteFailure(error: "Invalid"));
     } catch (e) {
-      emit(FavoriteFailure(error: _cleanErrorMessage(e)));
+      final errorMessage = ExceptionHandler.getErrorMessage(
+        ExceptionHandler.handleError(e),
+      );
+      emit(FavoriteFailure(error: errorMessage));
     }
   }
 
@@ -53,13 +44,12 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     emit(FavoriteLoading());
     try {
       await removeFavoriteUsecase(event.stationId);
-      emit(FavoriteSucess(message: "Removed favorite successfullly"));
-    } on SocketException {
-      emit(FavoriteFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(FavoriteFailure(error: "Invalid"));
+      emit(FavoriteSucess(message: "Removed favorite successfully"));
     } catch (e) {
-      emit(FavoriteFailure(error: _cleanErrorMessage(e)));
+      final errorMessage = ExceptionHandler.getErrorMessage(
+        ExceptionHandler.handleError(e),
+      );
+      emit(FavoriteFailure(error: errorMessage));
     }
   }
 
@@ -81,11 +71,10 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
         );
       }
     } catch (e) {
-      if (e.toString().contains("404") || e.toString().contains("not found")) {
-        emit(FavoriteFailure(error: "User not found"));
-      } else {
-        emit(FavoriteFailure(error: e.toString()));
-      }
+      final errorMessage = ExceptionHandler.getErrorMessage(
+        ExceptionHandler.handleError(e),
+      );
+      emit(FavoriteFailure(error: errorMessage));
     }
   }
 }

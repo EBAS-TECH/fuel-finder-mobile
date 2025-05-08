@@ -1,7 +1,9 @@
 import 'dart:convert';
 
-import 'package:fuel_finder/core/utils/token_services.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
+import 'package:fuel_finder/core/utils/token_services.dart';
 
 class UserRemoteDataSource {
   final String baseUrl = "https://fuel-finder-backend.onrender.com/api/user";
@@ -12,23 +14,26 @@ class UserRemoteDataSource {
   Future<Map<String, dynamic>> getUserById(String userId) async {
     try {
       final token = await tokenService.getAuthToken();
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/$userId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
-      final response = await http.get(
-        Uri.parse('$baseUrl/$userId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode != 200) {
-        throw 'Failed to fetch user: ${response.statusCode}';
-      }
-
-      final responseData = jsonDecode(response.body);
-      return responseData;
+      return _handleResponse(response);
+    } on SocketException {
+      throw SocketException(message: 'No internet connection');
+    } on http.ClientException {
+      throw SocketException(message: 'Failed to connect to server');
+    } on TimeoutException {
+      throw TimeoutException(message: 'Connection timeout');
     } catch (e) {
-      throw 'Failed to fetch user: ${e.toString()}';
+      final exception = ExceptionHandler.handleError(e);
+      throw exception;
     }
   }
 
@@ -40,29 +45,76 @@ class UserRemoteDataSource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/$userId'),
+            body: jsonEncode({
+              "first_name": firstName,
+              "last_name": lastName,
+              "username": userName,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
-      final response = await http.put(
-        Uri.parse('$baseUrl/$userId'),
-        body: jsonEncode({
-          "first_name": firstName,
-          "last_name": lastName,
-          "username": userName,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode != 200) {
-        print(response.body);
-        throw 'Failed to update user: ${response.statusCode}';
-      }
-
-      final responseData = jsonDecode(response.body);
-      return responseData;
+      return _handleResponse(response);
+    } on SocketException {
+      throw SocketException(message: 'No internet connection');
+    } on http.ClientException {
+      throw SocketException(message: 'Failed to connect to server');
+    } on TimeoutException {
+      throw TimeoutException(message: 'Connection timeout');
     } catch (e) {
-      throw 'Failed to update user: ${e.toString()}';
+      final exception = ExceptionHandler.handleError(e);
+      throw exception;
+    }
+  }
+
+  dynamic _handleResponse(http.Response response) {
+    try {
+      final responseData = jsonDecode(response.body);
+
+      switch (response.statusCode) {
+        case 200:
+          return responseData;
+        case 400:
+          throw BadRequestException(
+            message: responseData['message'] ?? 'Invalid user data',
+          );
+        case 401:
+        case 403:
+          throw UnAuthorizedException(
+            message:
+                responseData['message'] ?? 'Unauthorized access to user data',
+          );
+        case 404:
+          throw NotFoundException(
+            message: responseData['message'] ?? 'User not found',
+          );
+        case 409:
+          throw ConflictException(
+            message: responseData['message'] ?? 'Username already exists',
+          );
+        case 422:
+          throw InvalidInputException(
+            message: responseData['message'] ?? 'Invalid input format',
+          );
+        case 500:
+          throw ServerErrorException(
+            message: responseData['message'] ?? 'Failed to process user data',
+          );
+        default:
+          throw FetchDataException(
+            message:
+                responseData['message'] ??
+                'Error occurred while processing user request',
+          );
+      }
+    } on FormatException {
+      throw FormatException(message: 'Invalid server response format');
     }
   }
 }

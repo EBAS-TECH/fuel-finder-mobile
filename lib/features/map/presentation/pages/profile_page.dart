@@ -89,6 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
           if (state is UserFailure) {
+            print(state.error);
             ShowSnackbar.show(context, state.error);
           }
         },

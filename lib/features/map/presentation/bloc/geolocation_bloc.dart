@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 
 abstract class GeolocationEvent {}
 
@@ -29,7 +31,31 @@ class GeolocationBloc extends Bloc<GeolocationEvent, GeolocationState> {
     on<FetchUserLocation>((event, emit) async {
       emit(GeolocationLoading());
       try {
-        Position position = await Geolocator.getCurrentPosition();
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          throw SocketException(message: 'Location services are disabled');
+        }
+
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            throw UnAuthorizedException(
+              message: 'Location permissions are denied',
+            );
+          }
+        }
+
+        if (permission == LocationPermission.deniedForever) {
+          throw UnAuthorizedException(
+            message:
+                'Location permissions are permanently denied, we cannot request permissions',
+          );
+        }
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+        ).timeout(const Duration(seconds: 10));
+
         emit(
           GeolocationLoaded(
             latitude: position.latitude,
@@ -37,8 +63,11 @@ class GeolocationBloc extends Bloc<GeolocationEvent, GeolocationState> {
           ),
         );
       } catch (e) {
-        emit(GeolocationError(message: e.toString()));
+        final appException = ExceptionHandler.handleError(e);
+        print(appException.message);
+        emit(GeolocationError(message: appException.message));
       }
     });
   }
 }
+

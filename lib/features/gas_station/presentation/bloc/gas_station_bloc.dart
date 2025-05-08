@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/features/gas_station/domain/usecases/get_gas_station_usecase.dart';
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_event.dart';
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_state.dart';
@@ -21,8 +23,9 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
         event.latitude,
         event.longitude,
       );
+      
       if (response is! Map<String, dynamic>) {
-        throw Exception('Invalid response format');
+        throw InvalidInputException(message: 'Invalid response format from server');
       }
 
       final data = response['data'];
@@ -31,15 +34,16 @@ class GasStationBloc extends Bloc<GasStationEvent, GasStationState> {
       } else if (data is List) {
         emit(
           GasStationSucess(
-            message: "Gas stations fetched",
+            message: "Gas stations fetched successfully",
             gasStation: List<Map<String, dynamic>>.from(data),
           ),
         );
       } else {
-        throw Exception('Unexpected data format: ${data.runtimeType}');
+        throw FormatException(message: 'Unexpected data format: ${data.runtimeType}');
       }
     } catch (e) {
-      emit(GasStationFailure(error: e.toString()));
+      final exception = ExceptionHandler.handleError(e);
+      emit(GasStationFailure(error: ExceptionHandler.getErrorMessage(exception)));
     }
   }
 }

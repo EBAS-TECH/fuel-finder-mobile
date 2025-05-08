@@ -1,6 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
+import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/features/feedback/domain/usecases/create_feed_back_usecase.dart';
 import 'package:fuel_finder/features/feedback/domain/usecases/get_feed_back_usecase.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_event.dart';
@@ -10,14 +10,6 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
   final CreateFeedBackUsecase createFeedBackUsecase;
   final GetFeedBackUsecase getFeedBackUsecase;
 
-  String _cleanErrorMessage(dynamic error) {
-    String message = error.toString();
-    if (message.startsWith('Exception: ')) {
-      message = message.substring('Exception: '.length);
-    }
-    return message;
-  }
-
   FeedBackBloc({
     required this.createFeedBackUsecase,
     required this.getFeedBackUsecase,
@@ -25,6 +17,7 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
     on<CreateFeedBackEvent>(_onCreateFeedback);
     on<GetFeedBackByStationAndUserEvent>(_onGetFeedback);
   }
+
   Future<void> _onCreateFeedback(
     CreateFeedBackEvent event,
     Emitter<FeedBackState> emit,
@@ -48,12 +41,9 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
           feedback: updatedFeedback,
         ),
       );
-    } on SocketException {
-      emit(FeedBackFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(FeedBackFailure(error: "Invalid data format"));
     } catch (e) {
-      emit(FeedBackFailure(error: _cleanErrorMessage(e)));
+      final exception = ExceptionHandler.handleError(e);
+      emit(FeedBackFailure(error: ExceptionHandler.getErrorMessage(exception)));
     }
   }
 
@@ -76,12 +66,9 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
           ),
         );
       }
-    } on SocketException {
-      emit(FeedBackFailure(error: "No Internet connection"));
-    } on FormatException {
-      emit(FeedBackFailure(error: "Invalid"));
     } catch (e) {
-      if (e.toString().contains("404") || e.toString().contains("not found")) {
+      final exception = ExceptionHandler.handleError(e);
+      if (exception is NotFoundException) {
         emit(
           FeedBackFetchSucess(
             feedback: {'data': null},
@@ -89,8 +76,11 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
           ),
         );
       } else {
-        emit(FeedBackFailure(error: _cleanErrorMessage(e)));
+        emit(
+          FeedBackFailure(error: ExceptionHandler.getErrorMessage(exception)),
+        );
       }
     }
   }
 }
+
