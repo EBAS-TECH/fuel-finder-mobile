@@ -7,7 +7,7 @@ import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class FuelPriceRemoteRepository {
-  final String baseUrl = "https://fuel-finder-backend.onrender.com/api";
+  final String baseUrl = "http://192.168.230.78:5001/api";
   final TokenService tokenService;
 
   FuelPriceRemoteRepository({required this.tokenService});

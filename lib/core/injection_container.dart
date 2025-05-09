@@ -4,6 +4,7 @@ import 'package:fuel_finder/features/auth/data/datasources/auth_remote_data_sour
 import 'package:fuel_finder/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:fuel_finder/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:fuel_finder/features/auth/domain/usecases/resend_code_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signin_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/verify_email_usecase.dart';
@@ -53,7 +54,9 @@ void setUpDependencies() async {
 
   // Auth
 
-  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSource());
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSource(tokenService: sl<TokenService>()),
+  );
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authRemoteDataSource: sl<AuthRemoteDataSource>()),
   );
@@ -70,12 +73,16 @@ void setUpDependencies() async {
     () => LogoutUsecase(authRepository: sl<AuthRepository>()),
   );
   sl.registerLazySingleton(
+    () => ResendCodeUsecase(authRepository: sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton(
     () => AuthBloc(
       tokenService: sl<TokenService>(),
       signupUsecase: sl<SignupUsecase>(),
       signinUsecase: sl<SigninUsecase>(),
       verifyEmailUsecase: sl<VerifyEmailUsecase>(),
       logoutUsecase: sl<LogoutUsecase>(),
+      resendCodeUsecase: sl<ResendCodeUsecase>(),
     ),
   );
 

@@ -6,12 +6,12 @@ class AuthRepositoryImpl extends AuthRepository {
 
   AuthRepositoryImpl({required this.authRemoteDataSource});
   @override
-  Future<Map<String,dynamic>> signIn(String userName, String password) {
+  Future<Map<String, dynamic>> signIn(String userName, String password) {
     return authRemoteDataSource.signIn(userName, password);
   }
 
   @override
-  Future<Map<String,dynamic>> signUp(
+  Future<Map<String, dynamic>> signUp(
     String firstName,
     String lastName,
     String userName,
@@ -37,6 +37,11 @@ class AuthRepositoryImpl extends AuthRepository {
   @override
   Future<void> logOut() async {
     return await authRemoteDataSource.logOut();
+  }
+
+  @override
+  Future<void> resendCode(String userId) async {
+    return await authRemoteDataSource.resendCode(userId);
   }
 }
 

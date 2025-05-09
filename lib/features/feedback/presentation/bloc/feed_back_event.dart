@@ -17,3 +17,6 @@ class GetFeedBackByStationAndUserEvent extends FeedBackEvent {
 
   GetFeedBackByStationAndUserEvent({required this.stationId});
 }
+
+class ResetFeedBackEvent extends FeedBackEvent {}
+

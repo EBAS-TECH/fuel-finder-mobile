@@ -34,3 +34,9 @@ class AuthVerifyEmailEvent extends AuthEvent {
 
 class AuthLogOutEvent extends AuthEvent {}
 
+class AuthResendCodeEvent extends AuthEvent {
+  final String userId;
+
+  AuthResendCodeEvent({required this.userId});
+}
+

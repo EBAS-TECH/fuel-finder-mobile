@@ -219,20 +219,7 @@ class _ExplorePageState extends State<ExplorePage>
     double zoomLevel = getZoomLevel(context);
 
     return Scaffold(
-      appBar: CustomAppBar(
-        userId: widget.userId,
-        showUserInfo: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SearchPage()),
-              );
-            },
-            icon: const Icon(Icons.search, color: Colors.white),
-          ),
-        ],
-      ),
+      appBar: CustomAppBar(userId: widget.userId, showUserInfo: true),
       body: Stack(
         children: [
           BlocListener<RouteBloc, RouteState>(

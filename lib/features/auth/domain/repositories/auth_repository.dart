@@ -10,4 +10,6 @@ abstract class AuthRepository {
   Future<Map<String, dynamic>> signIn(String userName, String password);
   Future<void> logOut();
   Future<void> verifyEmail(String userId, String token);
+  Future<void> resendCode(String userId);
 }
+

@@ -5,6 +5,7 @@ import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.da
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_event.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
+import 'package:fuel_finder/shared/show_snackbar.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -78,12 +79,7 @@ class _FavoritePageState extends State<FavoritePage> {
         child: BlocConsumer<FavoriteBloc, FavoriteState>(
           listener: (context, state) {
             if (state is FavoriteSucess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              ShowSnackbar.show(context, state.message);
             }
           },
           builder: (context, state) {

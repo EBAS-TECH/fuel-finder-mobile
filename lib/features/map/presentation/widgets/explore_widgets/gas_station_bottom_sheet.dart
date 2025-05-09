@@ -179,7 +179,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                             ],
                           ),
                         ),
-                      if (displayedFuels.isNotEmpty)
+                      if (station["distance"] != null)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -187,36 +187,62 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            color: AppPallete.primaryColor.withOpacity(0.1),
+                            color: Colors.grey.shade300,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(
-                                Icons.local_gas_station,
+                                Icons.directions_car,
+                                color: Colors.blue,
                                 size: 14,
-                                color: AppPallete.primaryColor,
                               ),
-                              const SizedBox(width: 4),
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.4,
-                                ),
-                                child: Text(
-                                  fuelsText,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppPallete.primaryColor,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${station['distance'].toStringAsFixed(2)} km',
+                                style: const TextStyle(fontSize: 12),
                               ),
                             ],
                           ),
                         ),
                     ],
                   ),
+                  const SizedBox(height: 4),
+                  if (displayedFuels.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: AppPallete.primaryColor.withOpacity(0.1),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.local_gas_station,
+                            size: 14,
+                            color: AppPallete.primaryColor,
+                          ),
+                          const SizedBox(width: 4),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.7,
+                            ),
+                            child: Text(
+                              fuelsText,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppPallete.primaryColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -236,4 +262,3 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
     super.dispose();
   }
 }
-

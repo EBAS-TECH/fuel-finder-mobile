@@ -10,14 +10,25 @@ class AuthSuccess extends AuthState {
   AuthSuccess({required this.message});
 }
 
+class ResendCodeSuccess extends AuthState {
+  final String message;
+
+  ResendCodeSuccess({required this.message});
+}
+
 class AuthVerifyEmail extends AuthState {
   final String message;
   final String userId;
+  final Map<String, dynamic> user;
 
-  AuthVerifyEmail({required this.message, required this.userId});
+  AuthVerifyEmail({
+    required this.message,
+    required this.userId,
+    required this.user,
+  });
 }
 
-class AuthLogInSucess extends AuthState{
+class AuthLogInSucess extends AuthState {
   final String message;
   final String userId;
 

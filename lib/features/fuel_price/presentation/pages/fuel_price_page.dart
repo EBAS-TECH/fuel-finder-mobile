@@ -102,6 +102,8 @@ class _PricePageState extends State<PricePage> {
   }
 
   Widget _buildFuelCard(Map<String, dynamic> fuel, ThemeData theme) {
+    final effectiveUntil = _getEffectiveUntilDate(fuel['created_at']);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -149,8 +151,8 @@ class _PricePageState extends State<PricePage> {
                   Flexible(
                     child: _buildInfoItem(
                       Icons.calendar_today,
-                      'Last updated',
-                      _formatDate(fuel['updated_at']),
+                      'Since',
+                      _formatDate(fuel['created_at']),
                       theme,
                     ),
                   ),
@@ -161,9 +163,9 @@ class _PricePageState extends State<PricePage> {
                   ),
                   Flexible(
                     child: _buildInfoItem(
-                      Icons.event_available,
-                      'Created at',
-                      _formatDate(fuel['created_at']),
+                      Icons.event_busy,
+                      'Effective until',
+                      effectiveUntil,
                       theme,
                     ),
                   ),
@@ -183,6 +185,20 @@ class _PricePageState extends State<PricePage> {
         ),
       ),
     );
+  }
+
+  String _getEffectiveUntilDate(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      final effectiveDate = DateTime(
+        dateTime.year,
+        dateTime.month + 1,
+        dateTime.day,
+      );
+      return _formatDate(effectiveDate.toIso8601String());
+    } catch (e) {
+      return 'N/A';
+    }
   }
 
   Widget _buildInfoItem(
@@ -233,7 +249,7 @@ class _PricePageState extends State<PricePage> {
         const Icon(Icons.error, size: 80, color: Colors.red),
         const SizedBox(height: 16),
         Text(
-          "Error loading favorites",
+          "Error loading prices",
           style: TextStyle(
             fontSize: 18,
             color: Colors.grey[600],
@@ -247,9 +263,14 @@ class _PricePageState extends State<PricePage> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        ElevatedButton(onPressed: _getFuelPrices, child: const Text("Retry")),
+        ElevatedButton(
+          onPressed: _getFuelPrices,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppPallete.primaryColor,
+          ),
+          child: const Text("Retry", style: TextStyle(color: Colors.white)),
+        ),
       ],
     );
   }
 }
-

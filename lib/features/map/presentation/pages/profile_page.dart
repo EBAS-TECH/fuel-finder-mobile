@@ -89,7 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
       body: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
           if (state is UserFailure) {
-            print(state.error);
             ShowSnackbar.show(context, state.error);
           }
         },
@@ -100,6 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           } else if (state is UserSuccess) {
             final user = state.responseData["data"];
+            print(user);
             if (user == null) {
               return _buildErrorState("User data not found");
             }

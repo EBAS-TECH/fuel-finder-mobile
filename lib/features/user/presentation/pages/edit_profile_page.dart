@@ -24,6 +24,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _usernameController;
+  late TextEditingController _currentPasswordController;
+  late TextEditingController _newPasswordController;
+  late TextEditingController _confirmPasswordController;
+
+  bool _showPasswordSection = false;
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void initState() {
@@ -37,6 +45,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _usernameController = TextEditingController(
       text: widget.initialData["username"] ?? '',
     );
+    _currentPasswordController = TextEditingController();
+    _newPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
   }
 
   @override
@@ -44,6 +55,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _usernameController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -56,47 +70,192 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _firstNameController,
-              decoration: const InputDecoration(
-                labelText: 'First Name',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _lastNameController,
-              decoration: const InputDecoration(
-                labelText: 'Last Name',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person_outline),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.alternate_email),
-              ),
-            ),
+            _buildProfileInfoSection(),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveChanges,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: AppPallete.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('SAVE CHANGES'),
+            _buildPasswordSection(),
+            const SizedBox(height: 24),
+            _buildSaveButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileInfoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Profile Information',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppPallete.primaryColor,
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _firstNameController,
+          decoration: const InputDecoration(
+            labelText: 'First Name',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.person),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _lastNameController,
+          decoration: const InputDecoration(
+            labelText: 'Last Name',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.person_outline),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _usernameController,
+          decoration: const InputDecoration(
+            labelText: 'Username',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.alternate_email),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Change Password',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppPallete.primaryColor,
+              ),
+            ),
+            Transform.scale(
+              scale: 0.6,
+              child: Switch(
+                value: _showPasswordSection,
+                onChanged: (value) {
+                  setState(() {
+                    _showPasswordSection = value;
+                    if (!value) {
+                      _currentPasswordController.clear();
+                      _newPasswordController.clear();
+                      _confirmPasswordController.clear();
+                    }
+                  });
+                },
+                activeColor: AppPallete.primaryColor,
               ),
             ),
           ],
         ),
+        if (_showPasswordSection) ...[
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _currentPasswordController,
+            obscureText: _obscureCurrentPassword,
+            decoration: InputDecoration(
+              labelText: 'Current Password',
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureCurrentPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureCurrentPassword = !_obscureCurrentPassword;
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _newPasswordController,
+            obscureText: _obscureNewPassword,
+            decoration: InputDecoration(
+              labelText: 'New Password',
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureNewPassword ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureNewPassword = !_obscureNewPassword;
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _confirmPasswordController,
+            obscureText: _obscureConfirmPassword,
+            decoration: InputDecoration(
+              labelText: 'Confirm New Password',
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                  });
+                },
+              ),
+            ),
+            validator: (value) {
+              if (value != _newPasswordController.text) {
+                return 'Passwords do not match';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Password must be at least 6 characters long',
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _saveChanges,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: AppPallete.primaryColor,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Text('SAVE CHANGES'),
       ),
     );
   }
@@ -105,10 +264,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_firstNameController.text.isEmpty ||
         _lastNameController.text.isEmpty ||
         _usernameController.text.isEmpty) {
-      ShowSnackbar.show(context, "Please fill all fields");
+      ShowSnackbar.show(context, "Please fill all profile fields");
       return;
     }
+    if (_showPasswordSection) {
+      if (_currentPasswordController.text.isEmpty ||
+          _newPasswordController.text.isEmpty ||
+          _confirmPasswordController.text.isEmpty) {
+        ShowSnackbar.show(context, "Please fill all password fields");
+        return;
+      }
 
+      if (_newPasswordController.text.length < 8) {
+        ShowSnackbar.show(
+          context,
+          "Password must be at least 8 characters long",
+        );
+        return;
+      }
+
+      if (_newPasswordController.text != _confirmPasswordController.text) {
+        ShowSnackbar.show(context, "New passwords do not match");
+        return;
+      }
+    }
     context.read<UserBloc>().add(
       UpdateUserByIdEvent(
         _firstNameController.text,

@@ -71,13 +71,21 @@ class _RegisterPageState extends State<RegisterPage> {
               MaterialPageRoute(
                 builder:
                     (context) => EmailVerification(
+                      userData: state.user,
                       email: _emailController.text.trim(),
                       userId: state.userId,
                     ),
               ),
             );
           } else if (state is AuthFailure) {
-            ShowSnackbar.show(context, state.error, isError: true);
+            final message =
+                state.error.contains("email already exists")
+                    ? "Email already registered. Please login or use a different email"
+                    : state.error.contains("username already exists")
+                    ? "Username already taken. Please choose a different one"
+                    : state.error;
+
+            ShowSnackbar.show(context, message, isError: true);
           }
         },
         child: SingleChildScrollView(
@@ -312,3 +320,4 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 }
+

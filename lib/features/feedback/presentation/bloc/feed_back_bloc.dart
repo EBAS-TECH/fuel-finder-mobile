@@ -16,6 +16,7 @@ class FeedBackBloc extends Bloc<FeedBackEvent, FeedBackState> {
   }) : super(FeedBackInitial()) {
     on<CreateFeedBackEvent>(_onCreateFeedback);
     on<GetFeedBackByStationAndUserEvent>(_onGetFeedback);
+    on<ResetFeedBackEvent>((event, emit) => emit(FeedBackInitial()));
   }
 
   Future<void> _onCreateFeedback(

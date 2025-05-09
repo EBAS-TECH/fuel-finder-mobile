@@ -38,6 +38,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
   void didUpdateWidget(StationDetailPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.station["id"] != widget.station["id"]) {
+      context.read<FeedBackBloc>().add(ResetFeedBackEvent());
       _resetFeedbackState();
       _fetchFeedBack();
     }
@@ -204,12 +205,6 @@ class _StationDetailPageState extends State<StationDetailPage> {
                   _isEditing = false;
                 });
               }
-            } else if (state is FeedBackFailure) {
-              ShowSnackbar.show(
-                context,
-                "Failed to submit feedback",
-                isError: true,
-              );
             }
           },
           builder: (context, state) {
@@ -503,3 +498,4 @@ class _StationDetailPageState extends State<StationDetailPage> {
     );
   }
 }
+
