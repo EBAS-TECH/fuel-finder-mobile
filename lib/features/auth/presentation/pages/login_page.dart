@@ -7,7 +7,9 @@ import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
 import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
 import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
+import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.height < 600;
@@ -48,7 +51,10 @@ class _LoginPageState extends State<LoginPage> {
     final buttonVerticalPadding = isSmallScreen ? 14.0 : 16.0;
 
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [LanguageSwitcher()],
+      ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthLogInSucess) {
@@ -70,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: MediaQuery.of(context).size.width * 0.5,
               ),
               Text(
-                'Login',
+                l10n.loginTitle,
                 style: theme.textTheme.headlineLarge?.copyWith(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
@@ -78,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: textFieldSpacing / 2),
               Text(
-                "Enter your email and password to sign in",
+                l10n.loginSubtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: subtitleFontSize,
                 ),
@@ -91,27 +97,29 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
+                      context,
                       controller: _userNameController,
-                      label: 'Username',
+                      label: l10n.usernameLabel,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Username is required';
+                          return l10n.usernameError;
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
+                      context,
                       controller: _passwordController,
-                      label: 'Password',
+                      label: l10n.passwordLabel,
                       obscureText: _obscurePassword,
                       isPasswordField: true,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Password is required';
+                          return l10n.passwordErrorEmpty;
                         }
                         if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return l10n.passwordErrorLength;
                         }
                         return null;
                       },
@@ -126,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          "Forgot password?",
+                          l10n.forgotPassword,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: AppPallete.primaryColor,
                           ),
@@ -157,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                                     )
                                     : Text(
-                                      'LOGIN',
+                                      l10n.loginButton,
                                       style: TextStyle(
                                         fontSize: subtitleFontSize,
                                       ),
@@ -169,8 +177,8 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(height: textFieldSpacing),
                     authFooterText(
                       context,
-                      "Not registerd yet? ",
-                      "Register",
+                      "${l10n.notRegistered} ",
+                      l10n.register,
                       RegisterPage(),
                       false,
                     ),
@@ -185,7 +193,8 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(
+    BuildContext context, {
     required TextEditingController controller,
     required String label,
     required String? Function(String?) validator,
@@ -235,3 +244,4 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 }
+

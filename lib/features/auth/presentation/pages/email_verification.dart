@@ -6,8 +6,10 @@ import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
+import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmailVerification extends StatefulWidget {
   final String email;
@@ -84,7 +86,8 @@ class _EmailVerificationState extends State<EmailVerification> {
 
     final code = _pinController.text.trim();
     if (code.isEmpty || code.length != 6) {
-      ShowSnackbar.show(context, "Please enter a valid 6-digit code.");
+      final l10n = AppLocalizations.of(context)!;
+      ShowSnackbar.show(context, l10n.invalidCode);
       return;
     }
 
@@ -99,11 +102,15 @@ class _EmailVerificationState extends State<EmailVerification> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: const [LanguageSwitcher()],
+      ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (!mounted) return;
@@ -146,14 +153,14 @@ class _EmailVerificationState extends State<EmailVerification> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  "Verify Your Email",
+                  l10n.verifyEmailTitle,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "We've sent a 6-digit verification code to",
+                  l10n.verificationCodeSent,
                   style: theme.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -213,7 +220,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                               ),
                             )
                             : Text(
-                              "Verify Account",
+                              l10n.verifyAccount,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -226,13 +233,15 @@ class _EmailVerificationState extends State<EmailVerification> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Didn't receive a code? ",
+                      l10n.didNotReceiveCode,
                       style: theme.textTheme.bodyMedium,
                     ),
                     GestureDetector(
                       onTap: _canResend ? _handleResendCode : null,
                       child: Text(
-                        _canResend ? "Resend" : "Resend in $_resendTimeout",
+                        _canResend
+                            ? l10n.resend
+                            : "${l10n.resend} $_resendTimeout",
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color:
                               _canResend
@@ -248,7 +257,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    "Back to registration",
+                    l10n.backToRegistration,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppPallete.primaryColor,
                     ),

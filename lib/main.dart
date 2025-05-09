@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fuel_finder/core/injection_container.dart';
 import 'package:fuel_finder/core/themes/app_theme.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
@@ -15,9 +16,11 @@ import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart
 import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
 import 'package:fuel_finder/features/onboarding/onboarding_page.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
+import 'package:fuel_finder/features/settings/locale_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,37 +53,51 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<FavoriteBloc>()),
         BlocProvider(create: (_) => sl<FuelPriceBloc>()),
         BlocProvider(create: (_) => sl<FeedBackBloc>()),
+        BlocProvider(create: (_) => LocaleBloc()),
       ],
-      child: MaterialApp(
-        title: 'Fuel Finder',
-        theme: AppTheme.lightThemeMode,
-        darkTheme: AppTheme.darkThemeMode,
-        themeMode: ThemeMode.system,
-        home: FutureBuilder<String?>(
-          future: tokenService.getToken(),
-          builder: (context, snapshot) {
-            final hasToken = snapshot.data != null;
-            final seenOnboarding = tokenService.getSeenOnboarding() ?? false;
-            final userId = tokenService.getUserId();
+      child: Builder(
+        builder: (context) {
+          return MaterialApp(
+            title: 'Fuel Finder',
+            locale: context.watch<LocaleBloc>().state, 
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en'), Locale('am')],
+            theme: AppTheme.lightThemeMode,
+            darkTheme: AppTheme.darkThemeMode,
+            themeMode: ThemeMode.system,
+            home: FutureBuilder<String?>(
+              future: tokenService.getToken(),
+              builder: (context, snapshot) {
+                final hasToken = snapshot.data != null;
+                final seenOnboarding = tokenService.getSeenOnboarding() ?? false;
+                final userId = tokenService.getUserId();
 
-            if (!seenOnboarding) {
-              return const OnboardingPage();
-            }
+                if (!seenOnboarding) {
+                  return const OnboardingPage();
+                }
 
-            if (hasToken) {
-              if (userId != null) {
-                return HomePage(userId: userId);
-              } else {
-                return const LoginPage();
-              }
-            } else {
-              return const LoginPage();
-            }
-          },
-        ),
-        navigatorObservers: [routeObserver],
-        debugShowCheckedModeBanner: false,
+                if (hasToken) {
+                  if (userId != null) {
+                    return HomePage(userId: userId);
+                  } else {
+                    return const LoginPage();
+                  }
+                } else {
+                  return const LoginPage();
+                }
+              },
+            ),
+            navigatorObservers: [routeObserver],
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }
 }
+

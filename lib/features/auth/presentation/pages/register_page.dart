@@ -6,7 +6,9 @@ import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/email_verification.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
 import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
+import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -39,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.height < 600;
@@ -62,7 +65,10 @@ class _RegisterPageState extends State<RegisterPage> {
     final buttonVerticalPadding = isSmallScreen ? 14.0 : 16.0;
 
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: const [LanguageSwitcher()],
+      ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthVerifyEmail) {
@@ -94,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
             children: [
               SizedBox(height: sectionSpacing / 2),
               Text(
-                'Create Account',
+                l10n.registerTitle,
                 style: theme.textTheme.headlineLarge?.copyWith(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
@@ -102,7 +108,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: textFieldSpacing / 2),
               Text(
-                "Enter your email and create a password to sign up",
+                l10n.registerSubtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: subtitleFontSize,
                 ),
@@ -118,10 +124,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: sectionSpacing),
                     _buildTextField(
                       controller: _firstNameController,
-                      label: 'First Name',
+                      label: l10n.firstNameLabel,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'First name is required';
+                          return l10n.firstNameError;
                         }
                         return null;
                       },
@@ -129,10 +135,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
                       controller: _lastNameController,
-                      label: 'Last Name',
+                      label: l10n.lastNameLabel,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Last name is required';
+                          return l10n.lastNameError;
                         }
                         return null;
                       },
@@ -140,13 +146,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
                       controller: _usernameController,
-                      label: 'Username',
+                      label: l10n.usernameLabel,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Username is required';
+                          return l10n.usernameError;
                         }
                         if (value.length < 4) {
-                          return 'Username must be at least 4 characters';
+                          return l10n.usernameErrorLength;
                         }
                         return null;
                       },
@@ -154,15 +160,15 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
                       controller: _emailController,
-                      label: 'Email',
+                      label: l10n.emailLabel,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Email is required';
+                          return l10n.emailError;
                         }
                         final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
                         if (!emailRegex.hasMatch(value)) {
-                          return 'Enter a valid email';
+                          return l10n.emailInvalid;
                         }
                         return null;
                       },
@@ -170,15 +176,15 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
                       controller: _passwordController,
-                      label: 'Password',
+                      label: l10n.passwordLabel,
                       isPasswordField: true,
                       obscureText: _obscurePassword,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Password is required';
+                          return l10n.passwordErrorEmpty;
                         }
                         if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return l10n.passwordErrorLength;
                         }
                         return null;
                       },
@@ -191,14 +197,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: textFieldSpacing),
                     _buildTextField(
                       controller: _confirmPasswordController,
-                      label: 'Confirm Password',
+                      label: l10n.confirmPasswordLabel,
                       obscureText: _obscureConfirmPassword,
                       isPasswordField: true,
                       validator: (value) {
                         if (value != _passwordController.text) {
-                          return 'Passwords do not match';
+                          return l10n.confirmPasswordError;
                         } else if (value == null || value.trim().isEmpty) {
-                          return 'Password is required';
+                          return l10n.passwordErrorEmpty;
                         }
                         return null;
                       },
@@ -230,7 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       ),
                                     )
                                     : Text(
-                                      'SIGN UP',
+                                      l10n.registerButton,
                                       style: TextStyle(
                                         fontSize: subtitleFontSize,
                                       ),
@@ -243,8 +249,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: textFieldSpacing),
                     authFooterText(
                       context,
-                      "Already have an account? ",
-                      "Login",
+                      l10n.alreadyHaveAccount,
+                      l10n.login,
                       LoginPage(),
                       true,
                     ),
