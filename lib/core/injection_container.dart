@@ -39,6 +39,7 @@ import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/data/datasources/user_remote_data_source.dart';
 import 'package:fuel_finder/features/user/data/repositories/user_repository_impl.dart';
 import 'package:fuel_finder/features/user/domain/repositories/user_repository.dart';
+import 'package:fuel_finder/features/user/domain/usecases/change_password_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/update_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
@@ -101,9 +102,13 @@ void setUpDependencies() async {
     () => UpdateUserByIdUsecase(userRepository: sl<UserRepository>()),
   );
   sl.registerLazySingleton(
+    () => ChangePasswordUsecase(userRepository: sl<UserRepository>()),
+  );
+  sl.registerLazySingleton(
     () => UserBloc(
       getUserByIdUsecase: sl<GetUserByIdUsecase>(),
       updateUserByIdUsecase: sl<UpdateUserByIdUsecase>(),
+      changePasswordUsecase: sl<ChangePasswordUsecase>(),
     ),
   );
 

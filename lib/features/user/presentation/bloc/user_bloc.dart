@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
+import 'package:fuel_finder/features/user/domain/usecases/change_password_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/update_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
@@ -9,13 +12,16 @@ import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 class UserBloc extends Bloc<UserEvent, UserState> {
   final GetUserByIdUsecase getUserByIdUsecase;
   final UpdateUserByIdUsecase updateUserByIdUsecase;
+  final ChangePasswordUsecase changePasswordUsecase;
 
   UserBloc({
     required this.getUserByIdUsecase,
     required this.updateUserByIdUsecase,
+    required this.changePasswordUsecase,
   }) : super(UserInitial()) {
     on<GetUserByIdEvent>(_getUserById);
     on<UpdateUserByIdEvent>(_updateUserById);
+    on<ChangePasswordEvent>(_changePassword);
   }
 
   Future<void> _getUserById(
@@ -71,41 +77,44 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         event.lastName,
         event.userName,
       );
-
-      if (response['data'] == null) {
-        emit(UserNotFound(message: "User not found"));
-      } else {
-        emit(UserSuccess(response, message: "Successfully Updated"));
-      }
+      emit(UserUpdated(response));
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
-
-      switch (exception.runtimeType) {
-        case NotFoundException _:
-          emit(UserNotFound(message: exception.message));
-          break;
-        case UnAuthorizedException _:
-          emit(UserUnauthorized(message: exception.message));
-          break;
-        case BadRequestException _:
-          emit(UserValidationError(message: exception.message));
-          break;
-        case ConflictException _:
-          emit(UserConflictError(message: exception.message));
-          break;
-        case SocketException _:
-          emit(UserNetworkError(message: exception.message));
-          break;
-        case TimeoutException _:
-          emit(UserTimeoutError(message: exception.message));
-          break;
-        case ServerErrorException _:
-          emit(UserServerError(message: exception.message));
-          break;
-        default:
-          emit(UserFailure(error: exception.message));
-      }
+      _handleError(exception, emit);
     }
+  }
+
+  Future<void> _changePassword(
+    ChangePasswordEvent event,
+    Emitter<UserState> emit,
+  ) async {
+    emit(UserLoading());
+    try {
+      await changePasswordUsecase(event.oldPassword, event.newPassword);
+      emit(PasswordChanged());
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      _handleError(exception, emit);
+    }
+  }
+}
+
+void _handleError(AppException exception, Emitter<UserState> emit) {
+  switch (exception.runtimeType) {
+    case NotFoundException:
+      emit(UserNotFound(message: exception.message));
+      break;
+    case UnAuthorizedException:
+      emit(UserUnauthorized(message: exception.message));
+      break;
+    case BadRequestException:
+      emit(UserValidationError(message: exception.message));
+      break;
+    case ConflictException:
+      emit(UserConflictError(message: exception.message));
+      break;
+    default:
+      emit(UserError(exception.message));
   }
 }
 

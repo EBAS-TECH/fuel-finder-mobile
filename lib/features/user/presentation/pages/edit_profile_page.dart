@@ -4,6 +4,7 @@ import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
+import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -63,19 +64,41 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(title: "Edit Profile", centerTitle: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            _buildProfileInfoSection(),
-            const SizedBox(height: 24),
-            _buildPasswordSection(),
-            const SizedBox(height: 24),
-            _buildSaveButton(),
-          ],
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, state) {
+        if (state is UserError) {
+          ShowSnackbar.show(context, state.message);
+        } else if (state is UserUpdated) {
+          ShowSnackbar.show(context, 'Profile updated successfully');
+          Navigator.pop(context, state.userData);
+        } else if (state is PasswordChanged) {
+          ShowSnackbar.show(context, 'Password changed successfully');
+          setState(() {
+            _showPasswordSection = false;
+            _currentPasswordController.clear();
+            _newPasswordController.clear();
+            _confirmPasswordController.clear();
+          });
+        } else if (state is UserValidationError) {
+          ShowSnackbar.show(context, state.message,isError: true);
+        } else if (state is UserConflictError) {
+          ShowSnackbar.show(context, state.message,isError: true);
+        }
+      },
+      child: Scaffold(
+        appBar: CustomAppBar(title: "Edit Profile", centerTitle: true),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              _buildProfileInfoSection(),
+              const SizedBox(height: 24),
+              _buildPasswordSection(),
+              const SizedBox(height: 24),
+              _buildSaveButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -243,20 +266,27 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _saveChanges,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: AppPallete.primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, state) {
+        return SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: state is UserLoading ? null : _saveChanges,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: AppPallete.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child:
+                state is UserLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('SAVE CHANGES'),
           ),
-        ),
-        child: const Text('SAVE CHANGES'),
-      ),
+        );
+      },
     );
   }
 
@@ -267,27 +297,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ShowSnackbar.show(context, "Please fill all profile fields");
       return;
     }
-    if (_showPasswordSection) {
-      if (_currentPasswordController.text.isEmpty ||
-          _newPasswordController.text.isEmpty ||
-          _confirmPasswordController.text.isEmpty) {
-        ShowSnackbar.show(context, "Please fill all password fields");
-        return;
-      }
-
-      if (_newPasswordController.text.length < 8) {
-        ShowSnackbar.show(
-          context,
-          "Password must be at least 8 characters long",
-        );
-        return;
-      }
-
-      if (_newPasswordController.text != _confirmPasswordController.text) {
-        ShowSnackbar.show(context, "New passwords do not match");
-        return;
-      }
-    }
     context.read<UserBloc>().add(
       UpdateUserByIdEvent(
         _firstNameController.text,
@@ -296,8 +305,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
         widget.userId,
       ),
     );
+    if (_showPasswordSection) {
+      if (_currentPasswordController.text.isEmpty ||
+          _newPasswordController.text.isEmpty ||
+          _confirmPasswordController.text.isEmpty) {
+        ShowSnackbar.show(context, "Please fill all password fields");
+        return;
+      }
 
-    Navigator.pop(context);
+      if (_newPasswordController.text.length < 6) {
+        ShowSnackbar.show(
+          context,
+          "Password must be at least 6 characters long",
+        );
+        return;
+      }
+
+      if (_newPasswordController.text != _confirmPasswordController.text) {
+        ShowSnackbar.show(context, "New passwords do not match");
+        return;
+      }
+
+      context.read<UserBloc>().add(
+        ChangePasswordEvent(
+          oldPassword: _currentPasswordController.text,
+          newPassword: _newPasswordController.text,
+        ),
+      );
+    }
   }
 }
 

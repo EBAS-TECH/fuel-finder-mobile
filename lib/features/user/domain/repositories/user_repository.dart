@@ -6,5 +6,9 @@ abstract class UserRepository {
     String lastName,
     String userName,
   );
+  Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+  );
 }
 

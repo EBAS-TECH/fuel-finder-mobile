@@ -58,7 +58,40 @@ class UserRemoteDataSource {
               'Authorization': 'Bearer $token',
             },
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 30));
+
+      return _handleResponse(response);
+    } on SocketException {
+      throw SocketException(message: 'No internet connection');
+    } on http.ClientException {
+      throw SocketException(message: 'Failed to connect to server');
+    } on TimeoutException {
+      throw TimeoutException(message: 'Connection timeout');
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      throw exception;
+    }
+  }
+
+  Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+  ) async {
+    try {
+      final token = await tokenService.getAuthToken();
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/profile/change-password'),
+            body: jsonEncode({
+              "oldPassword": oldPassword,
+              "newPassword": newPassword,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
 
       return _handleResponse(response);
     } on SocketException {
@@ -82,7 +115,7 @@ class UserRemoteDataSource {
           return responseData;
         case 400:
           throw BadRequestException(
-            message: responseData['message'] ?? 'Invalid user data',
+            message: responseData['error'] ?? 'Invalid user data',
           );
         case 401:
         case 403:

@@ -24,5 +24,13 @@ class UserRepositoryImpl extends UserRepository {
       userName,
     );
   }
+
+  @override
+  Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+  ) {
+    return userRemoteDataSource.changePassword(oldPassword, newPassword);
+  }
 }
 
