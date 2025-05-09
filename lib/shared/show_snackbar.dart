@@ -9,16 +9,11 @@ class ShowSnackbar {
   }) {
     if (!context.mounted) return;
 
-    // Vibrant color definitions
     final backgroundColor =
-        isError
-            ? const Color(0xFFFFDDDD) // Bright light red
-            : const Color(0xFFE8F7E6); // Fresh light green
+        isError ? const Color(0xFFFFDDDD) : const Color(0xFFE8F7E6);
 
     final textColor =
-        isError
-            ? const Color(0xFFD32F2F) // Deep red
-            : const Color(0xFF388E3C); // Rich green
+        isError ? const Color(0xFFD32F2F) : const Color(0xFF388E3C);
 
     final icon =
         isError ? Icons.error_outline_rounded : Icons.check_circle_outlined;
