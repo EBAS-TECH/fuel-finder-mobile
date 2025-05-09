@@ -5,6 +5,7 @@ import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dar
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
+import 'package:fuel_finder/shared/circular_progress_indicator.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -66,23 +67,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
-        if (state is UserError) {
-          ShowSnackbar.show(context, state.message);
+        if (state is UserLoading) {
+          AppLoader();
         } else if (state is UserUpdated) {
           ShowSnackbar.show(context, 'Profile updated successfully');
           Navigator.pop(context, state.userData);
         } else if (state is PasswordChanged) {
           ShowSnackbar.show(context, 'Password changed successfully');
+          context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
           setState(() {
             _showPasswordSection = false;
             _currentPasswordController.clear();
             _newPasswordController.clear();
             _confirmPasswordController.clear();
           });
+        } else if (state is PasswordChangeError) {
+          ShowSnackbar.show(context, state.message, isError: true);
+        } else if (state is UserError) {
+          ShowSnackbar.show(context, state.message, isError: true);
         } else if (state is UserValidationError) {
-          ShowSnackbar.show(context, state.message,isError: true);
+          ShowSnackbar.show(context, state.message, isError: true);
         } else if (state is UserConflictError) {
-          ShowSnackbar.show(context, state.message,isError: true);
+          ShowSnackbar.show(context, state.message, isError: true);
         }
       },
       child: Scaffold(
@@ -294,9 +300,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_firstNameController.text.isEmpty ||
         _lastNameController.text.isEmpty ||
         _usernameController.text.isEmpty) {
-      ShowSnackbar.show(context, "Please fill all profile fields");
+      ShowSnackbar.show(
+        context,
+        "Please fill all profile fields",
+        isError: true,
+      );
       return;
     }
+
     context.read<UserBloc>().add(
       UpdateUserByIdEvent(
         _firstNameController.text,
@@ -305,34 +316,44 @@ class _EditProfilePageState extends State<EditProfilePage> {
         widget.userId,
       ),
     );
+
     if (_showPasswordSection) {
-      if (_currentPasswordController.text.isEmpty ||
-          _newPasswordController.text.isEmpty ||
-          _confirmPasswordController.text.isEmpty) {
-        ShowSnackbar.show(context, "Please fill all password fields");
-        return;
-      }
-
-      if (_newPasswordController.text.length < 6) {
-        ShowSnackbar.show(
-          context,
-          "Password must be at least 6 characters long",
-        );
-        return;
-      }
-
-      if (_newPasswordController.text != _confirmPasswordController.text) {
-        ShowSnackbar.show(context, "New passwords do not match");
-        return;
-      }
-
-      context.read<UserBloc>().add(
-        ChangePasswordEvent(
-          oldPassword: _currentPasswordController.text,
-          newPassword: _newPasswordController.text,
-        ),
-      );
+      _handlePasswordChange();
     }
+  }
+
+  void _handlePasswordChange() {
+    if (_currentPasswordController.text.isEmpty ||
+        _newPasswordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty) {
+      ShowSnackbar.show(
+        context,
+        "Please fill all password fields",
+        isError: true,
+      );
+      return;
+    }
+
+    if (_newPasswordController.text.length < 6) {
+      ShowSnackbar.show(
+        context,
+        "Password must be at least 6 characters long",
+        isError: true,
+      );
+      return;
+    }
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      ShowSnackbar.show(context, "New passwords do not match", isError: true);
+      return;
+    }
+
+    context.read<UserBloc>().add(
+      ChangePasswordEvent(
+        oldPassword: _currentPasswordController.text,
+        newPassword: _newPasswordController.text,
+      ),
+    );
   }
 }
 

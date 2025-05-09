@@ -37,6 +37,12 @@ class UserNotFound extends UserState {
   UserNotFound({required this.message});
 }
 
+class PasswordChangeError extends UserState {
+  final String message;
+
+  PasswordChangeError({required this.message});
+}
+
 class UserUnauthorized extends UserState {
   final String message;
 

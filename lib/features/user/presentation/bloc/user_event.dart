@@ -26,4 +26,3 @@ class ChangePasswordEvent extends UserEvent {
 
   ChangePasswordEvent({required this.oldPassword, required this.newPassword});
 }
-
