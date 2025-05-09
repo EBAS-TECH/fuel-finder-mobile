@@ -141,7 +141,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 isPrimary: true,
                                 width: double.infinity,
                                 onPressed: () async {
-                                //await tokenService?.setSeenOnboarding(true);
+                                  await tokenService?.setSeenOnboarding(true);
                                   print("Sucessfully saved");
                                   Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(

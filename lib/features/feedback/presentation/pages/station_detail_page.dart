@@ -9,6 +9,7 @@ import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_event.
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class StationDetailPage extends StatefulWidget {
   final Map<String, dynamic> station;
@@ -81,11 +82,13 @@ class _StationDetailPageState extends State<StationDetailPage> {
   }
 
   Future<void> _submitFeedback() async {
+    final localizations = AppLocalizations.of(context);
     final trimmedComment = _commentController.text.trim();
     if (_userRating == 0 && trimmedComment.isEmpty) {
       ShowSnackbar.show(
         context,
-        "Please provide a rating or comment",
+        localizations?.feedbackEmptyError ??
+            "Please provide a rating or comment",
         isError: true,
       );
       return;
@@ -93,10 +96,14 @@ class _StationDetailPageState extends State<StationDetailPage> {
 
     final confirmed = await _showConfirmationDialog(
       context,
-      _isEditing ? 'Update Feedback' : 'Submit Feedback',
       _isEditing
-          ? 'Are you sure you want to update your feedback?'
-          : 'Are you sure you want to submit your feedback?',
+          ? localizations?.updateFeedbackTitle ?? 'Update Feedback'
+          : localizations?.submitFeedbackTitle ?? 'Submit Feedback',
+      _isEditing
+          ? localizations?.updateFeedbackConfirmation ??
+              'Are you sure you want to update your feedback?'
+          : localizations?.submitFeedbackConfirmation ??
+              'Are you sure you want to submit your feedback?',
     );
 
     if (confirmed) {
@@ -115,6 +122,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
     String title,
     String content,
   ) async {
+    final localizations = AppLocalizations.of(context);
     return (await showDialog<bool>(
           context: context,
           builder:
@@ -124,11 +132,11 @@ class _StationDetailPageState extends State<StationDetailPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(localizations?.cancel ?? 'Cancel'),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Confirm'),
+                    child: Text(localizations?.confirm ?? 'Confirm'),
                   ),
                 ],
               ),
@@ -171,6 +179,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final station = widget.station;
     final stationData = station["data"] ?? station;
     final isSuggestion = stationData['suggestion'] == true;
@@ -190,7 +199,10 @@ class _StationDetailPageState extends State<StationDetailPage> {
         }
       },
       child: Scaffold(
-        appBar: CustomAppBar(title: "Fuel Station Details", centerTitle: true),
+        appBar: CustomAppBar(
+          title: localizations?.stationDetailsTitle ?? "Fuel Station Details",
+          centerTitle: true,
+        ),
         body: BlocConsumer<FeedBackBloc, FeedBackState>(
           listener: (context, state) {
             if (state is FeedBackSucess) {
@@ -242,7 +254,6 @@ class _StationDetailPageState extends State<StationDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
-                    color: Colors.grey.shade50,
                     child: ListTile(
                       leading: Icon(
                         Icons.local_gas_station,
@@ -255,7 +266,9 @@ class _StationDetailPageState extends State<StationDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            station['name'] ?? 'Gas Station',
+                            station['name'] ??
+                                localizations?.gasStation ??
+                                'Gas Station',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -264,10 +277,10 @@ class _StationDetailPageState extends State<StationDetailPage> {
                           if (isSuggestion)
                             Row(
                               children: [
-                                Icon(Icons.info_outline, size: 10),
+                                const Icon(Icons.info_outline, size: 10),
                                 Text(
-                                  "Suggested",
-                                  style: TextStyle(fontSize: 10),
+                                  localizations?.suggested ?? "Suggested",
+                                  style: const TextStyle(fontSize: 10),
                                 ),
                               ],
                             ),
@@ -305,8 +318,8 @@ class _StationDetailPageState extends State<StationDetailPage> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(width: 2),
-                                Spacer(),
+                                const SizedBox(width: 2),
+                                const Spacer(),
                                 Row(
                                   children: [
                                     const Icon(
@@ -317,6 +330,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
                                     const SizedBox(width: 8),
                                     Text(
                                       availableFuel?.join(', ') ??
+                                          localizations?.noFuelInfo ??
                                           'No fuel information',
                                       style: const TextStyle(
                                         fontSize: 12,
@@ -349,7 +363,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        '${distance.toStringAsFixed(1)} km',
+                                        '${distance.toStringAsFixed(1)} ${localizations?.distanceUnit ?? 'km'}',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -377,9 +391,9 @@ class _StationDetailPageState extends State<StationDetailPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Your Rating',
-                        style: TextStyle(
+                      Text(
+                        localizations?.yourRatingLabel ?? 'Your Rating',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -387,7 +401,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
                       if (_hasExistingFeedback && !_isEditing)
                         TextButton(
                           onPressed: _startEditing,
-                          child: const Text('Edit'),
+                          child: Text(localizations?.editButton ?? 'Edit'),
                         ),
                     ],
                   ),
@@ -417,7 +431,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        'You rated this station',
+                        localizations?.ratedMessage ?? 'You rated this station',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontStyle: FontStyle.italic,
@@ -427,9 +441,12 @@ class _StationDetailPageState extends State<StationDetailPage> {
 
                   const SizedBox(height: 16),
 
-                  const Text(
-                    'Your Comment',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    localizations?.yourCommentLabel ?? 'Your Comment',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
@@ -440,7 +457,8 @@ class _StationDetailPageState extends State<StationDetailPage> {
                       hintText:
                           (_hasExistingFeedback && !_isEditing)
                               ? ''
-                              : 'Share your experience...',
+                              : localizations?.commentHint ??
+                                  'Share your experience...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.grey),
@@ -467,9 +485,9 @@ class _StationDetailPageState extends State<StationDetailPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                side: BorderSide(color: Colors.grey),
+                                side: const BorderSide(color: Colors.grey),
                               ),
-                              child: const Text('Cancel'),
+                              child: Text(localizations?.cancel ?? 'Cancel'),
                             ),
                           ),
                         if (_isEditing) const SizedBox(width: 16),
@@ -484,7 +502,11 @@ class _StationDetailPageState extends State<StationDetailPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: Text(_isEditing ? 'Update' : 'Submit'),
+                            child: Text(
+                              _isEditing
+                                  ? localizations?.updateButton ?? 'Update'
+                                  : localizations?.submitButton ?? 'Submit',
+                            ),
                           ),
                         ),
                       ],

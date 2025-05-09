@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fuel_finder/features/feedback/presentation/pages/station_detail_page.dart';
+import 'package:latlong2/latlong.dart';
 
 class StationInfoCard extends StatelessWidget {
   final Map<String, dynamic> station;
@@ -21,14 +22,16 @@ class StationInfoCard extends StatelessWidget {
     required this.routePoints,
   });
 
-  String _formatDistance(double? meters) {
-    if (meters == null) return 'Loading...';
+  String _formatDistance(BuildContext context, double? meters) {
+    final l10n = AppLocalizations.of(context)!;
+    if (meters == null) return l10n.loading;
     if (meters < 1000) return '${meters.toStringAsFixed(0)} m';
     return '${(meters / 1000).toStringAsFixed(1)} km';
   }
 
-  String _formatDuration(double? seconds) {
-    if (seconds == null) return 'Loading...';
+  String _formatDuration(BuildContext context, double? seconds) {
+    final l10n = AppLocalizations.of(context)!;
+    if (seconds == null) return l10n.loading;
     if (seconds < 60) return '${seconds.toStringAsFixed(0)} sec';
     if (seconds < 3600) return '${(seconds / 60).toStringAsFixed(0)} min';
     return '${(seconds / 3600).toStringAsFixed(1)} hr';
@@ -36,17 +39,20 @@ class StationInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final stationData = station['data'] ?? station;
     final name = stationData['name'] ?? 'Gas Station';
     final fuels =
         (stationData['available_fuel'] as List<dynamic>?)?.join(', ') ??
-        'No fuel info';
+        l10n.noFuelInfo;
 
     if (routePoints.isNotEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDarkMode ? theme.cardColor : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           boxShadow: [
             BoxShadow(
@@ -66,15 +72,20 @@ class StationInfoCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: theme.textTheme.bodyLarge?.color,
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: onClose,
-                  child: const Icon(Icons.close, size: 22),
+                  child: Icon(
+                    Icons.close,
+                    size: 22,
+                    color: theme.iconTheme.color,
+                  ),
                 ),
               ],
             ),
@@ -86,21 +97,35 @@ class StationInfoCard extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.location_on, color: Colors.blue, size: 18),
+                    Icon(
+                      Icons.location_on,
+                      color: AppPallete.primaryColor,
+                      size: 18,
+                    ),
                     const SizedBox(width: 4),
-                    Text(_formatDistance(distance)),
+                    Text(
+                      _formatDistance(context, distance),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
+                    ),
                   ],
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.access_time_filled,
-                      color: Colors.blue,
+                      color: AppPallete.primaryColor,
                       size: 18,
                     ),
                     const SizedBox(width: 4),
-                    Text(_formatDuration(duration)),
+                    Text(
+                      _formatDuration(context, duration),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -108,13 +133,16 @@ class StationInfoCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.local_gas_station,
-                  color: Colors.orange,
+                  color: AppPallete.secondaryColor,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
-                Text('$fuels available'),
+                Text(
+                  '$fuels ${l10n.available}',
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                ),
               ],
             ),
           ],
@@ -122,13 +150,14 @@ class StationInfoCard extends StatelessWidget {
       );
     }
 
-    final averageRate = stationData['averageRate']?.toString() ?? 'Not rated';
+    final averageRate = stationData['averageRate']?.toString() ?? l10n.notRated;
     final isSuggested = stationData['suggestion'] == true;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? theme.cardColor : Colors.white,
+
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
@@ -148,15 +177,20 @@ class StationInfoCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
               ),
               GestureDetector(
                 onTap: onClose,
-                child: const Icon(Icons.close, size: 22),
+                child: Icon(
+                  Icons.close,
+                  size: 22,
+                  color: theme.iconTheme.color,
+                ),
               ),
             ],
           ),
@@ -170,54 +204,75 @@ class StationInfoCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.star, color: Colors.amber, size: 18),
                   const SizedBox(width: 4),
-                  Text(averageRate),
+                  Text(
+                    averageRate,
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                  ),
                 ],
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.location_on, color: Colors.blue, size: 18),
-                  const SizedBox(width: 4),
-                  Text(_formatDistance(distance)),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.access_time_filled,
-                    color: Colors.blue,
+                  Icon(
+                    Icons.location_on,
+                    color: AppPallete.primaryColor,
                     size: 18,
                   ),
                   const SizedBox(width: 4),
-                  Text(_formatDuration(duration)),
+                  Text(
+                    _formatDistance(context, distance),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.access_time_filled,
+                    color: AppPallete.primaryColor,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _formatDuration(context, duration),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                  ),
                 ],
               ),
               if (isSuggested)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Suggested'),
+                    Text(
+                      l10n.suggested,
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
+                    ),
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text(
-                              "This suggestion is made based on the station's ratings and user votes",
-                              style: TextStyle(color: Colors.white),
+                            content: Text(
+                              l10n.suggestionTooltip,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
+                              ),
                             ),
                             duration: const Duration(seconds: 3),
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            backgroundColor: theme.colorScheme.surface,
                           ),
                         );
                       },
-                      child: const Icon(
+                      child: Icon(
                         Icons.info_outline,
-                        color: Colors.grey,
+                        color: theme.iconTheme.color,
                         size: 16,
                       ),
                     ),
@@ -228,13 +283,16 @@ class StationInfoCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_gas_station,
-                color: Colors.orange,
+                color: AppPallete.secondaryColor,
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text('$fuels available'),
+              Text(
+                '$fuels ${l10n.available}',
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+              ),
             ],
           ),
           const Divider(),
@@ -252,8 +310,8 @@ class StationInfoCard extends StatelessWidget {
                         size: 22,
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Show route',
+                      Text(
+                        l10n.showRoute,
                         style: TextStyle(
                           color: AppPallete.primaryColor,
                           fontWeight: FontWeight.w500,
@@ -262,7 +320,7 @@ class StationInfoCard extends StatelessWidget {
                       const Spacer(),
                       Icon(
                         Icons.chevron_right,
-                        color: Colors.grey[400],
+                        color: theme.iconTheme.color,
                         size: 22,
                       ),
                     ],
@@ -286,20 +344,23 @@ class StationInfoCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
-                        color: Colors.black87,
+                        color: theme.iconTheme.color,
                         size: 22,
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'More details',
-                        style: TextStyle(fontWeight: FontWeight.w500),
+                      Text(
+                        l10n.moreDetails,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
                       ),
                       const Spacer(),
                       Icon(
                         Icons.chevron_right,
-                        color: Colors.grey[400],
+                        color: theme.iconTheme.color,
                         size: 22,
                       ),
                     ],
@@ -313,3 +374,4 @@ class StationInfoCard extends StatelessWidget {
     );
   }
 }
+

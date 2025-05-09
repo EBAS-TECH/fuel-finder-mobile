@@ -6,7 +6,7 @@ import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class UserRemoteDataSource {
-  final String baseUrl = "http://192.168.230.78:5001/api/user";
+  final String baseUrl = "https://fuel-finder-backend.onrender.com/api/user";
   final TokenService tokenService;
 
   UserRemoteDataSource({required this.tokenService});

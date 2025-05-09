@@ -5,6 +5,7 @@ import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_blo
 import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_event.dart';
 import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PricePage extends StatefulWidget {
   const PricePage({super.key});
@@ -28,9 +29,13 @@ class _PricePageState extends State<PricePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLargeScreen = MediaQuery.of(context).size.width > 600;
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: CustomAppBar(title: "Fuel Prices", centerTitle: true),
+      appBar: CustomAppBar(
+        title: localizations?.fuelPricesTitle ?? 'Fuel Prices',
+        centerTitle: true,
+      ),
       body: BlocBuilder<FuelPriceBloc, FuelPriceState>(
         builder: (context, state) {
           if (state is FuelPriceLoading) {
@@ -38,12 +43,34 @@ class _PricePageState extends State<PricePage> {
               child: CircularProgressIndicator(color: AppPallete.primaryColor),
             );
           } else if (state is FuelPriceFailure) {
-            return Center(child: _buildErrorState("Failed to get prices"));
+            return Center(
+              child: _buildErrorState(
+                localizations?.errorLoadingPrices ?? 'Error loading fuel prices',
+              ),
+            );
           } else if (state is FuelPriceSucess) {
             final fuelPrices = state.fuelPrices['data'] as List;
-            return _buildFuelPriceLayout(theme, isLargeScreen, fuelPrices);
+            if (fuelPrices.isEmpty) {
+              return Center(
+                child: Text(
+                  localizations?.noPriceData ?? 'No fuel price data',
+                  style: theme.textTheme.titleLarge,
+                ),
+              );
+            }
+            return _buildFuelPriceLayout(
+              theme,
+              isLargeScreen,
+              fuelPrices,
+              localizations,
+            );
           }
-          return const Center(child: Text('No data available'));
+          return Center(
+            child: Text(
+              localizations?.noPriceData ?? 'No data available',
+              style: theme.textTheme.titleLarge,
+            ),
+          );
         },
       ),
     );
@@ -53,6 +80,7 @@ class _PricePageState extends State<PricePage> {
     ThemeData theme,
     bool isLargeScreen,
     List<dynamic> fuelPrices,
+    AppLocalizations? localizations,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -67,9 +95,9 @@ class _PricePageState extends State<PricePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (isLargeScreen)
-                  _buildLargeLayout(theme, fuelPrices)
+                  _buildLargeLayout(theme, fuelPrices, localizations)
                 else
-                  _buildMobileLayout(theme, fuelPrices),
+                  _buildMobileLayout(theme, fuelPrices, localizations),
                 const SizedBox(height: 16),
               ],
             ),
@@ -79,29 +107,44 @@ class _PricePageState extends State<PricePage> {
     );
   }
 
-  Widget _buildMobileLayout(ThemeData theme, List<dynamic> fuelPrices) {
+  Widget _buildMobileLayout(
+    ThemeData theme,
+    List<dynamic> fuelPrices,
+    AppLocalizations? localizations,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: fuelPrices.map((fuel) => _buildFuelCard(fuel, theme)).toList(),
+      children: fuelPrices
+          .map((fuel) => _buildFuelCard(fuel, theme, localizations))
+          .toList(),
     );
   }
 
-  Widget _buildLargeLayout(ThemeData theme, List<dynamic> fuelPrices) {
+  Widget _buildLargeLayout(
+    ThemeData theme,
+    List<dynamic> fuelPrices,
+    AppLocalizations? localizations,
+  ) {
     return Wrap(
       spacing: 16,
       runSpacing: 16,
       alignment: WrapAlignment.center,
-      children:
-          fuelPrices
-              .map(
-                (fuel) =>
-                    SizedBox(width: 400, child: _buildFuelCard(fuel, theme)),
-              )
-              .toList(),
+      children: fuelPrices
+          .map(
+            (fuel) => SizedBox(
+              width: 400,
+              child: _buildFuelCard(fuel, theme, localizations),
+            ),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildFuelCard(Map<String, dynamic> fuel, ThemeData theme) {
+  Widget _buildFuelCard(
+    Map<String, dynamic> fuel,
+    ThemeData theme,
+    AppLocalizations? localizations,
+  ) {
     final effectiveUntil = _getEffectiveUntilDate(fuel['created_at']);
 
     return Card(
@@ -132,7 +175,8 @@ class _PricePageState extends State<PricePage> {
                       ),
                     ),
                     Text(
-                      '${fuel['price']} Br/L',
+                      localizations?.pricePerLiter(fuel['price'].toString()) ??
+                          '${fuel['price']} Br/L',
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: AppPallete.primaryColor,
                       ),
@@ -151,7 +195,7 @@ class _PricePageState extends State<PricePage> {
                   Flexible(
                     child: _buildInfoItem(
                       Icons.calendar_today,
-                      'Since',
+                      localizations?.since ?? 'Since',
                       _formatDate(fuel['created_at']),
                       theme,
                     ),
@@ -164,7 +208,7 @@ class _PricePageState extends State<PricePage> {
                   Flexible(
                     child: _buildInfoItem(
                       Icons.event_busy,
-                      'Effective until',
+                      localizations?.effectiveUntil ?? 'Effective until',
                       effectiveUntil,
                       theme,
                     ),
@@ -177,8 +221,8 @@ class _PricePageState extends State<PricePage> {
             const SizedBox(height: 12),
             _buildInfoItem(
               Icons.business,
-              'Source',
-              'Ministry of Mines and Petroleum',
+              localizations?.source ?? 'Source',
+              localizations?.ministryOfMines ?? 'Ministry of Mines and Petroleum',
               theme,
             ),
           ],
@@ -243,13 +287,15 @@ class _PricePageState extends State<PricePage> {
   }
 
   Widget _buildErrorState(String error) {
+    final localizations = AppLocalizations.of(context);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.error, size: 80, color: Colors.red),
         const SizedBox(height: 16),
         Text(
-          "Error loading prices",
+          localizations?.errorLoadingPrices ?? 'Error loading prices',
           style: TextStyle(
             fontSize: 18,
             color: Colors.grey[600],
@@ -268,9 +314,13 @@ class _PricePageState extends State<PricePage> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppPallete.primaryColor,
           ),
-          child: const Text("Retry", style: TextStyle(color: Colors.white)),
+          child: Text(
+            localizations?.retry ?? 'Retry',
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );
   }
 }
+

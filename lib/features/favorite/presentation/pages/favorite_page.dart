@@ -6,6 +6,7 @@ import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_event.d
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -34,24 +35,28 @@ class _FavoritePageState extends State<FavoritePage> {
     String stationId,
     String stationName,
   ) async {
+    final localizations = AppLocalizations.of(context);
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Remove Favorite'),
+          title: Text(localizations?.removeFavorite ?? 'Remove Favorite'),
           content: Text(
-            'Are you sure you want to remove $stationName from favorites?',
+            localizations?.removeFavoriteConfirmation(stationName) ??
+                'Are you sure you want to remove $stationName from favorites?',
           ),
+
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(localizations?.cancel ?? 'Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Remove'),
+              child: Text(localizations?.remove ?? 'Remove'),
               onPressed: () {
                 Navigator.of(context).pop();
                 _removeFavorite(stationId);
@@ -72,8 +77,13 @@ class _FavoritePageState extends State<FavoritePage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
-      appBar: CustomAppBar(title: "Favorites", centerTitle: true),
+      appBar: CustomAppBar(
+        title: localizations?.favoritesTitle ?? 'Favorites',
+        centerTitle: true,
+      ),
       body: RefreshIndicator(
         onRefresh: fetchFavorites,
         child: BlocConsumer<FavoriteBloc, FavoriteState>(
@@ -100,11 +110,19 @@ class _FavoritePageState extends State<FavoritePage> {
                         Icons.local_gas_station,
                         color: AppPallete.primaryColor,
                       ),
-                      title: Text(item['en_name'] ?? 'Gas Station'),
+                      title: Text(
+                        item['en_name'] ??
+                            localizations?.gasStation ??
+                            'Gas Station',
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(item['address'] ?? 'Address'),
+                          Text(
+                            item['address'] ??
+                                localizations?.address ??
+                                'Address',
+                          ),
                           const SizedBox(height: 4),
                           Row(
                             children: [
@@ -126,7 +144,10 @@ class _FavoritePageState extends State<FavoritePage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                _formatFuelTypes(item['available_fuel']),
+                                _formatFuelTypes(
+                                  item['available_fuel'],
+                                  localizations,
+                                ),
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ],
@@ -139,7 +160,9 @@ class _FavoritePageState extends State<FavoritePage> {
                           _showRemoveConfirmationDialog(
                             context,
                             item['station_id'],
-                            item['en_name'] ?? 'this station',
+                            item['en_name'] ??
+                                localizations?.gasStation ??
+                                'this station',
                           );
                         },
                       ),
@@ -150,7 +173,10 @@ class _FavoritePageState extends State<FavoritePage> {
             } else if (state is FavoriteLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is FavoriteFailure) {
-              return _buildErrorState("Failed to get favorites");
+              return _buildErrorState(
+                localizations?.errorLoadingFavorites ??
+                    'Failed to get favorites',
+              );
             }
             return _buildEmptyFavorite(context);
           },
@@ -159,20 +185,27 @@ class _FavoritePageState extends State<FavoritePage> {
     );
   }
 
-  String _formatFuelTypes(List<dynamic>? fuelTypes) {
-    if (fuelTypes == null || fuelTypes.isEmpty) return 'No fuel';
+  String _formatFuelTypes(
+    List<dynamic>? fuelTypes,
+    AppLocalizations? localizations,
+  ) {
+    if (fuelTypes == null || fuelTypes.isEmpty) {
+      return localizations?.noFuel ?? 'No fuel';
+    }
     return fuelTypes.join(', ');
   }
 
   Widget _buildEmptyFavorite(BuildContext context) {
     final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset("assets/images/no_fav.png"),
           Text(
-            "No Favorites yet",
+            localizations?.noFavoritesYet ?? 'No Favorites yet',
             style: theme.textTheme.headlineLarge?.copyWith(
               color: AppPallete.primaryColor,
             ),
@@ -180,7 +213,8 @@ class _FavoritePageState extends State<FavoritePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: Text(
-              "Tap the heart icon on a gas station to favorite it",
+              localizations?.addFavoritesHint ??
+                  'Tap the heart icon on a gas station to favorite it',
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -191,13 +225,15 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   Widget _buildErrorState(String error) {
+    final localizations = AppLocalizations.of(context);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.error, size: 80, color: Colors.red),
         const SizedBox(height: 16),
         Text(
-          "Error loading favorites",
+          localizations?.errorLoadingFavorites ?? 'Error loading favorites',
           style: TextStyle(
             fontSize: 18,
             color: Colors.grey[600],
@@ -211,7 +247,10 @@ class _FavoritePageState extends State<FavoritePage> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        ElevatedButton(onPressed: _fetchFavorites, child: const Text("Retry")),
+        ElevatedButton(
+          onPressed: _fetchFavorites,
+          child: Text(localizations?.retry ?? 'Retry'),
+        ),
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GasStationBottomSheet extends StatefulWidget {
   final List<Map<String, dynamic>> stations;
@@ -49,24 +50,36 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       height: MediaQuery.of(context).size.height * 0.55,
+      decoration: BoxDecoration(
+       color: isDarkMode?theme.cardColor:Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       child: Column(
         children: [
-          const Text(
-            'Nearby Gas Stations',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            l10n.nearbyGasStations,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.bodyLarge?.color,
+            ),
           ),
           const SizedBox(height: 10),
           TabBar(
             controller: _tabController,
             labelColor: AppPallete.primaryColor,
-            unselectedLabelColor: Colors.grey,
-            tabs: const [
-              Tab(text: 'All'),
-              Tab(text: 'Petrol'),
-              Tab(text: 'Diesel'),
+            unselectedLabelColor: theme.textTheme.bodyMedium?.color,
+            indicatorColor: AppPallete.primaryColor,
+            tabs: [
+              Tab(text: l10n.all),
+              Tab(text: l10n.petrol),
+              Tab(text: l10n.diesel),
             ],
           ),
           const SizedBox(height: 5),
@@ -74,9 +87,9 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildStationList(_allStations, showAllFuels: true),
-                _buildStationList(_petrolStations, fuelType: 'PETROL'),
-                _buildStationList(_dieselStations, fuelType: 'DIESEL'),
+                _buildStationList(context, _allStations, showAllFuels: true),
+                _buildStationList(context, _petrolStations, fuelType: 'PETROL'),
+                _buildStationList(context, _dieselStations, fuelType: 'DIESEL'),
               ],
             ),
           ),
@@ -86,12 +99,20 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
   }
 
   Widget _buildStationList(
+    BuildContext context,
     List<Map<String, dynamic>> stations, {
     bool showAllFuels = false,
     String? fuelType,
   }) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     if (stations.isEmpty) {
-      return const Center(child: Text('No stations found'));
+      return Center(
+        child: Text(
+          l10n.noStationsFound,
+          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -115,7 +136,6 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4),
-          color: Colors.grey.shade50,
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -123,7 +143,10 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
             ),
             leading: Icon(
               Icons.local_gas_station,
-              color: isSuggestion ? AppPallete.primaryColor : Colors.orange,
+              color:
+                  isSuggestion
+                      ? AppPallete.primaryColor
+                      : AppPallete.secondaryColor,
             ),
             title: Row(
               children: [
@@ -131,16 +154,29 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                   child: Text(
                     station['name'] ?? 'Gas Station',
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ),
                 if (isSuggestion)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.info_outline, size: 12),
+                      Icon(
+                        Icons.info_outline,
+                        size: 12,
+                        color: theme.iconTheme.color,
+                      ),
                       const SizedBox(width: 4),
-                      const Text("Suggested", style: TextStyle(fontSize: 10)),
+                      Text(
+                        l10n.suggested,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                      ),
                     ],
                   ),
               ],
@@ -161,7 +197,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey.shade300,
+                            color: theme.colorScheme.surface,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -174,7 +210,10 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                               const SizedBox(width: 2),
                               Text(
                                 '${station['averageRate']}',
-                                style: const TextStyle(fontSize: 12),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.textTheme.bodyMedium?.color,
+                                ),
                               ),
                             ],
                           ),
@@ -187,20 +226,23 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey.shade300,
+                            color: theme.colorScheme.surface,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.directions_car,
-                                color: Colors.blue,
+                                color: AppPallete.primaryColor,
                                 size: 14,
                               ),
                               const SizedBox(width: 2),
                               Text(
                                 '${station['distance'].toStringAsFixed(2)} km',
-                                style: const TextStyle(fontSize: 12),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.textTheme.bodyMedium?.color,
+                                ),
                               ),
                             ],
                           ),
@@ -221,7 +263,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.local_gas_station,
                             size: 14,
                             color: AppPallete.primaryColor,
@@ -233,7 +275,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                             ),
                             child: Text(
                               fuelsText,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppPallete.primaryColor,
                               ),
@@ -262,3 +304,4 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
     super.dispose();
   }
 }
+

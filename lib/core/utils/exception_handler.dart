@@ -5,7 +5,7 @@ class ExceptionHandler {
     if (error is AppException) {
       return error;
     } else if (error is FormatException) {
-      return FormatException(message: error.message);
+      return FormatException(message: "Error connecting to the server");
     } else if (error is SocketException) {
       return SocketException(message: error.message);
     } else if (error is TimeoutException) {
@@ -13,7 +13,7 @@ class ExceptionHandler {
     } else if (error is String) {
       return _parseStringError(error);
     } else {
-      return UnknownException(message: error.toString());
+      return UnknownException(message: "Error connecting to the server");
     }
   }
 

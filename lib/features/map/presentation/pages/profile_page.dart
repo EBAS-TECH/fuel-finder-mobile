@@ -9,7 +9,9 @@ import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 import 'package:fuel_finder/features/user/presentation/pages/edit_profile_page.dart';
+import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -31,6 +33,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _handleLogOut(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
@@ -38,26 +42,31 @@ class _ProfilePageState extends State<ProfilePage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
-              'Log Out',
-              style: TextStyle(fontWeight: FontWeight.bold),
+
+            title: Text(
+              l10n.logOut,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
             ),
-            content: const Text(
-              'Are you sure you want to log out of your account?',
+            content: Text(
+              l10n.logOutConfirmation,
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
-                  'Cancel',
+                  l10n.cancel,
                   style: TextStyle(color: AppPallete.primaryColor),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Log Out',
-                  style: TextStyle(color: Colors.red),
+                child: Text(
+                  l10n.logOut,
+                  style: TextStyle(color: Colors.redAccent),
                 ),
               ),
             ],
@@ -75,14 +84,36 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Scaffold(
       appBar: CustomAppBar(
-        title: "My Profile",
-        centerTitle: true,
+        title: l10n.myProfile,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: () => _navigateToEditProfile(context),
+          Container(
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? theme.cardColor : Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.edit, size: 20),
+                  ),
+                  onPressed: () => _navigateToEditProfile(context),
+                ),
+                const SizedBox(width: 4),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: LanguageSwitcher(isSmall: true),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -94,21 +125,25 @@ class _ProfilePageState extends State<ProfilePage> {
         },
         builder: (context, state) {
           if (state is UserLoading) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppPallete.primaryColor),
             );
           } else if (state is UserSuccess) {
             final user = state.responseData["data"];
             print(user);
             if (user == null) {
-              return _buildErrorState("User data not found");
+              return _buildErrorState(context, "User data not found");
             }
             return _buildProfileContent(user, context);
           } else if (state is UserFailure) {
-            return _buildErrorState(state.error);
+            return _buildErrorState(context, state.error);
           }
-          return const Center(
-            child: Icon(Icons.person, size: 80, color: AppPallete.primaryColor),
+          return Center(
+            child: Icon(
+              Icons.person,
+              size: 80,
+              color: theme.colorScheme.primary,
+            ),
           );
         },
       ),
@@ -116,14 +151,15 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildProfileContent(Map<String, dynamic> user, BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           const SizedBox(height: 10),
-          _buildProfileHeader(user),
+          _buildProfileHeader(user, context),
           const SizedBox(height: 24),
-          _buildUserInfoCard(user),
+          _buildUserInfoCard(context, user),
           const SizedBox(height: 24),
           _buildLogoutButton(context),
           const SizedBox(height: 24),
@@ -132,7 +168,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileHeader(Map<String, dynamic> user) {
+  Widget _buildProfileHeader(Map<String, dynamic> user, BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Container(
@@ -141,12 +178,12 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppPallete.primaryColor.withOpacity(0.2),
+              color: theme.colorScheme.primary.withOpacity(0.2),
               width: 4,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: theme.shadowColor.withOpacity(0.2),
                 blurRadius: 10,
                 spreadRadius: 2,
               ),
@@ -159,11 +196,11 @@ class _ProfilePageState extends State<ProfilePage> {
               fit: BoxFit.cover,
               errorBuilder:
                   (context, error, stackTrace) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(
+                    color: theme.cardColor,
+                    child: Icon(
                       Icons.person,
                       size: 60,
-                      color: Colors.grey,
+                      color: theme.iconTheme.color,
                     ),
                   ),
             ),
@@ -172,25 +209,34 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 20),
         Text(
           "${user["first_name"] ?? 'No name'} ${user["last_name"] ?? ''}",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           user["email"] ?? 'No email',
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          style: TextStyle(
+            fontSize: 16,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+          ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: AppPallete.primaryColor.withOpacity(0.1),
+            color: theme.colorScheme.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppPallete.primaryColor.withOpacity(0.3)),
+            border: Border.all(
+              color: theme.colorScheme.primary.withOpacity(0.3),
+            ),
           ),
           child: Text(
             user["role"]?.toString().toUpperCase() ?? 'USER',
             style: TextStyle(
-              color: AppPallete.primaryColor,
+              color: theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -199,29 +245,36 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildUserInfoCard(Map<String, dynamic> user) {
+  Widget _buildUserInfoCard(BuildContext context, Map<String, dynamic> user) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
+        side: BorderSide(color: theme.dividerColor.withOpacity(0.2), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             _buildInfoItem(
+              context: context,
               icon: Icons.person_outline,
-              label: "Username",
+              label: l10n.username,
               value: user["username"] ?? 'Not provided',
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Divider(
+                height: 1,
+                color: theme.dividerColor.withOpacity(0.2),
+              ),
             ),
             _buildInfoItem(
+              context: context,
               icon: Icons.calendar_today_outlined,
-              label: "Member Since",
+              label: l10n.memberSince,
               value:
                   user["created_at"] != null
                       ? DateTime.parse(
@@ -229,14 +282,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       ).toLocal().toString().split(' ')[0]
                       : 'Unknown',
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Divider(
+                height: 1,
+                color: theme.dividerColor.withOpacity(0.2),
+              ),
             ),
             _buildInfoItem(
+              context: context,
               icon: Icons.verified_outlined,
-              label: "Account Status",
-              value: user["verified"] == true ? "Verified" : "Not Verified",
+              label: l10n.accountStatus,
+              value:
+                  user["verified"] == true ? l10n.verified : l10n.notVerified,
               isVerified: user["verified"] == true,
             ),
           ],
@@ -246,17 +304,19 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildInfoItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
     bool isVerified = false,
   }) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icon,
-          color: isVerified ? Colors.green : AppPallete.primaryColor,
+          color: isVerified ? Colors.green : theme.colorScheme.primary,
           size: 24,
         ),
         const SizedBox(width: 16),
@@ -266,7 +326,10 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -274,7 +337,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: isVerified ? Colors.green : AppPallete.textPrimary,
+                  color:
+                      isVerified
+                          ? Colors.green
+                          : theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ],
@@ -285,11 +351,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildLogoutButton(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        icon: const Icon(Icons.logout, color: Colors.redAccent),
-        label: const Text('Log Out', style: TextStyle(color: Colors.redAccent)),
+        icon: Icon(Icons.logout, color: Colors.redAccent),
+        label: Text(l10n.logOut, style: TextStyle(color: Colors.redAccent)),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -303,7 +371,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildErrorState(String error) {
+  Widget _buildErrorState(BuildContext context, String error) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -317,10 +387,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Error loading profile",
+              l10n.errorLoadingProfile,
               style: TextStyle(
                 fontSize: 18,
-                color: AppPallete.textPrimary,
+                color: theme.textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -328,14 +398,17 @@ class _ProfilePageState extends State<ProfilePage> {
             Text(
               error,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _fetchUserData,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppPallete.primaryColor,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -344,7 +417,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text("Try Again"),
+              child: Text(l10n.tryAgain),
             ),
           ],
         ),

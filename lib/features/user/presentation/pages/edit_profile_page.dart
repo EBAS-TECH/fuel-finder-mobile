@@ -7,6 +7,7 @@ import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 import 'package:fuel_finder/shared/circular_progress_indicator.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String userId;
@@ -65,15 +66,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
         if (state is UserLoading) {
           AppLoader();
         } else if (state is UserUpdated) {
-          ShowSnackbar.show(context, 'Profile updated successfully');
+          ShowSnackbar.show(
+            context,
+            localizations?.profileUpdateSuccess ??
+                'Profile updated successfully',
+          );
           Navigator.pop(context, state.userData);
         } else if (state is PasswordChanged) {
-          ShowSnackbar.show(context, 'Password changed successfully');
+          ShowSnackbar.show(
+            context,
+            localizations?.passwordChangeSuccess ??
+                'Password changed successfully',
+          );
           context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
           setState(() {
             _showPasswordSection = false;
@@ -92,17 +102,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
         }
       },
       child: Scaffold(
-        appBar: CustomAppBar(title: "Edit Profile", centerTitle: true),
+        appBar: CustomAppBar(
+          title: localizations?.editProfileTitle ?? 'Edit Profile',
+          centerTitle: true,
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               const SizedBox(height: 16),
-              _buildProfileInfoSection(),
+              _buildProfileInfoSection(localizations),
               const SizedBox(height: 24),
-              _buildPasswordSection(),
+              _buildPasswordSection(localizations),
               const SizedBox(height: 24),
-              _buildSaveButton(),
+              _buildSaveButton(localizations),
             ],
           ),
         ),
@@ -110,13 +123,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildProfileInfoSection() {
+  Widget _buildProfileInfoSection(AppLocalizations? localizations) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Profile Information',
-          style: TextStyle(
+        Text(
+          localizations?.profileInformation ?? 'Profile Information',
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppPallete.primaryColor,
@@ -125,44 +138,44 @@ class _EditProfilePageState extends State<EditProfilePage> {
         const SizedBox(height: 16),
         TextFormField(
           controller: _firstNameController,
-          decoration: const InputDecoration(
-            labelText: 'First Name',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.person),
+          decoration: InputDecoration(
+            labelText: localizations?.firstNameLabel ?? 'First Name',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.person),
           ),
         ),
         const SizedBox(height: 16),
         TextFormField(
           controller: _lastNameController,
-          decoration: const InputDecoration(
-            labelText: 'Last Name',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.person_outline),
+          decoration: InputDecoration(
+            labelText: localizations?.lastNameLabel ?? 'Last Name',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.person_outline),
           ),
         ),
         const SizedBox(height: 16),
         TextFormField(
           controller: _usernameController,
-          decoration: const InputDecoration(
-            labelText: 'Username',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.alternate_email),
+          decoration: InputDecoration(
+            labelText: localizations?.usernameLabel ?? 'Username',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.alternate_email),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPasswordSection() {
+  Widget _buildPasswordSection(AppLocalizations? localizations) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Change Password',
-              style: TextStyle(
+            Text(
+              localizations?.changePassword ?? 'Change Password',
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppPallete.primaryColor,
@@ -193,7 +206,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             controller: _currentPasswordController,
             obscureText: _obscureCurrentPassword,
             decoration: InputDecoration(
-              labelText: 'Current Password',
+              labelText: localizations?.currentPassword ?? 'Current Password',
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
@@ -216,7 +229,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             controller: _newPasswordController,
             obscureText: _obscureNewPassword,
             decoration: InputDecoration(
-              labelText: 'New Password',
+              labelText: localizations?.newPassword ?? 'New Password',
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
@@ -237,7 +250,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
             decoration: InputDecoration(
-              labelText: 'Confirm New Password',
+              labelText:
+                  localizations?.confirmNewPassword ?? 'Confirm New Password',
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
@@ -256,14 +270,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             validator: (value) {
               if (value != _newPasswordController.text) {
-                return 'Passwords do not match';
+                return localizations?.passwordsDontMatch ??
+                    'Passwords do not match';
               }
               return null;
             },
           ),
           const SizedBox(height: 8),
           Text(
-            'Password must be at least 6 characters long',
+            localizations?.passwordRequirement ??
+                'Password must be at least 6 characters long',
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
@@ -271,7 +287,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(AppLocalizations? localizations) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
         return SizedBox(
@@ -289,7 +305,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             child:
                 state is UserLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('SAVE CHANGES'),
+                    : Text(localizations?.saveChanges ?? 'SAVE CHANGES'),
           ),
         );
       },
@@ -297,12 +313,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _saveChanges() {
+    final localizations = AppLocalizations.of(context);
+
     if (_firstNameController.text.isEmpty ||
         _lastNameController.text.isEmpty ||
         _usernameController.text.isEmpty) {
       ShowSnackbar.show(
         context,
-        "Please fill all profile fields",
+        localizations?.fillAllFields ?? "Please fill all profile fields",
         isError: true,
       );
       return;
@@ -323,12 +341,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _handlePasswordChange() {
+    final localizations = AppLocalizations.of(context);
+
     if (_currentPasswordController.text.isEmpty ||
         _newPasswordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
       ShowSnackbar.show(
         context,
-        "Please fill all password fields",
+        localizations?.fillAllFields ?? "Please fill all password fields",
         isError: true,
       );
       return;
@@ -337,14 +357,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_newPasswordController.text.length < 6) {
       ShowSnackbar.show(
         context,
-        "Password must be at least 6 characters long",
+        localizations?.passwordTooShort ??
+            "Password must be at least 6 characters long",
         isError: true,
       );
       return;
     }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ShowSnackbar.show(context, "New passwords do not match", isError: true);
+      ShowSnackbar.show(
+        context,
+        localizations?.passwordsDontMatch ?? "New passwords do not match",
+        isError: true,
+      );
       return;
     }
 

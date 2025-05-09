@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? userId;
@@ -24,6 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (showUserInfo && userId != null) {
       context.read<UserBloc>().add(GetUserByIdEvent(userId: userId!));
     }
@@ -56,8 +60,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Hey There",
+                            Text(
+                              l10n.heyThere,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -76,7 +80,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ],
                     );
                   } else {
-                    return const Row(
+                    return  Row(
                       children: [
                         CircleAvatar(
                           backgroundImage: NetworkImage(
@@ -89,14 +93,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Hey There",
+                              l10n.heyThere,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                               ),
                             ),
                             Text(
-                              "Loading...",
+                              l10n.loading,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -111,7 +115,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 },
               )
               : Text(
-                title ?? "Title",
+                title ?? "HomePage",
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

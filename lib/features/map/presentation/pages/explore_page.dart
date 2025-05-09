@@ -5,7 +5,6 @@ import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_b
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_event.dart';
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_state.dart';
 import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart';
-import 'package:fuel_finder/features/map/presentation/pages/search_page.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
@@ -17,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/gas_station_bottom_sheet.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/station_info_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExplorePage extends StatefulWidget {
   final String userId;
@@ -40,14 +40,23 @@ class _ExplorePageState extends State<ExplorePage>
   bool _showRouteOnMap = false;
   AnimationController? _animationController;
 
-  final String _mapTypeUrl =
-      'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
+  String get _mapTypeUrl {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return isDarkMode
+        ? 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=MHrVVdsKyXBzKmc1z9Oo'
+        : 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
+  }
 
   @override
   void initState() {
     super.initState();
-    _checkLocationPermission();
     _fetchUserData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkLocationPermission();
   }
 
   @override
@@ -58,15 +67,13 @@ class _ExplorePageState extends State<ExplorePage>
   }
 
   void _checkLocationPermission() async {
+    final l10n = AppLocalizations.of(context)!;
     PermissionStatus status = await Permission.locationWhenInUse.request();
 
     if (status.isGranted && mounted) {
       context.read<GeolocationBloc>().add(FetchUserLocation());
     } else if (status.isDenied && mounted) {
-      ShowSnackbar.show(
-        context,
-        "Location permission is required to access your location",
-      );
+      ShowSnackbar.show(context, l10n.locationPermissionRequired);
     } else if (status.isPermanentlyDenied) {
       openAppSettings();
     }
@@ -217,7 +224,7 @@ class _ExplorePageState extends State<ExplorePage>
   Widget build(BuildContext context) {
     super.build(context);
     double zoomLevel = getZoomLevel(context);
-
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: CustomAppBar(userId: widget.userId, showUserInfo: true),
       body: Stack(
@@ -257,14 +264,17 @@ class _ExplorePageState extends State<ExplorePage>
               bottom: 120,
               right: 25,
               child: FloatingActionButton(
-                backgroundColor: AppPallete.primaryColor,
+                backgroundColor: AppPallete.whiteColor,
                 onPressed: () {
                   final state = context.read<GasStationBloc>().state;
                   if (state is GasStationSucess) {
                     _showGasStationsBottomSheet(state.gasStation ?? []);
                   }
                 },
-                child: const Icon(Icons.local_gas_station_rounded),
+                child: Icon(
+                  Icons.local_gas_station_rounded,
+                  color: Colors.black,
+                ),
               ),
             ),
           if (_showStationInfo && _selectedStation != null)

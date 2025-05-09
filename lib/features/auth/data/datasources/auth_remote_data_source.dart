@@ -5,7 +5,7 @@ import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 
 class AuthRemoteDataSource {
-  final String baseUrl = "http://192.168.230.78:5001/api/auth";
+  final String baseUrl = "https://fuel-finder-backend.onrender.com/api/auth";
   final TokenService tokenService;
 
   AuthRemoteDataSource({required this.tokenService});
@@ -125,6 +125,7 @@ class AuthRemoteDataSource {
     } on FormatException catch (_) {
       throw FormatException(message: 'Invalid response format');
     } catch (e) {
+      print(e.toString());
       throw ExceptionHandler.handleError(e);
     }
   }
