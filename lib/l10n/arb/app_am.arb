@@ -136,6 +136,20 @@
   "passwordChangeSuccess": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
   "fillAllFields": "እባክዎ ሁሉንም መስኮች ይሙሉ",
   "passwordsDontMatch": "የይለፍ ቃሎች አንድ አይነት አይደሉም",
-  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ቁምፊ ሊኖረው ይገባል"
+  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ቁምፊ ሊኖረው ይገባል",
+
+  "forgotPasswordTitle": "የይለፍ ቃል ረሳኽው",
+  "forgotPasswordSubtitle": "የይለፍ ቃል ዳግም ለማስጀመር ኢሜልዎን ያስገቡ",
+  "emailLabel": "ኢሜል",
+  "emailError": "ኢሜል ያስፈልጋል",
+  "emailInvalid": "ትክክለኛ ኢሜል ያስገቡ",
+  "sendCodeButton": "ኮድ ላክ",
+  "resetPasswordTitle": "የይለፍ ቃል ዳግም ያስጀምሩ",
+  "resetPasswordSubtitle": "ወደ ኢሜልዎ የተላከውን ኮድ እና አዲስ የይለፍ ቃል ያስገቡ",
+  "newPasswordLabel": "አዲስ የይለፍ ቃል",
+  "confirmNewPasswordLabel": "አዲሱን የይለፍ ቃል ያረጋግጡ",
+  "resetPasswordButton": "የይለፍ ቃል ዳግም ያስጀምሩ",
+  "codeVerificationTitle": "የኮድ ማረጋገጫ",
+  "codeVerificationSubtitle": "ወደ ኢሜልዎ የተላከውን 6-አሃዝ ኮድ ያስገቡ"
 }
 

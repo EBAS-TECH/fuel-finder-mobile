@@ -135,6 +135,19 @@
   "passwordChangeSuccess": "Password changed successfully",
   "fillAllFields": "Please fill all fields",
   "passwordsDontMatch": "Passwords do not match",
-  "passwordTooShort": "Password must be at least 6 characters long"
+  "passwordTooShort": "Password must be at least 6 characters long",
+  "forgotPasswordTitle": "Forgot Password",
+  "forgotPasswordSubtitle": "Enter your email to receive a password reset code",
+  "emailLabel": "Email",
+  "emailError": "Email is required",
+  "emailInvalid": "Enter a valid email",
+  "sendCodeButton": "SEND CODE",
+  "resetPasswordTitle": "Reset Password",
+  "resetPasswordSubtitle": "Enter the code sent to your email and set a new password",
+  "newPasswordLabel": "New Password",
+  "confirmNewPasswordLabel": "Confirm New Password",
+  "resetPasswordButton": "RESET PASSWORD",
+  "codeVerificationTitle": "Code Verification",
+  "codeVerificationSubtitle": "Enter the 6-digit code sent to your email"
 }
 

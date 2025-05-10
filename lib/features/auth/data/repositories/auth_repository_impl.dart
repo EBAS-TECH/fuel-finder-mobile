@@ -43,5 +43,23 @@ class AuthRepositoryImpl extends AuthRepository {
   Future<void> resendCode(String userId) async {
     return await authRemoteDataSource.resendCode(userId);
   }
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword(String email) {
+    return authRemoteDataSource.forgotPassword(email);
+  }
+
+  @override
+  Future<Map<String, dynamic>> forgotVerify(String userId, String code) {
+    return authRemoteDataSource.forgotVerify(userId, code);
+  }
+
+  @override
+  Future<Map<String, dynamic>> setNewPassword(
+    String userId,
+    String newPassword,
+  ) {
+    return authRemoteDataSource.setNewPassword(userId, newPassword);
+  }
 }
 

@@ -11,5 +11,11 @@ abstract class AuthRepository {
   Future<void> logOut();
   Future<void> verifyEmail(String userId, String token);
   Future<void> resendCode(String userId);
+  Future<Map<String, dynamic>> forgotPassword(String email);
+  Future<Map<String, dynamic>> forgotVerify(String userId, String code);
+  Future<Map<String, dynamic>> setNewPassword(
+    String userId,
+    String newPassword,
+  );
 }
 

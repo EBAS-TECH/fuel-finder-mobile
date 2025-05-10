@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
+import 'package:fuel_finder/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:fuel_finder/features/auth/domain/usecases/forgot_verify_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/resend_code_usecase.dart';
+import 'package:fuel_finder/features/auth/domain/usecases/set_new_password_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signin_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:fuel_finder/features/auth/domain/usecases/verify_email_usecase.dart';
@@ -17,11 +20,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyEmailUsecase verifyEmailUsecase;
   final LogoutUsecase logoutUsecase;
   final ResendCodeUsecase resendCodeUsecase;
+  final ForgotPasswordUsecase forgotPasswordUsecase;
+  final ForgotVerifyUsecase forgotVerifyUsecase;
+  final SetNewPasswordUsecase setNewPasswordUsecase;
   final TokenService tokenService;
 
   static const int _minimumLoadingTime = 1500;
 
   AuthBloc({
+    required this.forgotVerifyUsecase,
+    required this.setNewPasswordUsecase,
+    required this.forgotPasswordUsecase,
     required this.resendCodeUsecase,
     required this.signupUsecase,
     required this.signinUsecase,
@@ -34,6 +43,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthVerifyEmailEvent>(_onVerifyEmail);
     on<AuthLogOutEvent>(_onLogOut);
     on<AuthResendCodeEvent>(_onResend);
+    on<AuthForgotPasswordEvent>(_onForgotPassword);
+    on<AuthVerifyForgotEvent>(_onForgotVerify);
+    on<AuthSetNewPasswordEvent>(_onSetNewPassword);
   }
 
   Future<void> _onSignUp(AuthSignUpEvent event, Emitter<AuthState> emit) async {
@@ -137,6 +149,52 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await resendCodeUsecase(event.userId);
       emit(ResendCodeSuccess(message: "Verification code resent"));
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
+    }
+  }
+
+  Future<void> _onForgotPassword(
+    AuthForgotPasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final response = await forgotPasswordUsecase(event.email);
+      emit(AuthForgotPasswordSucess(response: response));
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
+    }
+  }
+
+  Future<void> _onForgotVerify(
+    AuthVerifyForgotEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final response = await forgotVerifyUsecase(event.userId, event.code);
+      emit(AuthVerifyForgotSucess(response: response));
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
+    }
+  }
+
+  Future<void> _onSetNewPassword(
+    AuthSetNewPasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      await setNewPasswordUsecase(event.userId, event.newPassword);
+      emit(
+        AuthSetNewPasswordSucess(
+          message: "Sucessfully updated password. Please login",
+        ),
+      );
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
       emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));

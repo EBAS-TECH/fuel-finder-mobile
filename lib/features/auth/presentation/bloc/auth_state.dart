@@ -41,3 +41,21 @@ class AuthFailure extends AuthState {
   AuthFailure({required this.error});
 }
 
+class AuthForgotPasswordSucess extends AuthState {
+  final Map<String, dynamic> response;
+
+  AuthForgotPasswordSucess({required this.response});
+}
+
+class AuthVerifyForgotSucess extends AuthState {
+  final Map<String, dynamic> response;
+
+  AuthVerifyForgotSucess({required this.response});
+}
+
+class AuthSetNewPasswordSucess extends AuthState {
+  final String message;
+
+  AuthSetNewPasswordSucess({required this.message});
+}
+

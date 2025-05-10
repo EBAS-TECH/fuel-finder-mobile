@@ -40,3 +40,23 @@ class AuthResendCodeEvent extends AuthEvent {
   AuthResendCodeEvent({required this.userId});
 }
 
+class AuthForgotPasswordEvent extends AuthEvent {
+  final String email;
+
+  AuthForgotPasswordEvent({required this.email});
+}
+
+class AuthVerifyForgotEvent extends AuthEvent {
+  final String userId;
+  final String code;
+
+  AuthVerifyForgotEvent({required this.userId, required this.code});
+}
+
+class AuthSetNewPasswordEvent extends AuthEvent {
+  final String userId;
+  final String newPassword;
+
+  AuthSetNewPasswordEvent({required this.userId, required this.newPassword});
+}
+

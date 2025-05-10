@@ -215,5 +215,47 @@ class AuthRemoteDataSource {
       throw ExceptionHandler.handleError(e);
     }
   }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$baseUrl/forgot"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<Map<String, dynamic>> forgotVerify(String userId, String code) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$baseUrl/forgot/verify/$userId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"token": code}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<Map<String, dynamic>> setNewPassword(
+    String userId,
+    String newPassword,
+  ) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$baseUrl/new-password/$userId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"new_password": newPassword}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
 }
 

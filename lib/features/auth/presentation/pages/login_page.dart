@@ -4,6 +4,7 @@ import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
+import 'package:fuel_finder/features/auth/presentation/pages/forgot_password.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
 import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
 import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
@@ -133,10 +134,19 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(
-                          l10n.forgotPassword,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppPallete.primaryColor,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ForgotPasswordPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            l10n.forgotPassword,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppPallete.primaryColor,
+                            ),
                           ),
                         ),
                       ],
