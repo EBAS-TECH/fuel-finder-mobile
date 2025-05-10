@@ -218,27 +218,63 @@ class AuthRemoteDataSource {
 
   Future<Map<String, dynamic>> forgotPassword(String email) async {
     try {
-      final response = await http.put(
-        Uri.parse("$baseUrl/forgot"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email}),
-      );
-      return jsonDecode(response.body);
+      final response = await http
+          .put(
+            Uri.parse("$baseUrl/forgot"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({"email": email}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = json.decode(response.body);
+
+      switch (response.statusCode) {
+        case 200:
+          return responseBody;
+        case 400:
+          throw BadRequestException(message: responseBody['message']);
+        case 404:
+          throw NotFoundException(message: responseBody['message']);
+        case 500:
+          throw ServerErrorException(message: responseBody['message']);
+        default:
+          throw FetchDataException(
+            message: 'Error occurred while processing forgot password',
+          );
+      }
     } catch (e) {
-      throw e.toString();
+      throw ExceptionHandler.handleError(e);
     }
   }
 
   Future<Map<String, dynamic>> forgotVerify(String userId, String code) async {
     try {
-      final response = await http.put(
-        Uri.parse("$baseUrl/forgot/verify/$userId"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"token": code}),
-      );
-      return jsonDecode(response.body);
+      final response = await http
+          .put(
+            Uri.parse("$baseUrl/forgot/verify/$userId"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({"token": code}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = json.decode(response.body);
+
+      switch (response.statusCode) {
+        case 200:
+          return responseBody;
+        case 400:
+          throw BadRequestException(message: responseBody['message']);
+        case 404:
+          throw NotFoundException(message: responseBody['message']);
+        case 500:
+          throw ServerErrorException(message: responseBody['message']);
+        default:
+          throw FetchDataException(
+            message: 'Error occurred while verifying forgot password code',
+          );
+      }
     } catch (e) {
-      throw e.toString();
+      throw ExceptionHandler.handleError(e);
     }
   }
 
@@ -247,14 +283,32 @@ class AuthRemoteDataSource {
     String newPassword,
   ) async {
     try {
-      final response = await http.put(
-        Uri.parse("$baseUrl/new-password/$userId"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"new_password": newPassword}),
-      );
-      return jsonDecode(response.body);
+      final response = await http
+          .put(
+            Uri.parse("$baseUrl/new-password/$userId"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({"new_password": newPassword}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = json.decode(response.body);
+
+      switch (response.statusCode) {
+        case 200:
+          return responseBody;
+        case 400:
+          throw BadRequestException(message: responseBody['message']);
+        case 404:
+          throw NotFoundException(message: responseBody['message']);
+        case 500:
+          throw ServerErrorException(message: responseBody['message']);
+        default:
+          throw FetchDataException(
+            message: 'Error occurred while setting new password',
+          );
+      }
     } catch (e) {
-      throw e.toString();
+      throw ExceptionHandler.handleError(e);
     }
   }
 }

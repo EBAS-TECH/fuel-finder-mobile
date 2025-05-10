@@ -148,6 +148,9 @@
   "confirmNewPasswordLabel": "Confirm New Password",
   "resetPasswordButton": "RESET PASSWORD",
   "codeVerificationTitle": "Code Verification",
-  "codeVerificationSubtitle": "Enter the 6-digit code sent to your email"
+  "codeVerificationSubtitle": "Enter the 6-digit code sent to your email",
+
+  "codeVerificationError":"Incorrect verifcation code",
+  "verifyButton":"Verify"
 }
 

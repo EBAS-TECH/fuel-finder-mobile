@@ -150,6 +150,9 @@
   "confirmNewPasswordLabel": "አዲሱን የይለፍ ቃል ያረጋግጡ",
   "resetPasswordButton": "የይለፍ ቃል ዳግም ያስጀምሩ",
   "codeVerificationTitle": "የኮድ ማረጋገጫ",
-  "codeVerificationSubtitle": "ወደ ኢሜልዎ የተላከውን 6-አሃዝ ኮድ ያስገቡ"
+  "codeVerificationSubtitle": "ወደ ኢሜልዎ የተላከውን 6-አሃዝ ኮድ ያስገቡ",
+
+  "codeVerificationError":"የይለፍ ቃሎች አንድ አይነት አይደሉም",
+  "verifyButton":"ያረጋግጡ"
 }
 

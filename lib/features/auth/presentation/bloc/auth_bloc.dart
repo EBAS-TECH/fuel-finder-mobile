@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
@@ -189,12 +190,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      await setNewPasswordUsecase(event.userId, event.newPassword);
+     final responsee = await setNewPasswordUsecase(event.userId, event.newPassword);
       emit(
         AuthSetNewPasswordSucess(
-          message: "Sucessfully updated password. Please login",
+          message: "Successfully updated password. Please login",
         ),
       );
+      print("Password update response $responsee");
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
       emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));

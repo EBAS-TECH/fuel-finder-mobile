@@ -77,7 +77,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             localizations?.profileUpdateSuccess ??
                 'Profile updated successfully',
           );
-          Navigator.pop(context, state.userData);
         } else if (state is PasswordChanged) {
           ShowSnackbar.show(
             context,

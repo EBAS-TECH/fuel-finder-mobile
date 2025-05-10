@@ -28,7 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _fetchUserData();
   }
 
-  void _fetchUserData() {
+  Future<void> _fetchUserData() async {
     context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
   }
 
@@ -87,65 +87,70 @@ class _ProfilePageState extends State<ProfilePage> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: l10n.myProfile,
-        actions: [
-          Container(
-            padding: const EdgeInsets.only(right: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? theme.cardColor : Colors.white,
-                      shape: BoxShape.circle,
+    return RefreshIndicator(
+      onRefresh: _fetchUserData,
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: l10n.myProfile,
+          actions: [
+            Container(
+              padding: const EdgeInsets.only(right: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? theme.cardColor : Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.edit, size: 20),
                     ),
-                    child: Icon(Icons.edit, size: 20),
+                    onPressed: () => _navigateToEditProfile(context),
                   ),
-                  onPressed: () => _navigateToEditProfile(context),
-                ),
-                const SizedBox(width: 4),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: LanguageSwitcher(isSmall: true),
-                ),
-              ],
+                  const SizedBox(width: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: LanguageSwitcher(isSmall: true),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-      body: BlocConsumer<UserBloc, UserState>(
-        listener: (context, state) {
-          if (state is UserFailure) {
-            ShowSnackbar.show(context, state.error);
-          }
-        },
-        builder: (context, state) {
-          if (state is UserLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: AppPallete.primaryColor),
-            );
-          } else if (state is UserSuccess) {
-            final user = state.responseData["data"];
-            print(user);
-            if (user == null) {
-              return _buildErrorState(context, "User data not found");
+          ],
+        ),
+        body: BlocConsumer<UserBloc, UserState>(
+          listener: (context, state) {
+            if (state is UserFailure) {
+              ShowSnackbar.show(context, state.error);
             }
-            return _buildProfileContent(user, context);
-          } else if (state is UserFailure) {
-            return _buildErrorState(context, state.error);
-          }
-          return Center(
-            child: Icon(
-              Icons.person,
-              size: 80,
-              color: theme.colorScheme.primary,
-            ),
-          );
-        },
+          },
+          builder: (context, state) {
+            if (state is UserLoading) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppPallete.primaryColor,
+                ),
+              );
+            } else if (state is UserSuccess) {
+              final user = state.responseData["data"];
+              print(user);
+              if (user == null) {
+                return _buildErrorState(context, "User data not found");
+              }
+              return _buildProfileContent(user, context);
+            } else if (state is UserFailure) {
+              return _buildErrorState(context, state.error);
+            }
+            return Center(
+              child: Icon(
+                Icons.person,
+                size: 80,
+                color: theme.colorScheme.primary,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
