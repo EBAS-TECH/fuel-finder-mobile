@@ -8,30 +8,36 @@ class TrackLocationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Align(
       alignment: Alignment.bottomRight,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          margin: EdgeInsets.only(left: 15, right: 15, top: 20),
+          margin: const EdgeInsets.only(left: 15, right: 15, top: 20),
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: AppPallete.whiteColor,
+            color: isDarkMode
+                ? Theme.of(context).colorScheme.surfaceVariant
+                : AppPallete.whiteColor,
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
                 color: AppPallete.greyColor.withOpacity(0.4),
                 blurRadius: 5.0,
                 spreadRadius: 0.5,
-                offset: Offset(0, 0),
+                offset: const Offset(0, 0),
               ),
             ],
           ),
           child: Center(
             child: Icon(
               FontAwesomeIcons.locationCrosshairs,
-              color: Colors.black87,
+              color: isDarkMode
+                  ? Theme.of(context).colorScheme.onSurfaceVariant
+                  : Colors.black,
             ),
           ),
         ),

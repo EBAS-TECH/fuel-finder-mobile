@@ -50,13 +50,18 @@ class _ExplorePageState extends State<ExplorePage>
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
+    if (!_initialZoomDone) {
+      _fetchUserData();
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _checkLocationPermission();
+    final geolocationState = context.read<GeolocationBloc>().state;
+    if (geolocationState is! GeolocationLoaded) {
+      _checkLocationPermission();
+    }
   }
 
   @override
@@ -264,7 +269,10 @@ class _ExplorePageState extends State<ExplorePage>
               bottom: 120,
               right: 25,
               child: FloatingActionButton(
-                backgroundColor: AppPallete.whiteColor,
+                backgroundColor:
+                    isDarkMode
+                        ? Theme.of(context).colorScheme.surfaceVariant
+                        : AppPallete.whiteColor,
                 onPressed: () {
                   final state = context.read<GasStationBloc>().state;
                   if (state is GasStationSucess) {
@@ -273,7 +281,10 @@ class _ExplorePageState extends State<ExplorePage>
                 },
                 child: Icon(
                   Icons.local_gas_station_rounded,
-                  color: Colors.black,
+                  color:
+                      isDarkMode
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
+                          : Colors.black,
                 ),
               ),
             ),
