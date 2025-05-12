@@ -25,6 +25,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
@@ -69,7 +70,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
             child: Column(
               children: [
-                Image.asset("assets/images/logo.png", width: size.width * 0.5),
+                Image.asset(
+                  isDarkMode
+                      ? "assets/images/logo_dark.png"
+                      : "assets/images/logo.png",
+                  width: size.width * 0.5,
+                ),
                 Text(
                   l10n.resetPasswordTitle,
                   style: theme.textTheme.headlineLarge?.copyWith(

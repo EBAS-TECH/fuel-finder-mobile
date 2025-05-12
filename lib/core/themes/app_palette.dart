@@ -32,7 +32,7 @@ class AppPallete {
   static const Color darkTextColor = Color(0xFFEFEFEF);
   static const Color darkIconColor = Color(0xFFB0B0B0);
   static const Color darkCardColor = Color(0xFF1F1F1F);
-  static const Color darkBackgroundColor = Color(0xFF121212);
+  static const Color darkBackgroundColor =Colors.black;
 
   static var redColor;
 }

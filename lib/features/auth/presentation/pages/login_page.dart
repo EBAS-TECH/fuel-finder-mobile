@@ -28,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
@@ -73,7 +74,9 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               Image.asset(
-                "assets/images/logo.png",
+                isDarkMode
+                    ? "assets/images/logo_dark.png"
+                    : "assets/images/logo.png",
                 width: MediaQuery.of(context).size.width * 0.5,
               ),
               Text(
