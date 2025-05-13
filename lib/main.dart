@@ -59,14 +59,18 @@ class MainApp extends StatelessWidget {
         builder: (context) {
           return MaterialApp(
             title: 'Fuel Finder',
-            locale: context.watch<LocaleBloc>().state, 
+            locale: context.watch<LocaleBloc>().state,
             localizationsDelegates: [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('en'), Locale('am')],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('am'),
+             // Locale('om'),
+            ],
             theme: AppTheme.lightThemeMode,
             darkTheme: AppTheme.darkThemeMode,
             themeMode: ThemeMode.system,
@@ -74,7 +78,8 @@ class MainApp extends StatelessWidget {
               future: tokenService.getToken(),
               builder: (context, snapshot) {
                 final hasToken = snapshot.data != null;
-                final seenOnboarding = tokenService.getSeenOnboarding() ?? false;
+                final seenOnboarding =
+                    tokenService.getSeenOnboarding() ?? false;
                 final userId = tokenService.getUserId();
 
                 if (!seenOnboarding) {

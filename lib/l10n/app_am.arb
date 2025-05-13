@@ -153,6 +153,31 @@
   "codeVerificationSubtitle": "ወደ ኢሜልዎ የተላከውን 6-አሃዝ ኮድ ያስገቡ",
 
   "codeVerificationError":"የይለፍ ቃሎች አንድ አይነት አይደሉም",
-  "verifyButton":"ያረጋግጡ"
+  "verifyButton":"ያረጋግጡ",
+
+    "signup": "ምዝገባ ተሳክቷል",
+    "signin": "ግባት ተሳክቷል",
+    "verifyEmail": "ኢሜል ማረጋገጫ ተሳክቷል። እባክዎ ይግቡ",
+    "logout": "ውጣት ተሳክቷል",
+    "resendCode": "ማረጋገጫ ኮድ በድጋሚ ተልኳል",
+    "forgotVerify": "ኮድ ተረጋግጧል። አዲስ የይለፍ ቃል ያስገቡ",
+    "setNewPassword": "የይለፍ ቃል ተሻሽሏል። እባክዎ ይግቡ",
+    "profileUpdate": "መገለጫ ተሻሽሏል",
+    "passwordChange": "የይለፍ ቃል ተቀይሯል",
+
+    "conflict": "ተጠቃሚ አስቀድሞ አለ",
+    "unauthorized": "ልክ ያልሆነ የግብይት ማስረጃ",
+    "notFound": "ተጠቃሚ አልተገኘም",
+    "serverError": "የሰርቨር ስህተት። እባክዎ እንደገና ይሞክሩ",
+    "noInternet": "የኢንተርኔት ግንኙነት የለም",
+    "timeout": "ጥያቄው ጊዜ አልፎታል",
+    "invalidInput": "ልክ ያልሆነ ግቤት",
+    "unknown": "ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ",
+    "invalidCode": "ልክ ያልሆነ ማረጋገጫ ኮድ",
+    "passwordMismatch": "የይለፍ ቃሎች አንድ አይነት አይደሉም",
+    "emailInvalid": "ልክ ያልሆነ የኢሜል ቅርጸት",
+    "viewNearbyStations": "አቅራቢ የነዳጅ ጣቢያዎችን ይመልከቱ",
+    "locationNotLoaded": "እባክዎ አካባቢዎን እየጫንን ሳለ ይጠብቁ"
+
 }
 

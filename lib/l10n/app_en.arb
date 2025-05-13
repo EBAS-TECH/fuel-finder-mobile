@@ -151,6 +151,30 @@
   "codeVerificationSubtitle": "Enter the 6-digit code sent to your email",
 
   "codeVerificationError":"Incorrect verifcation code",
-  "verifyButton":"Verify"
+  "verifyButton":"Verify",
+
+    "signup": "Registration successful",
+    "signin": "Login successful",
+    "verifyEmail": "Email verification successful. Please login",
+    "logout": "Logout successful",
+    "resendCode": "Verification code resent",
+    "forgotVerify": "Code verified. Set a new password",
+    "setNewPassword": "Password updated successfully. Please login",
+    "profileUpdate": "Profile updated successfully",
+    "passwordChange": "Password changed successfully",
+
+    "conflict": "User already exists",
+    "unauthorized": "Invalid credentials",
+    "notFound": "User not found",
+    "serverError": "Server error. Please try again",
+    "noInternet": "No internet connection",
+    "timeout": "Request timed out",
+    "invalidInput": "Invalid input",
+    "unknown": "An error occurred. Please try again",
+    "invalidCode": "Invalid verification code",
+    "passwordMismatch": "Passwords do not match",
+    "emailInvalid": "Invalid email format",
+    "viewNearbyStations": "View nearby stations",
+    "locationNotLoaded": "Please wait while we load your location"
 }
 

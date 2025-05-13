@@ -10,6 +10,7 @@ import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/tr
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
+import 'package:fuel_finder/shared/circular_progress_indicator.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -230,6 +231,7 @@ class _ExplorePageState extends State<ExplorePage>
     super.build(context);
     double zoomLevel = getZoomLevel(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final locationState = context.read<GeolocationBloc>().state;
     return Scaffold(
       appBar: CustomAppBar(userId: widget.userId, showUserInfo: true),
       body: Stack(
@@ -274,9 +276,21 @@ class _ExplorePageState extends State<ExplorePage>
                         ? Theme.of(context).colorScheme.surfaceVariant
                         : AppPallete.whiteColor,
                 onPressed: () {
-                  final state = context.read<GasStationBloc>().state;
-                  if (state is GasStationSucess) {
-                    _showGasStationsBottomSheet(state.gasStation ?? []);
+                  final l10n = AppLocalizations.of(context)!;
+                  final userState = context.read<GeolocationBloc>().state;
+                  final gasState = context.read<GasStationBloc>().state;
+
+                  if (userState is! GeolocationLoaded) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.locationNotLoaded)),
+                    );
+                    return;
+                  }
+                  if (gasState is GasStationLoading) {
+                    AppLoader();
+                  }
+                  if (gasState is GasStationSucess) {
+                    _showGasStationsBottomSheet(gasState.gasStation ?? []);
                   }
                 },
                 child: Icon(

@@ -42,10 +42,7 @@ class LanguageSwitcher extends StatelessWidget {
               value: Locale('en'),
               child: Text('English'),
             ),
-            DropdownMenuItem<Locale>(
-              value: Locale('am'),
-              child: Text('አማርኛ'),
-            ),
+            DropdownMenuItem<Locale>(value: Locale('am'), child: Text('አማርኛ')),
           ],
           onChanged: (Locale? newLocale) {
             if (newLocale != null) {

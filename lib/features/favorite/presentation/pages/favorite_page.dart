@@ -198,12 +198,17 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget _buildEmptyFavorite(BuildContext context) {
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset("assets/images/no_fav.png"),
+          Image.asset(
+            isDarkMode
+                ? "assets/images/no_fav_dark.png"
+                : "assets/images/no_fav.png",
+          ),
           Text(
             localizations?.noFavoritesYet ?? 'No Favorites yet',
             style: theme.textTheme.headlineLarge?.copyWith(
