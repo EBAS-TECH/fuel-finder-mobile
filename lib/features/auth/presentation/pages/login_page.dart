@@ -4,6 +4,7 @@ import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
+import 'package:fuel_finder/features/auth/presentation/pages/email_verification.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/forgot_password.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
 import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
@@ -63,6 +64,17 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => HomePage(userId: state.userId),
+              ),
+            );
+          } else if (state is AuthVerifyEmail) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder:
+                    (context) => EmailVerification(
+                      email: state.user["email"],
+                      userId: state.userId,
+                      userData: state.user,
+                    ),
               ),
             );
           } else if (state is AuthFailure) {

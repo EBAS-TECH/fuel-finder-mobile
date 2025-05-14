@@ -10,6 +10,12 @@ class AuthSuccess extends AuthState {
   AuthSuccess({required this.message});
 }
 
+class AuthEmailNotVerifed extends AuthState {
+  final Map<String, dynamic> user;
+
+  AuthEmailNotVerifed({required this.user});
+}
+
 class ResendCodeSuccess extends AuthState {
   final String message;
 

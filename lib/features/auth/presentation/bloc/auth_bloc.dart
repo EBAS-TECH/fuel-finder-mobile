@@ -95,6 +95,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final response = await signinUsecase(event.userName, event.password);
       final userId = response["user"]["id"];
       final token = response["token"];
+      final isVerified = response["user"]["verified"] ?? false;
 
       await tokenService.saveToken(token);
       await tokenService.saveUserId(userId);
@@ -105,8 +106,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           Duration(milliseconds: _minimumLoadingTime - elapsed),
         );
       }
-
-      emit(AuthLogInSucess(message: "Login successful", userId: userId));
+      if (isVerified) {
+        emit(AuthLogInSucess(message: "Login successful", userId: userId));
+      } else if (isVerified == false) {
+        emit(
+          AuthVerifyEmail(
+            message: "Email not verifed. Verifcation code sent to your email",
+            userId: userId,
+            user: response["user"],
+          ),
+        );
+      }
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
       emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
@@ -189,7 +199,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-     final responsee = await setNewPasswordUsecase(event.userId, event.newPassword);
+      final responsee = await setNewPasswordUsecase(
+        event.userId,
+        event.newPassword,
+      );
       emit(
         AuthSetNewPasswordSucess(
           message: "Successfully updated password. Please login",
@@ -197,6 +210,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       print("Password update response $responsee");
     } catch (e) {
+      print(e.toString());
       final exception = ExceptionHandler.handleError(e);
       emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
     }

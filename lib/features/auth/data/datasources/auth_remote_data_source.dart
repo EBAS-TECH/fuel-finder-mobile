@@ -276,7 +276,6 @@ class AuthRemoteDataSource {
       );
 
       final responseBody = json.decode(response.body);
-
       switch (response.statusCode) {
         case 200:
           return responseBody;

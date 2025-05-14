@@ -12,12 +12,14 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmailVerification extends StatefulWidget {
+  final bool? registerdVerifcation;
   final String email;
   final String userId;
   final Map<String, dynamic> userData;
 
   const EmailVerification({
     super.key,
+    this.registerdVerifcation = false,
     required this.email,
     required this.userId,
     required this.userData,

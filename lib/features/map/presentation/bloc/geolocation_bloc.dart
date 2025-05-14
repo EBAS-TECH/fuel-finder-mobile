@@ -54,7 +54,7 @@ class GeolocationBloc extends Bloc<GeolocationEvent, GeolocationState> {
         }
         Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.best,
-        ).timeout(const Duration(seconds: 30));
+        );
 
         emit(
           GeolocationLoaded(
