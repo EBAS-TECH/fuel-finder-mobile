@@ -19,20 +19,18 @@ class AuthRemoteDataSource {
     String role,
   ) async {
     try {
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/signup'),
-            body: jsonEncode({
-              "first_name": firstName,
-              "last_name": lastName,
-              "username": userName,
-              "password": password,
-              "email": email,
-              "role": role,
-            }),
-            headers: {"Content-Type": "application/json"},
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.post(
+        Uri.parse('$baseUrl/signup'),
+        body: jsonEncode({
+          "first_name": firstName,
+          "last_name": lastName,
+          "username": userName,
+          "password": password,
+          "email": email,
+          "role": role,
+        }),
+        headers: {"Content-Type": "application/json"},
+      );
 
       final responseData = jsonDecode(response.body);
       print(responseData);
@@ -92,13 +90,11 @@ class AuthRemoteDataSource {
 
   Future<Map<String, dynamic>> signIn(String userName, String password) async {
     try {
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/login'),
-            body: jsonEncode({"username": userName, "password": password}),
-            headers: {"Content-Type": "application/json"},
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.post(
+        Uri.parse('$baseUrl/login'),
+        body: jsonEncode({"username": userName, "password": password}),
+        headers: {"Content-Type": "application/json"},
+      );
 
       final responseData = jsonDecode(response.body);
       print(responseData);
@@ -132,12 +128,10 @@ class AuthRemoteDataSource {
 
   Future<void> logOut() async {
     try {
-      final response = await http
-          .post(
-            Uri.parse("$baseUrl/logout"),
-            headers: {"Content-Type": "application/json"},
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.post(
+        Uri.parse("$baseUrl/logout"),
+        headers: {"Content-Type": "application/json"},
+      );
 
       if (response.statusCode != 200) {
         throw FetchDataException(message: 'Logout failed');
@@ -149,13 +143,11 @@ class AuthRemoteDataSource {
 
   Future<void> verifyEmail(String userId, String token) async {
     try {
-      final response = await http
-          .put(
-            Uri.parse("$baseUrl/verify/$userId"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"token": token}),
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.put(
+        Uri.parse("$baseUrl/verify/$userId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"token": token}),
+      );
 
       final responseBody = json.decode(response.body);
 
@@ -183,15 +175,13 @@ class AuthRemoteDataSource {
   Future<void> resendCode(String userId) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http
-          .get(
-            Uri.parse("$baseUrl/resend/$userId"),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.get(
+        Uri.parse("$baseUrl/resend/$userId"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       final responseBody = json.decode(response.body);
 
@@ -218,13 +208,11 @@ class AuthRemoteDataSource {
 
   Future<Map<String, dynamic>> forgotPassword(String email) async {
     try {
-      final response = await http
-          .put(
-            Uri.parse("$baseUrl/forgot"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"email": email}),
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.put(
+        Uri.parse("$baseUrl/forgot"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email}),
+      );
 
       final responseBody = json.decode(response.body);
 
@@ -249,13 +237,11 @@ class AuthRemoteDataSource {
 
   Future<Map<String, dynamic>> forgotVerify(String userId, String code) async {
     try {
-      final response = await http
-          .put(
-            Uri.parse("$baseUrl/forgot/verify/$userId"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"token": code}),
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.put(
+        Uri.parse("$baseUrl/forgot/verify/$userId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"token": code}),
+      );
 
       final responseBody = json.decode(response.body);
 
@@ -283,13 +269,11 @@ class AuthRemoteDataSource {
     String newPassword,
   ) async {
     try {
-      final response = await http
-          .put(
-            Uri.parse("$baseUrl/new-password/$userId"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"new_password": newPassword}),
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.put(
+        Uri.parse("$baseUrl/new-password/$userId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"new_password": newPassword}),
+      );
 
       final responseBody = json.decode(response.body);
 
