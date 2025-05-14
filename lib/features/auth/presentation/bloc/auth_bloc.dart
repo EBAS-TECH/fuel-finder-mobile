@@ -63,10 +63,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final userData = response["data"];
       final userId = userData["id"];
       final isVerified = userData["verified"] ?? false;
-      final token = response["token"] ?? '';
-
-      await tokenService.saveUserId(userId);
-      await tokenService.saveToken(token);
 
       if (isVerified) {
         emit(AuthSuccess(message: "Registration successful"));

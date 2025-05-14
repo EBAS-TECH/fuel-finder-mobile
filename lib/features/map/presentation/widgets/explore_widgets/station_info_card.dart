@@ -135,7 +135,7 @@ class StationInfoCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.local_gas_station,
-                  color: AppPallete.secondaryColor,
+                  color: AppPallete.primaryColor,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -285,7 +285,7 @@ class StationInfoCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.local_gas_station,
-                color: AppPallete.secondaryColor,
+                color: AppPallete.primaryColor,
                 size: 18,
               ),
               const SizedBox(width: 8),

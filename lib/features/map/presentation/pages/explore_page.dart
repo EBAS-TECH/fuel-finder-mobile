@@ -458,7 +458,7 @@ class _ExplorePageState extends State<ExplorePage>
                 color:
                     station['suggestion'] == true
                         ? AppPallete.primaryColor
-                        : Colors.orange,
+                        : Colors.red,
                 size: 30,
               ),
             ),

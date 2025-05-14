@@ -8,7 +8,7 @@
   "passwordErrorEmpty": "Password is required",
   "passwordErrorLength": "Password must be at least 6 characters",
   "forgotPassword": "Forgot password?",
-  "loginButton": "LOGIN",
+  "loginButton": "SIGN IN",
   "notRegistered": "Not registered yet? ",
   "register": "Register",
 
