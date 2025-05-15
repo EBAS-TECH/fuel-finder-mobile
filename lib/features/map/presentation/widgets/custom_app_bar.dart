@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fuel_finder/features/map/presentation/pages/profile_page.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
@@ -28,9 +29,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-   /*  if (showUserInfo && userId != null) {
+    if (showUserInfo && userId != null) {
       context.read<UserBloc>().add(GetUserByIdEvent(userId: userId!));
-    } */
+    }
 
     return AppBar(
       centerTitle: centerTitle,
@@ -47,44 +48,56 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 builder: (context, state) {
                   if (state is UserSuccess) {
                     final user = state.responseData;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    ProfilePage(userId: user["data"]["id"]),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              'https://api.dicebear.com/7.x/initials/png?seed=${user["data"]["first_name"][0]}${user["data"]["last_name"][0]}&backgroundColor=eeeeee&textColor=000000&bold=true&radius=50',
+                            ),
+
+                            radius: 20,
+                          ),
+
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.heyThere,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                "${user["data"]["first_name"]} ${user["data"]["last_name"]}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
                     return Row(
                       children: [
                         CircleAvatar(
                           backgroundImage: NetworkImage(
-                            user["data"]["profile_pic"] ??
-                                'https://avatar.iran.liara.run/public/boy?username=user',
-                          ),
-                          radius: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.heyThere,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              "${user["data"]["first_name"]} ${user["data"]["last_name"]}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  } else {
-                    return  Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            'https://avatar.iran.liara.run/public/boy?username=user',
+                            'https://robohash.org/user123.png',
                           ),
                           radius: 20,
                         ),

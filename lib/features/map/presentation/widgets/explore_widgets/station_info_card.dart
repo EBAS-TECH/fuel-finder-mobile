@@ -373,7 +373,7 @@ class StationInfoCard extends StatelessWidget {
                           l10n.showRoute,
                           style: TextStyle(
                             color: AppPallete.primaryColor,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const Spacer(),
@@ -419,7 +419,7 @@ class StationInfoCard extends StatelessWidget {
                         Text(
                           l10n.moreDetails,
                           style: TextStyle(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
                             color: AppPallete.primaryColor,
                           ),
                         ),
