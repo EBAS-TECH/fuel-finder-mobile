@@ -52,7 +52,6 @@ class _ExplorePageState extends State<ExplorePage>
   void initState() {
     super.initState();
     if (!_initialZoomDone) {
-      _fetchUserData();
     }
   }
 
@@ -469,17 +468,24 @@ class _ExplorePageState extends State<ExplorePage>
   }
 
   void _showGasStationsBottomSheet(List<Map<String, dynamic>> stations) {
-    showModalBottomSheet(
-      backgroundColor: Colors.white,
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return GasStationBottomSheet(
-          stations: stations,
-          onStationTap: _handleStationTap,
-        );
-      },
-    );
+    final geoState = context.read<GeolocationBloc>().state;
+    if (geoState is GeolocationLoaded) {
+      showModalBottomSheet(
+        backgroundColor: Colors.white,
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return GasStationBottomSheet(
+            latitude: geoState.latitude,
+            longitude: geoState.longitude,
+            stations: stations,
+            onStationTap: _handleStationTap,
+          );
+        },
+      );
+    } else {
+      ShowSnackbar.show(context, "Location not available", isError: true);
+    }
   }
 
   void _animatedMoveToLocation(LatLng target) {

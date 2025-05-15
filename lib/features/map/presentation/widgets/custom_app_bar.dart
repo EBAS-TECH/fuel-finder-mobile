@@ -28,9 +28,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (showUserInfo && userId != null) {
+   /*  if (showUserInfo && userId != null) {
       context.read<UserBloc>().add(GetUserByIdEvent(userId: userId!));
-    }
+    } */
 
     return AppBar(
       centerTitle: centerTitle,

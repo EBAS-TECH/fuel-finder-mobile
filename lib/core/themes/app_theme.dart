@@ -63,7 +63,7 @@ class AppTheme {
       ),
     ),
     dialogTheme: DialogTheme(backgroundColor: Colors.grey.shade200),
-    cardTheme: CardTheme(color: AppPallete.lightCardColor),
+    cardTheme: CardTheme(color: AppPallete.whiteColor),
   );
 
   static final darkThemeMode = ThemeData(
@@ -124,3 +124,4 @@ class AppTheme {
     ),
   );
 }
+
