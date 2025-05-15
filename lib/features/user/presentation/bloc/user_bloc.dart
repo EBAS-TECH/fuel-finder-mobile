@@ -37,29 +37,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
-
-      switch (exception.runtimeType) {
-        case NotFoundException _:
-          emit(UserNotFound(message: exception.message));
-          break;
-        case UnAuthorizedException _:
-          emit(UserUnauthorized(message: exception.message));
-          break;
-        case BadRequestException _:
-          emit(UserValidationError(message: exception.message));
-          break;
-        case SocketException _:
-          emit(UserNetworkError(message: exception.message));
-          break;
-        case TimeoutException _:
-          emit(UserTimeoutError(message: exception.message));
-          break;
-        case ServerErrorException _:
-          emit(UserServerError(message: exception.message));
-          break;
-        default:
-          emit(UserFailure(error: exception.message));
-      }
+      _handleError(exception, emit);
     }
   }
 
@@ -89,30 +67,34 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       await changePasswordUsecase(event.oldPassword, event.newPassword);
-      emit(PasswordChanged());
+      emit(PasswordChanged(message: "Successfully updated password"));
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
-      _handleError(exception, emit);
+      if (exception is UnAuthorizedException) {
+        emit(PasswordChangeError(message: exception.message));
+      } else {
+        _handleError(exception, emit);
+      }
     }
   }
-}
 
-void _handleError(AppException exception, Emitter<UserState> emit) {
-  switch (exception.runtimeType) {
-    case NotFoundException:
-      emit(UserNotFound(message: exception.message));
-      break;
-    case UnAuthorizedException:
-      emit(UserUnauthorized(message: exception.message));
-      break;
-    case BadRequestException:
-      emit(UserValidationError(message: exception.message));
-      break;
-    case ConflictException:
-      emit(UserConflictError(message: exception.message));
-      break;
-    default:
-      emit(UserError(exception.message));
+  void _handleError(AppException exception, Emitter<UserState> emit) {
+    switch (exception.runtimeType) {
+      case NotFoundException:
+        emit(UserNotFound(message: exception.message));
+        break;
+      case UnAuthorizedException:
+        emit(UserUnauthorized(message: exception.message));
+        break;
+      case BadRequestException:
+        emit(UserValidationError(message: exception.message));
+        break;
+      case ConflictException:
+        emit(UserConflictError(message: exception.message));
+        break;
+      default:
+        emit(UserError(exception.message));
+    }
   }
 }
 

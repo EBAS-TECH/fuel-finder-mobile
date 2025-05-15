@@ -142,9 +142,9 @@ class _ExplorePageState extends State<ExplorePage>
     });
   }
 
-  void _fetchUserData() {
+/*   void _fetchUserData() {
     context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
-  }
+  } */
 
   void _getGasStations(double latitude, double longitude) {
     context.read<GasStationBloc>().add(
@@ -230,7 +230,6 @@ class _ExplorePageState extends State<ExplorePage>
     super.build(context);
     double zoomLevel = getZoomLevel(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final locationState = context.read<GeolocationBloc>().state;
     return Scaffold(
       appBar: CustomAppBar(userId: widget.userId, showUserInfo: true),
       body: Stack(

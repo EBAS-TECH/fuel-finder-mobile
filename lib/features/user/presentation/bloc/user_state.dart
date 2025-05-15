@@ -17,7 +17,11 @@ class UserLoaded extends UserState {
   UserLoaded(this.userData);
 }
 
-class PasswordChanged extends UserState {}
+class PasswordChanged extends UserState {
+  final String message;
+
+  PasswordChanged({required this.message});
+}
 
 class UserError extends UserState {
   final String message;

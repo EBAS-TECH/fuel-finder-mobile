@@ -35,6 +35,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isUpdatingProfile = false;
+  bool _isChangingPassword = false;
 
   @override
   void initState() {
@@ -67,21 +69,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    return BlocListener<UserBloc, UserState>(
+    return BlocConsumer<UserBloc, UserState>(
       listener: (context, state) {
-        if (state is UserLoading) {
-          AppLoader();
-        } else if (state is UserUpdated) {
-          ShowSnackbar.show(
-            context,
-            localizations?.profileUpdateSuccess ??
-                'Profile updated successfully',
-          );
+        if (state is UserUpdated) {
+          _isUpdatingProfile = false;
+          if (!_showPasswordSection) {
+            ShowSnackbar.show(
+              context,
+              localizations?.profileUpdateSuccess ?? 'Profile updated successfully',
+            );
+          } else {
+            // Only start password change after profile update succeeds
+            _handlePasswordChange();
+          }
         } else if (state is PasswordChanged) {
+          _isChangingPassword = false;
           ShowSnackbar.show(
             context,
-            localizations?.passwordChangeSuccess ??
-                'Password changed successfully',
+            localizations?.passwordChangeSuccess ?? 'Password changed successfully',
           );
           context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
           setState(() {
@@ -91,34 +96,50 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _confirmPasswordController.clear();
           });
         } else if (state is PasswordChangeError) {
+          _isChangingPassword = false;
           ShowSnackbar.show(context, state.message, isError: true);
-        } else if (state is UserError) {
-          ShowSnackbar.show(context, state.message, isError: true);
-        } else if (state is UserValidationError) {
-          ShowSnackbar.show(context, state.message, isError: true);
-        } else if (state is UserConflictError) {
-          ShowSnackbar.show(context, state.message, isError: true);
-        }
+        }   else if (state is UserError) {
+      _isUpdatingProfile = false;
+      _isChangingPassword = false;
+      ShowSnackbar.show(context, state.message, isError: true);
+    }
+    else if (state is UserValidationError) {
+      _isUpdatingProfile = false;
+      _isChangingPassword = false;
+      ShowSnackbar.show(context, state.message, isError: true);
+    }
+    else if (state is UserConflictError) {
+      _isUpdatingProfile = false;
+      _isChangingPassword = false;
+      ShowSnackbar.show(context, state.message, isError: true);
+    }
+    else if (state is UserUnauthorized) {
+      _isUpdatingProfile = false;
+      _isChangingPassword = false;
+      ShowSnackbar.show(context, state.message, isError: true);
+    }
       },
-      child: Scaffold(
-        appBar: CustomAppBar(
-          title: localizations?.editProfileTitle ?? 'Edit Profile',
-          centerTitle: true,
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              _buildProfileInfoSection(localizations),
-              const SizedBox(height: 24),
-              _buildPasswordSection(localizations),
-              const SizedBox(height: 24),
-              _buildSaveButton(localizations),
-            ],
+      builder: (context, state) {
+        return Scaffold(
+          appBar: CustomAppBar(
+            title: localizations?.editProfileTitle ?? 'Edit Profile',
+            centerTitle: true,
           ),
-        ),
-      ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                _buildProfileInfoSection(localizations),
+                const SizedBox(height: 24),
+                _buildPasswordSection(localizations),
+                const SizedBox(height: 24),
+                _buildSaveButton(localizations),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -210,9 +231,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureCurrentPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off,
+                  _obscureCurrentPassword ? Icons.visibility : Icons.visibility_off,
                   color: Colors.grey,
                 ),
                 onPressed: () {
@@ -249,15 +268,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
             decoration: InputDecoration(
-              labelText:
-                  localizations?.confirmNewPassword ?? 'Confirm New Password',
+              labelText: localizations?.confirmNewPassword ?? 'Confirm New Password',
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureConfirmPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off,
+                  _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
                   color: Colors.grey,
                 ),
                 onPressed: () {
@@ -269,16 +285,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             validator: (value) {
               if (value != _newPasswordController.text) {
-                return localizations?.passwordsDontMatch ??
-                    'Passwords do not match';
+                return localizations?.passwordsDontMatch ?? 'Passwords do not match';
               }
               return null;
             },
           ),
           const SizedBox(height: 8),
           Text(
-            localizations?.passwordRequirement ??
-                'Password must be at least 6 characters long',
+            localizations?.passwordRequirement ?? 'Password must be at least 6 characters long',
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
@@ -287,27 +301,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildSaveButton(AppLocalizations? localizations) {
-    return BlocBuilder<UserBloc, UserState>(
-      builder: (context, state) {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: state is UserLoading ? null : _saveChanges,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppPallete.primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child:
-                state is UserLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(localizations?.saveChanges ?? 'SAVE CHANGES'),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: (_isUpdatingProfile || _isChangingPassword) ? null : _saveChanges,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: AppPallete.primaryColor,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      },
+        ),
+        child: (_isUpdatingProfile || _isChangingPassword)
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(localizations?.saveChanges ?? 'SAVE CHANGES'),
+      ),
     );
   }
 
@@ -325,6 +334,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
+    setState(() {
+      _isUpdatingProfile = true;
+    });
+
     context.read<UserBloc>().add(
       UpdateUserByIdEvent(
         _firstNameController.text,
@@ -333,10 +346,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         widget.userId,
       ),
     );
-
-    if (_showPasswordSection) {
-      _handlePasswordChange();
-    }
   }
 
   void _handlePasswordChange() {
@@ -350,16 +359,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
         localizations?.fillAllFields ?? "Please fill all password fields",
         isError: true,
       );
+      setState(() {
+        _isUpdatingProfile = false;
+      });
       return;
     }
 
     if (_newPasswordController.text.length < 6) {
       ShowSnackbar.show(
         context,
-        localizations?.passwordTooShort ??
-            "Password must be at least 6 characters long",
+        localizations?.passwordTooShort ?? "Password must be at least 6 characters long",
         isError: true,
       );
+      setState(() {
+        _isUpdatingProfile = false;
+      });
       return;
     }
 
@@ -369,8 +383,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
         localizations?.passwordsDontMatch ?? "New passwords do not match",
         isError: true,
       );
+      setState(() {
+        _isUpdatingProfile = false;
+      });
       return;
     }
+
+    setState(() {
+      _isChangingPassword = true;
+    });
 
     context.read<UserBloc>().add(
       ChangePasswordEvent(

@@ -7,14 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_event.dart';
 
-class StationInfoCard extends StatelessWidget {
+class StationInfoCard extends StatefulWidget {
   final Map<String, dynamic> station;
   final VoidCallback onClose;
   final VoidCallback onShowRoute;
   final double? distance;
   final double? duration;
   final List<LatLng> routePoints;
-  final bool isFavorite;
 
   const StationInfoCard({
     super.key,
@@ -24,8 +23,25 @@ class StationInfoCard extends StatelessWidget {
     this.distance,
     this.duration,
     required this.routePoints,
-    this.isFavorite = false,
   });
+
+  static const stationImages = [
+    "assets/images/station1.png",
+    "assets/images/station2.png",
+    "assets/images/station3.png",
+  ];
+
+  @override
+  State<StationInfoCard> createState() => _StationInfoCardState();
+}
+
+class _StationInfoCardState extends State<StationInfoCard> {
+  late bool isFavorite;
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = widget.station["isFavorite"] == true;
+  }
 
   String _formatDistance(BuildContext context, double? meters) {
     final l10n = AppLocalizations.of(context)!;
@@ -42,26 +58,20 @@ class StationInfoCard extends StatelessWidget {
     return '${(seconds / 3600).toStringAsFixed(1)} hr';
   }
 
-  static const stationImages = [
-    "assets/images/station1.png",
-    "assets/images/station2.png",
-    "assets/images/station3.png",
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final stationData = station['data'] ?? station;
+    final stationData = widget.station['data'] ?? widget.station;
     final name = stationData['name'] ?? 'Gas Station';
     final imageIndex =
-        (stationData['name']?.hashCode ?? 0).abs() % stationImages.length;
+        (stationData['name']?.hashCode ?? 0).abs() % StationInfoCard.stationImages.length;
     final fuels =
         (stationData['available_fuel'] as List<dynamic>?)?.join(', ') ??
         l10n.noFuelInfo;
 
-    if (routePoints.isNotEmpty) {
+    if (widget.routePoints.isNotEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -82,17 +92,29 @@ class StationInfoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: theme.textTheme.bodyLarge?.color,
-                    ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        StationInfoCard.stationImages[imageIndex],
+                        width: 40,
+                        height: 40,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 GestureDetector(
-                  onTap: onClose,
+                  onTap: widget.onClose,
                   child: Icon(
                     Icons.close,
                     size: 22,
@@ -107,66 +129,31 @@ class StationInfoCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: Colors.red,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDistance(context, distance),
-                              style: TextStyle(
-                                color: theme.textTheme.bodyMedium?.color,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: 10),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.access_time_filled,
-                              color: AppPallete.primaryColor,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDuration(context, duration),
-                              style: TextStyle(
-                                color: theme.textTheme.bodyMedium?.color,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    Icon(Icons.location_on, color: Colors.red, size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDistance(context, widget.distance),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
                     ),
-
-                    GestureDetector(
-                      onTap: () {
-                        final stationId = stationData['station_id']?.toString();
-                        if (stationId != null) {
-                          if (isFavorite) {
-                            context.read<FavoriteBloc>().add(
-                              RemoveFavoriteEvent(stationId: stationId),
-                            );
-                          } else {
-                            context.read<FavoriteBloc>().add(
-                              SetFavoriteEvent(stationId: stationId),
-                            );
-                          }
-                        }
-                      },
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : theme.iconTheme.color,
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.access_time_filled,
+                      color: AppPallete.primaryColor,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDuration(context, widget.duration),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
                       ),
                     ),
                   ],
@@ -175,16 +162,47 @@ class StationInfoCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.local_gas_station,
-                  color: AppPallete.primaryColor,
-                  size: 18,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.local_gas_station,
+                      color: AppPallete.primaryColor,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$fuels ${l10n.available}',
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  '$fuels ${l10n.available}',
-                  style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                GestureDetector(
+                  onTap: () {
+                    final stationId = widget.station['id']?.toString();
+                    if (stationId != null) {
+                      setState(() {
+                        isFavorite = !isFavorite;
+                      });
+
+                      if (isFavorite) {
+                        context.read<FavoriteBloc>().add(
+                          SetFavoriteEvent(stationId: stationId),
+                        );
+                      } else {
+                        context.read<FavoriteBloc>().add(
+                          RemoveFavoriteEvent(stationId: stationId),
+                        );
+                      }
+                    }
+                  },
+                  child: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : theme.iconTheme.color,
+                  ),
                 ),
               ],
             ),
@@ -218,7 +236,11 @@ class StationInfoCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Image.asset(stationImages[imageIndex], width: 48, height: 48),
+                  Image.asset(
+                    StationInfoCard.stationImages[imageIndex],
+                    width: 48,
+                    height: 48,
+                  ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +271,7 @@ class StationInfoCard extends StatelessWidget {
                 ],
               ),
               GestureDetector(
-                onTap: onClose,
+                onTap: widget.onClose,
                 child: Icon(
                   Icons.close,
                   size: 22,
@@ -268,12 +290,12 @@ class StationInfoCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.location_on,
-                    color: AppPallete.primaryColor,
+                    color: Colors.red,
                     size: 18,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    _formatDistance(context, distance),
+                    _formatDistance(context, widget.distance),
                     style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
                 ],
@@ -288,7 +310,7 @@ class StationInfoCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    _formatDuration(context, duration),
+                    _formatDuration(context, widget.duration),
                     style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
                 ],
@@ -354,7 +376,7 @@ class StationInfoCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: GestureDetector(
-                  onTap: onShowRoute,
+                  onTap: widget.onShowRoute,
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -393,12 +415,11 @@ class StationInfoCard extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder:
-                            (context) => StationDetailPage(
-                              station: station,
-                              distance: distance,
-                              duration: duration,
-                            ),
+                        builder: (context) => StationDetailPage(
+                          station: widget.station,
+                          distance: widget.distance,
+                          duration: widget.duration,
+                        ),
                       ),
                     );
                   },
@@ -406,7 +427,7 @@ class StationInfoCard extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: Colors.grey.shade300),
                     ),
                     child: Row(
                       children: [
