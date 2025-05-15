@@ -136,7 +136,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                 setState(() {
                   _isVerifying = false;
                 });
-                ShowSnackbar.show(context, state.error, isError: true);
+                ShowSnackbar.show(context, state.error);
               }
             });
           }
@@ -155,14 +155,18 @@ class _EmailVerificationState extends State<EmailVerification> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  l10n.verifyEmailTitle,
+                  widget.registerdVerifcation == true
+                      ? l10n.verifyEmailTitleUnverified
+                      : l10n.verifyEmailTitle,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  l10n.verificationCodeSent,
+                  widget.registerdVerifcation == true
+                      ? l10n.mustVerifyEmail
+                      : l10n.verificationCodeSent,
                   style: theme.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -257,9 +261,21 @@ class _EmailVerificationState extends State<EmailVerification> {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    if (widget.registerdVerifcation == true) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                        (route) => false,
+                      );
+                    } else {
+                      Navigator.of(context).pop();
+                    }
+                  },
                   child: Text(
-                    l10n.backToRegistration,
+                    widget.registerdVerifcation == true
+                        ? l10n.backToLogin
+                        : l10n.backToRegistration,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppPallete.primaryColor,
                     ),

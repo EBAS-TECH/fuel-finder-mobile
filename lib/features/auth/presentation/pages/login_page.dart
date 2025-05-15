@@ -66,11 +66,12 @@ class _LoginPageState extends State<LoginPage> {
                 builder: (context) => HomePage(userId: state.userId),
               ),
             );
-          } else if (state is AuthVerifyEmail) {
+          } else if (state is AuthEmailNotVerifed) {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder:
                     (context) => EmailVerification(
+                      registerdVerifcation: true,
                       email: state.user["email"],
                       userId: state.userId,
                       userData: state.user,

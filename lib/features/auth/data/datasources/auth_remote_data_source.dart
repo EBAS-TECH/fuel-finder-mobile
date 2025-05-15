@@ -150,6 +150,9 @@ class AuthRemoteDataSource {
       );
 
       final responseBody = json.decode(response.body);
+      print(userId);
+      print(token);
+      print(responseBody);
 
       switch (response.statusCode) {
         case 200:

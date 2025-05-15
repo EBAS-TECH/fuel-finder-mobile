@@ -73,6 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
         listener: (context, state) {
           if (state is AuthVerifyEmail) {
             debugPrint(state.message);
+            ShowSnackbar.show(context, "Verifcation code sent to your email");
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder:
@@ -80,6 +81,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       userData: state.user,
                       email: _emailController.text.trim(),
                       userId: state.userId,
+                      registerdVerifcation: false,
                     ),
               ),
             );

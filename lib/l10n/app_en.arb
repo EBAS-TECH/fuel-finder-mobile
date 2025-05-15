@@ -37,6 +37,9 @@
   "resendIn": "Resend in",
   "backToRegistration": "Back to registration",
   "invalidCode": "Please enter a valid 6-digit code",
+  "verifyEmailTitleUnverified": "Email not verified",
+  "mustVerifyEmail": "You must verify your email to use our app",
+  "backToLogin": "Back to login",
 
   "gasStation": "Gas Station",
   "noFuelInfo": "No fuel info",

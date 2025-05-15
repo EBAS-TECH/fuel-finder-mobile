@@ -90,7 +90,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final response = await signinUsecase(event.userName, event.password);
       final userId = response["user"]["id"];
-      final token = response["token"];
+      final token = response["token"] ?? "";
+      final userData = response["user"];
       final isVerified = response["user"]["verified"] ?? false;
 
       await tokenService.saveToken(token);
@@ -104,18 +105,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       if (isVerified) {
         emit(AuthLogInSucess(message: "Login successful", userId: userId));
-      } else if (isVerified == false) {
+      } else {
         emit(
-          AuthVerifyEmail(
-            message: "Email not verifed. Verifcation code sent to your email",
+          AuthEmailNotVerifed(
+            message: "Email not verifed",
             userId: userId,
-            user: response["user"],
+            user: userData,
           ),
         );
       }
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
-      emit(AuthFailure(error: ExceptionHandler.getErrorMessage(exception)));
+      emit(AuthFailure(error: exception.toString()));
     } finally {
       stopwatch.stop();
     }

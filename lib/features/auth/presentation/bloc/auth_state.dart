@@ -11,9 +11,11 @@ class AuthSuccess extends AuthState {
 }
 
 class AuthEmailNotVerifed extends AuthState {
+  final String message;
+  final String userId;
   final Map<String, dynamic> user;
 
-  AuthEmailNotVerifed({required this.user});
+  AuthEmailNotVerifed({required this.message, required this.userId, required this.user});
 }
 
 class ResendCodeSuccess extends AuthState {

@@ -37,6 +37,7 @@
   "resendIn": "በ",
   "backToRegistration": "ወደ ምዝገባ ተመለስ",
   "invalidCode": "እባክዎ ትክክለኛ 6-አሃዝ ኮድ ያስገቡ",
+  "backToLogin": "ወደ ግባ ተመለስ",
 
   "gasStation": "የነዳጅ ጣቢያ",
   "noFuelInfo": "የነዳጅ መረጃ የለም",
@@ -84,6 +85,8 @@
   "address": "አድራሻ",
   "noFuel": "ነዳጅ የለም",
   "averageRating": "አማካኝ ደረጃ",
+  "verifyEmailTitleUnverified": "ኢሜል አልተረጋገጠም",
+  "mustVerifyEmail": "አፕሊኬሽንን ለመጠቀም ኢሜልዎን ማረጋገጥ አለብዎት",
 
   "stationDetailsTitle": "የነዳጅ ጣቢያ ዝርዝሮች",
   "yourRatingLabel": "የእርስዎ ደረጃ",
