@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_bloc.dart';
 import 'package:fuel_finder/features/gas_station/presentation/bloc/gas_station_event.dart';
@@ -43,16 +44,17 @@ class _ExplorePageState extends State<ExplorePage>
 
   String get _mapTypeUrl {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final apiKey = dotenv.get('MAPTILER_API_KEY');
+
     return isDarkMode
-        ? 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=MHrVVdsKyXBzKmc1z9Oo'
-        : 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=MHrVVdsKyXBzKmc1z9Oo';
+        ? 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=$apiKey'
+        : 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=$apiKey';
   }
 
   @override
   void initState() {
     super.initState();
-    if (!_initialZoomDone) {
-    }
+    if (!_initialZoomDone) {}
   }
 
   @override
@@ -142,7 +144,7 @@ class _ExplorePageState extends State<ExplorePage>
     });
   }
 
-/*   void _fetchUserData() {
+  /*   void _fetchUserData() {
     context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
   } */
 

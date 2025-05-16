@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 
 class AuthRemoteDataSource {
-  final String baseUrl = "https://fuel-finder-backend.onrender.com/api/auth";
+  final String baseUrl = "${dotenv.get("BASE_URL")}/auth";
   final TokenService tokenService;
 
   AuthRemoteDataSource({required this.tokenService});
@@ -97,8 +98,6 @@ class AuthRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print(responseData);
-
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -116,12 +115,10 @@ class AuthRemoteDataSource {
           );
       }
     } on http.ClientException catch (e) {
-      print(e.message);
       throw FetchDataException(message: e.message);
     } on FormatException catch (_) {
       throw FormatException(message: 'Invalid response format');
     } catch (e) {
-      print(e.toString());
       throw ExceptionHandler.handleError(e);
     }
   }

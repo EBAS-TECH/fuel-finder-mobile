@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class FavoriteRemoteDataSource {
-  final String baseurl = "https://fuel-finder-backend.onrender.com/api";
+  final String baseurl = dotenv.get("BASE_URL");
   final TokenService tokenService;
 
   FavoriteRemoteDataSource({required this.tokenService});

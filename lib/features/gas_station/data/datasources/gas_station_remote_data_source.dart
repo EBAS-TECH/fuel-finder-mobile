@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
 
 class GasStationRemoteDataSource {
-  final String baseUrl = "https://fuel-finder-backend.onrender.com/api";
+  final String baseUrl = dotenv.get("BASE_URL");
   final TokenService tokenService;
 
   GasStationRemoteDataSource({required this.tokenService});

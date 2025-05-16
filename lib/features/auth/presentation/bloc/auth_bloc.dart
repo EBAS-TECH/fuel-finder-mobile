@@ -114,6 +114,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ),
         );
       }
+    } on BadRequestException catch (e) {
+      emit(AuthFailure(error: e.message));
+    } on UnAuthorizedException catch (e) {
+      emit(AuthFailure(error: e.message));
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
       emit(AuthFailure(error: exception.toString()));
