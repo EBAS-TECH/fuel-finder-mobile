@@ -45,27 +45,29 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
 
   void _fetchGasStations() {
     context.read<GasStationBloc>().add(
-          GetGasStationsEvent(
-            latitude: widget.latitude.toString(),
-            longitude: widget.longitude.toString(),
-          ),
-        );
+      GetGasStationsEvent(
+        latitude: widget.latitude.toString(),
+        longitude: widget.longitude.toString(),
+      ),
+    );
   }
 
   void _categorizeStations(List<Map<String, dynamic>> stations) {
     _allStations = stations;
-    _petrolStations = stations.where((station) {
-      final fuels = station['available_fuel'] as List<dynamic>? ?? [];
-      return fuels.any(
-        (fuel) => fuel.toString().toUpperCase().contains('PETROL'),
-      );
-    }).toList();
-    _dieselStations = stations.where((station) {
-      final fuels = station['available_fuel'] as List<dynamic>? ?? [];
-      return fuels.any(
-        (fuel) => fuel.toString().toUpperCase().contains('DIESEL'),
-      );
-    }).toList();
+    _petrolStations =
+        stations.where((station) {
+          final fuels = station['available_fuel'] as List<dynamic>? ?? [];
+          return fuels.any(
+            (fuel) => fuel.toString().toUpperCase().contains('PETROL'),
+          );
+        }).toList();
+    _dieselStations =
+        stations.where((station) {
+          final fuels = station['available_fuel'] as List<dynamic>? ?? [];
+          return fuels.any(
+            (fuel) => fuel.toString().toUpperCase().contains('DIESEL'),
+          );
+        }).toList();
   }
 
   @override
@@ -73,7 +75,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return BlocConsumer<GasStationBloc, GasStationState>(
       listener: (context, state) {
         if (state is GasStationSucess) {
@@ -86,7 +88,8 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
           height: MediaQuery.of(context).size.height * 0.55,
           decoration: BoxDecoration(
             color: isDarkMode ? theme.cardColor : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
           child: Column(
             children: [
               Text(
@@ -110,9 +113,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
                 ],
               ),
               const SizedBox(height: 5),
-              Expanded(
-                child: _buildContent(state, context),
-              ),
+              Expanded(child: _buildContent(state, context)),
             ],
           ),
         );
@@ -147,7 +148,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
   }) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (stations.isEmpty) {
       return Center(
         child: Text(
@@ -163,15 +164,16 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
         final station = stations[index];
         final isSuggestion = station['suggestion'] == true;
         final fuels = station['available_fuel'] as List<dynamic>? ?? [];
-        final displayedFuels = showAllFuels
-            ? fuels
-            : fuels
-                .where(
-                  (fuel) => fuel.toString().toUpperCase().contains(
-                    fuelType ?? '',
-                  ),
-                )
-                .toList();
+        final displayedFuels =
+            showAllFuels
+                ? fuels
+                : fuels
+                    .where(
+                      (fuel) => fuel.toString().toUpperCase().contains(
+                        fuelType ?? '',
+                      ),
+                    )
+                    .toList();
 
         final fuelsText = displayedFuels.join(', ');
 
@@ -187,7 +189,7 @@ class _GasStationBottomSheetState extends State<GasStationBottomSheet>
               horizontal: 12,
               vertical: 8,
             ),
-            leading: Image.asset(stationImages[index % stationImages.length]),
+            leading: Image(image: NetworkImage(station["logo"])),
             title: Row(
               children: [
                 Expanded(

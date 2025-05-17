@@ -24,13 +24,6 @@ class StationInfoCard extends StatefulWidget {
     this.duration,
     required this.routePoints,
   });
-
-  static const stationImages = [
-    "assets/images/station1.png",
-    "assets/images/station2.png",
-    "assets/images/station3.png",
-  ];
-
   @override
   State<StationInfoCard> createState() => _StationInfoCardState();
 }
@@ -65,8 +58,7 @@ class _StationInfoCardState extends State<StationInfoCard> {
     final l10n = AppLocalizations.of(context)!;
     final stationData = widget.station['data'] ?? widget.station;
     final name = stationData['name'] ?? 'Gas Station';
-    final imageIndex =
-        (stationData['name']?.hashCode ?? 0).abs() % StationInfoCard.stationImages.length;
+    final logo = stationData["logo"];
     final fuels =
         (stationData['available_fuel'] as List<dynamic>?)?.join(', ') ??
         l10n.noFuelInfo;
@@ -94,11 +86,7 @@ class _StationInfoCardState extends State<StationInfoCard> {
                 Expanded(
                   child: Row(
                     children: [
-                      Image.asset(
-                        StationInfoCard.stationImages[imageIndex],
-                        width: 40,
-                        height: 40,
-                      ),
+                      Image(image: NetworkImage(logo), width: 40, height: 40),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -236,11 +224,7 @@ class _StationInfoCardState extends State<StationInfoCard> {
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    StationInfoCard.stationImages[imageIndex],
-                    width: 48,
-                    height: 48,
-                  ),
+                  Image(image: NetworkImage(logo), width: 48, height: 48),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,11 +272,7 @@ class _StationInfoCardState extends State<StationInfoCard> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.location_on,
-                    color: Colors.red,
-                    size: 18,
-                  ),
+                  Icon(Icons.location_on, color: Colors.red, size: 18),
                   const SizedBox(width: 4),
                   Text(
                     _formatDistance(context, widget.distance),
@@ -415,11 +395,12 @@ class _StationInfoCardState extends State<StationInfoCard> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => StationDetailPage(
-                          station: widget.station,
-                          distance: widget.distance,
-                          duration: widget.duration,
-                        ),
+                        builder:
+                            (context) => StationDetailPage(
+                              station: widget.station,
+                              distance: widget.distance,
+                              duration: widget.duration,
+                            ),
                       ),
                     );
                   },

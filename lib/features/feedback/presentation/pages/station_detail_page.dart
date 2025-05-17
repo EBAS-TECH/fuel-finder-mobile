@@ -8,7 +8,6 @@ import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_bloc.d
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_event.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
-import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/station_info_card.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -187,9 +186,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
     final distance = stationData['distance'] as double?;
     final availableFuel = stationData['available_fuel'] as List<dynamic>?;
     final averageRate = stationData['averageRate']?.toString() ?? '0';
-    final imageIndex =
-        (stationData['name']?.hashCode ?? 0).abs() %
-        StationInfoCard.stationImages.length;
+    final logo = stationData["logo"];
 
     return BlocListener<FavoriteBloc, FavoriteState>(
       listener: (context, state) {
@@ -259,9 +256,7 @@ class _StationDetailPageState extends State<StationDetailPage> {
                 children: [
                   Card(
                     child: ListTile(
-                      leading: Image.asset(
-                        StationInfoCard.stationImages[imageIndex],
-                      ),
+                      leading: Image(image: NetworkImage(logo)),
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
