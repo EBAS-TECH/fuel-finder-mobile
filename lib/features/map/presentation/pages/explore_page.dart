@@ -9,8 +9,6 @@ import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
-import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
-import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/shared/circular_progress_indicator.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:latlong2/latlong.dart';
@@ -256,8 +254,8 @@ class _ExplorePageState extends State<ExplorePage>
           ),
           if (_showStationInfo && _selectedStation != null)
             Positioned(
-              bottom: 120,
-              right: 15,
+              bottom: 140,
+              right: 0,
               child: TrackLocationButton(onTap: _centerMapOnUserLocation),
             ),
           if (!(_showStationInfo && _selectedStation != null))

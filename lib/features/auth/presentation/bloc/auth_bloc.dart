@@ -106,6 +106,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (isVerified) {
         emit(AuthLogInSucess(message: "Login successful", userId: userId));
       } else {
+        await resendCodeUsecase(userId);
         emit(
           AuthEmailNotVerifed(
             message: "Email not verifed",
