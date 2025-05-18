@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,7 +13,6 @@ import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
-import 'package:fuel_finder/shared/circular_progress_indicator.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -284,12 +287,41 @@ class _ExplorePageState extends State<ExplorePage>
                     );
                     return;
                   }
-                  if (gasState is GasStationLoading) {
-                    AppLoader();
-                  }
-                  if (gasState is GasStationSucess) {
-                    _showGasStationsBottomSheet(gasState.gasStation ?? []);
-                  }
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder:
+                        (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                  );
+
+                  late final StreamSubscription streamSubscription;
+
+                  context.read<GasStationBloc>().add(
+                    GetGasStationsEvent(
+                      latitude: userState.latitude.toString(),
+                      longitude: userState.longitude.toString(),
+                    ),
+                  );
+
+                  streamSubscription = context
+                      .read<GasStationBloc>()
+                      .stream
+                      .listen((state) {
+                        if (state is GasStationSucess) {
+                          Navigator.of(context).pop();
+                          _showGasStationsBottomSheet(state.gasStation ?? []);
+                          streamSubscription.cancel();
+                        } else if (state is GasStationFailure) {
+                          Navigator.of(context).pop();
+                          ShowSnackbar.show(
+                            context,
+                            state.error,
+                            isError: true,
+                          );
+                          streamSubscription.cancel();
+                        }
+                      });
                 },
                 child: Icon(
                   Icons.local_gas_station_rounded,
@@ -468,9 +500,9 @@ class _ExplorePageState extends State<ExplorePage>
 
   void _showGasStationsBottomSheet(List<Map<String, dynamic>> stations) {
     final geoState = context.read<GeolocationBloc>().state;
+
     if (geoState is GeolocationLoaded) {
       showModalBottomSheet(
-        backgroundColor: Colors.white,
         context: context,
         isScrollControlled: true,
         builder: (context) {
