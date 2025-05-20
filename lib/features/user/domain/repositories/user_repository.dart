@@ -1,3 +1,5 @@
+import 'dart:io';
+
 abstract class UserRepository {
   Future<Map<String, dynamic>> getUserById(String userId);
   Future<Map<String, dynamic>> updateUserById(
@@ -10,5 +12,6 @@ abstract class UserRepository {
     String oldPassword,
     String newPassword,
   );
+  Future<void> uploadProfilePic(File imageFile);
 }
 

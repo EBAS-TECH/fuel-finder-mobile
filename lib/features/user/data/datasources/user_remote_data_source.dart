@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:fuel_finder/core/exceptions/app_exceptions.dart';
 import 'package:fuel_finder/core/utils/token_services.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class UserRemoteDataSource {
   final String baseUrl = "${dotenv.get("BASE_URL")}/user";
@@ -149,6 +154,44 @@ class UserRemoteDataSource {
       }
     } on FormatException {
       throw FormatException(message: 'Invalid server response format');
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadProfilePic(File imageFile) async {
+    try {
+      final token = await tokenService.getAuthToken();
+      final uri = Uri.parse("$baseUrl/change-profile-pic");
+      final request =
+          http.MultipartRequest("POST", uri)
+            ..headers['Authorization'] = 'Bearer $token'
+            ..files.add(
+              await http.MultipartFile.fromPath(
+                'profile_pic',
+                imageFile.path,
+                contentType: MediaType.parse(
+                  lookupMimeType(imageFile.path) ?? 'image/jpeg',
+                ),
+              ),
+            );
+
+      final response = await request.send();
+      final responseString = await response.stream.bytesToString();
+      final responseData = jsonDecode(responseString);
+
+      if (response.statusCode == 200) {
+        return responseData;
+      } else {
+        throw Exception('Upload failed with status: ${response.statusCode}');
+      }
+    } on SocketException {
+      throw SocketException(message: 'No internet connection');
+    } on http.ClientException {
+      throw SocketException(message: 'Failed to connect to server');
+    } on TimeoutException {
+      throw TimeoutException(message: 'Connection timeout');
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      throw exception;
     }
   }
 }
