@@ -1,8 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
@@ -174,15 +171,14 @@ class UserRemoteDataSource {
               ),
             );
 
-      final response = await request.send();
+      final response = await request.send().timeout(
+        const Duration(seconds: 30),
+      );
       final responseString = await response.stream.bytesToString();
-      final responseData = jsonDecode(responseString);
 
-      if (response.statusCode == 200) {
-        return responseData;
-      } else {
-        throw Exception('Upload failed with status: ${response.statusCode}');
-      }
+      return _handleResponse(
+        http.Response(responseString, response.statusCode),
+      );
     } on SocketException {
       throw SocketException(message: 'No internet connection');
     } on http.ClientException {

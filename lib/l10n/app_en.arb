@@ -178,6 +178,11 @@
     "passwordMismatch": "Passwords do not match",
     "emailInvalid": "Invalid email format",
     "viewNearbyStations": "View nearby stations",
-    "locationNotLoaded": "Please wait while we load your location"
+    "locationNotLoaded": "Please wait while we load your location",
+
+  "changeProfilePicture": "Change Profile Picture",
+  "imagePickerError": "Failed to pick image",
+  "storagePermissionDenied": "Storage permission is required to select images",
+  "cameraPermissionDenied": "Camera permission is required to take photos"
 }
 

@@ -4,6 +4,7 @@ import 'package:fuel_finder/core/utils/exception_handler.dart';
 import 'package:fuel_finder/features/user/domain/usecases/change_password_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:fuel_finder/features/user/domain/usecases/update_user_by_id_usecase.dart';
+import 'package:fuel_finder/features/user/domain/usecases/upload_profile_pic_usecase.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 
@@ -11,15 +12,18 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   final GetUserByIdUsecase getUserByIdUsecase;
   final UpdateUserByIdUsecase updateUserByIdUsecase;
   final ChangePasswordUsecase changePasswordUsecase;
+  final UploadProfilePicUsecase uploadProfilePicUsecase;
 
   UserBloc({
     required this.getUserByIdUsecase,
     required this.updateUserByIdUsecase,
     required this.changePasswordUsecase,
+    required this.uploadProfilePicUsecase,
   }) : super(UserInitial()) {
     on<GetUserByIdEvent>(_getUserById);
     on<UpdateUserByIdEvent>(_updateUserById);
     on<ChangePasswordEvent>(_changePassword);
+    on<UploadProfilePicEvent>(_uploadProfilePic);
   }
 
   Future<void> _getUserById(
@@ -94,6 +98,22 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         break;
       default:
         emit(UserError(exception.message));
+    }
+  }
+
+  Future<void> _uploadProfilePic(
+    UploadProfilePicEvent event,
+    Emitter<UserState> emit,
+  ) async {
+    emit(ImageFileUploadLoading());
+    try {
+      final response = await uploadProfilePicUsecase(event.imageFile);
+      emit(
+        ImageFileUploadSucess(message: "Profile picture updated successfully"),
+      );
+    } catch (e) {
+      final exception = ExceptionHandler.handleError(e);
+      emit(ImageFileUploadFailure(error: exception.message));
     }
   }
 }

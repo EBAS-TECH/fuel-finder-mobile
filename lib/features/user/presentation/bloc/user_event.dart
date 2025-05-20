@@ -1,3 +1,5 @@
+import 'dart:io';
+
 abstract class UserEvent {}
 
 class GetUserByIdEvent extends UserEvent {
@@ -25,4 +27,10 @@ class ChangePasswordEvent extends UserEvent {
   final String newPassword;
 
   ChangePasswordEvent({required this.oldPassword, required this.newPassword});
+}
+
+class UploadProfilePicEvent extends UserEvent {
+  final File imageFile;
+
+  UploadProfilePicEvent({required this.imageFile});
 }

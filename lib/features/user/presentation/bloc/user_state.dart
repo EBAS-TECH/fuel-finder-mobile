@@ -101,3 +101,17 @@ class UserUpdatePasswordFailure extends UserState {
   UserUpdatePasswordFailure({required this.error});
 }
 
+class ImageFileUploadSucess extends UserState {
+  final String message;
+
+  ImageFileUploadSucess({required this.message});
+}
+
+class ImageFileUploadFailure extends UserState {
+  final String error;
+
+  ImageFileUploadFailure({required this.error});
+}
+
+class ImageFileUploadLoading extends UserState {}
+

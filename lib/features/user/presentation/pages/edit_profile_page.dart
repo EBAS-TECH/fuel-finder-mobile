@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
@@ -5,9 +8,10 @@ import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dar
 import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
-import 'package:fuel_finder/shared/circular_progress_indicator.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String userId;
@@ -30,6 +34,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _currentPasswordController;
   late TextEditingController _newPasswordController;
   late TextEditingController _confirmPasswordController;
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   bool _showPasswordSection = false;
   bool _obscureCurrentPassword = true;
@@ -37,6 +43,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   bool _obscureConfirmPassword = true;
   bool _isUpdatingProfile = false;
   bool _isChangingPassword = false;
+  bool _isUploadingImage = false;
 
   @override
   void initState() {
@@ -66,6 +73,45 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final status = await Permission.photos.request();
+      if (!status.isGranted) {
+        if (status.isPermanentlyDenied) {
+          await openAppSettings();
+        }
+        ShowSnackbar.show(
+          context,
+          AppLocalizations.of(context)?.storagePermissionDenied ??
+              'Storage permission is required to select images',
+          isError: true,
+        );
+        return;
+      }
+
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) print('Image picker error: $e');
+      ShowSnackbar.show(
+        context,
+        AppLocalizations.of(context)?.imagePickerError ??
+            'Failed to pick image',
+        isError: true,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
@@ -73,20 +119,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
       listener: (context, state) {
         if (state is UserUpdated) {
           _isUpdatingProfile = false;
-          if (!_showPasswordSection) {
+          if (_selectedImage != null) {
+            _uploadProfileImage();
+          } else if (!_showPasswordSection) {
             ShowSnackbar.show(
               context,
-              localizations?.profileUpdateSuccess ?? 'Profile updated successfully',
+              localizations?.profileUpdateSuccess ??
+                  'Profile updated successfully',
             );
           } else {
-            // Only start password change after profile update succeeds
             _handlePasswordChange();
           }
         } else if (state is PasswordChanged) {
           _isChangingPassword = false;
           ShowSnackbar.show(
             context,
-            localizations?.passwordChangeSuccess ?? 'Password changed successfully',
+            localizations?.passwordChangeSuccess ??
+                'Password changed successfully',
           );
           context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
           setState(() {
@@ -95,29 +144,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _newPasswordController.clear();
             _confirmPasswordController.clear();
           });
+        } else if (state is ImageFileUploadSucess) {
+          _isUploadingImage = false;
+          ShowSnackbar.show(
+            context,
+            localizations?.profileUpdateSuccess ??
+                'Profile updated successfully',
+          );
+          context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
+        } else if (state is ImageFileUploadFailure) {
+          _isUploadingImage = false;
+          ShowSnackbar.show(context, state.error, isError: true);
         } else if (state is PasswordChangeError) {
           _isChangingPassword = false;
           ShowSnackbar.show(context, state.message, isError: true);
-        }   else if (state is UserError) {
-      _isUpdatingProfile = false;
-      _isChangingPassword = false;
-      ShowSnackbar.show(context, state.message, isError: true);
-    }
-    else if (state is UserValidationError) {
-      _isUpdatingProfile = false;
-      _isChangingPassword = false;
-      ShowSnackbar.show(context, state.message, isError: true);
-    }
-    else if (state is UserConflictError) {
-      _isUpdatingProfile = false;
-      _isChangingPassword = false;
-      ShowSnackbar.show(context, state.message, isError: true);
-    }
-    else if (state is UserUnauthorized) {
-      _isUpdatingProfile = false;
-      _isChangingPassword = false;
-      ShowSnackbar.show(context, state.message, isError: true);
-    }
+        } else if (state is UserError) {
+          _isUpdatingProfile = false;
+          _isChangingPassword = false;
+          ShowSnackbar.show(context, state.message, isError: true);
+        } else if (state is UserValidationError) {
+          _isUpdatingProfile = false;
+          _isChangingPassword = false;
+          ShowSnackbar.show(context, state.message, isError: true);
+        } else if (state is UserConflictError) {
+          _isUpdatingProfile = false;
+          _isChangingPassword = false;
+          ShowSnackbar.show(context, state.message, isError: true);
+        } else if (state is UserUnauthorized) {
+          _isUpdatingProfile = false;
+          _isChangingPassword = false;
+          ShowSnackbar.show(context, state.message, isError: true);
+        }
       },
       builder: (context, state) {
         return Scaffold(
@@ -130,6 +187,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             child: Column(
               children: [
                 const SizedBox(height: 16),
+                _buildProfileImage(localizations),
+                const SizedBox(height: 24),
                 _buildProfileInfoSection(localizations),
                 const SizedBox(height: 24),
                 _buildPasswordSection(localizations),
@@ -140,6 +199,57 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildProfileImage(AppLocalizations? localizations) {
+    return Center(
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 60,
+            backgroundColor: AppPallete.primaryColor.withOpacity(0.1),
+            backgroundImage:
+                _selectedImage != null
+                    ? FileImage(_selectedImage!)
+                    : widget.initialData["profile_pic"] != null
+                    ? NetworkImage(widget.initialData["profile_pic"])
+                    : null,
+            child:
+                _selectedImage == null &&
+                        widget.initialData["profile_pic"] == null
+                    ? const Icon(
+                      Icons.person,
+                      size: 60,
+                      color: AppPallete.primaryColor,
+                    )
+                    : null,
+          ),
+          if (_isUploadingImage)
+            const Positioned.fill(
+              child: CircularProgressIndicator(color: AppPallete.primaryColor),
+            ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppPallete.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.camera_alt,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -231,7 +341,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureCurrentPassword ? Icons.visibility : Icons.visibility_off,
+                  _obscureCurrentPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
                   color: Colors.grey,
                 ),
                 onPressed: () {
@@ -268,12 +380,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
             decoration: InputDecoration(
-              labelText: localizations?.confirmNewPassword ?? 'Confirm New Password',
+              labelText:
+                  localizations?.confirmNewPassword ?? 'Confirm New Password',
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                  _obscureConfirmPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
                   color: Colors.grey,
                 ),
                 onPressed: () {
@@ -285,14 +400,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             validator: (value) {
               if (value != _newPasswordController.text) {
-                return localizations?.passwordsDontMatch ?? 'Passwords do not match';
+                return localizations?.passwordsDontMatch ??
+                    'Passwords do not match';
               }
               return null;
             },
           ),
           const SizedBox(height: 8),
           Text(
-            localizations?.passwordRequirement ?? 'Password must be at least 6 characters long',
+            localizations?.passwordRequirement ??
+                'Password must be at least 6 characters long',
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
@@ -304,7 +421,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: (_isUpdatingProfile || _isChangingPassword) ? null : _saveChanges,
+        onPressed:
+            (_isUpdatingProfile || _isChangingPassword || _isUploadingImage)
+                ? null
+                : _saveChanges,
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: AppPallete.primaryColor,
@@ -313,9 +433,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: (_isUpdatingProfile || _isChangingPassword)
-            ? const CircularProgressIndicator(color: Colors.white)
-            : Text(localizations?.saveChanges ?? 'SAVE CHANGES'),
+        child:
+            (_isUpdatingProfile || _isChangingPassword || _isUploadingImage)
+                ? const CircularProgressIndicator(color: Colors.white)
+                : Text(localizations?.saveChanges ?? 'SAVE CHANGES'),
       ),
     );
   }
@@ -348,6 +469,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  void _uploadProfileImage() {
+    if (_selectedImage == null) return;
+
+    setState(() {
+      _isUploadingImage = true;
+    });
+
+    context.read<UserBloc>().add(
+      UploadProfilePicEvent(imageFile: _selectedImage!),
+    );
+  }
+
   void _handlePasswordChange() {
     final localizations = AppLocalizations.of(context);
 
@@ -368,7 +501,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_newPasswordController.text.length < 6) {
       ShowSnackbar.show(
         context,
-        localizations?.passwordTooShort ?? "Password must be at least 6 characters long",
+        localizations?.passwordTooShort ??
+            "Password must be at least 6 characters long",
         isError: true,
       );
       setState(() {
