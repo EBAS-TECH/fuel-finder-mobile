@@ -5,7 +5,7 @@ import 'package:fuel_finder/features/user/presentation/bloc/user_bloc.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_event.dart';
 import 'package:fuel_finder/features/user/presentation/bloc/user_state.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? userId;
@@ -27,7 +27,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Only fetch user data once when the widget is first built
     if (showUserInfo && userId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<UserBloc>().add(GetUserByIdEvent(userId: userId!));
@@ -42,7 +41,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           showUserInfo && userId != null
               ? BlocBuilder<UserBloc, UserState>(
                 buildWhen: (previous, current) {
-                  // Only rebuild if the state actually changed
                   return current is UserSuccess || current is UserFailure;
                 },
                 builder: (context, state) {
@@ -61,9 +59,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       child: Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              'https://api.dicebear.com/7.x/initials/png?seed=${user["data"]["first_name"][0]}${user["data"]["last_name"][0]}&backgroundColor=eeeeee&textColor=000000&bold=true&radius=50',
-                            ),
+                            backgroundImage:
+                                user["data"]["profile_pic"] != null
+                                    ? NetworkImage(user["data"]["profile_pic"])
+                                    : NetworkImage(
+                                      'https://api.dicebear.com/7.x/initials/png?seed=${user["data"]["first_name"][0]}${user["data"]["last_name"][0]}&backgroundColor=eeeeee&textColor=000000&bold=true&radius=50',
+                                    ),
                             radius: 20,
                           ),
                           const SizedBox(width: 8),

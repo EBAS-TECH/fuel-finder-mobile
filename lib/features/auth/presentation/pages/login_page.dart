@@ -9,9 +9,9 @@ import 'package:fuel_finder/features/auth/presentation/pages/forgot_password.dar
 import 'package:fuel_finder/features/auth/presentation/pages/register_page.dart';
 import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
 import 'package:fuel_finder/features/map/presentation/pages/home_page.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

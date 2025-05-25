@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/bottom_nav_bar_item.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int currentIndex;

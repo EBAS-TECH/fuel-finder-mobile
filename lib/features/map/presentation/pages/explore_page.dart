@@ -13,13 +13,13 @@ import 'package:fuel_finder/features/map/presentation/bloc/geolocation_bloc.dart
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/track_location_button.dart';
 import 'package:fuel_finder/features/route/presentation/bloc/route_bloc.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/gas_station_bottom_sheet.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/explore_widgets/station_info_card.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExplorePage extends StatefulWidget {
   final String userId;

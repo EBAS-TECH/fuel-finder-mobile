@@ -8,8 +8,8 @@ import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_bloc.d
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_event.dart';
 import 'package:fuel_finder/features/feedback/presentation/bloc/feed_back_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class StationDetailPage extends StatefulWidget {
   final Map<String, dynamic> station;

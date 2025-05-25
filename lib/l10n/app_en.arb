@@ -183,6 +183,15 @@
   "changeProfilePicture": "Change Profile Picture",
   "imagePickerError": "Failed to pick image",
   "storagePermissionDenied": "Storage permission is required to select images",
-  "cameraPermissionDenied": "Camera permission is required to take photos"
+  "cameraPermissionDenied": "Camera permission is required to take photos",
+  "passwordErrorLetterNumberCombo": "Must contain combination of letters and numbers",
+  "passwordErrorTooCommon": "This password is too common and insecure",
+  "passwordErrorUppercase": "Must contain at least one uppercase letter",
+"passwordErrorLowercase": "Must contain at least one lowercase letter",
+"passwordErrorNumber": "Must contain at least one number",
+"passwordErrorSpecialChar": "Must contain at least one special character",
+"passwordErrorLength": "Password must be at least 8 characters long",
+"passwordErrorEmpty": "Password field must be filled"
+
 }
 

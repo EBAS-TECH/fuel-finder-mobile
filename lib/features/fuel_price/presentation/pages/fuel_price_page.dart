@@ -5,7 +5,7 @@ import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_blo
 import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_event.dart';
 import 'package:fuel_finder/features/fuel_price/presentation/bloc/fuel_price_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 
 class PricePage extends StatefulWidget {
   const PricePage({super.key});

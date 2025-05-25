@@ -17,15 +17,13 @@ class UserRemoteDataSource {
   Future<Map<String, dynamic>> getUserById(String userId) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http
-          .get(
-            Uri.parse('$baseUrl/$userId'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
+      final response = await http.get(
+        Uri.parse('$baseUrl/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       return _handleResponse(response);
     } on SocketException {
@@ -48,20 +46,18 @@ class UserRemoteDataSource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http
-          .put(
-            Uri.parse('$baseUrl/$userId'),
-            body: jsonEncode({
-              "first_name": firstName,
-              "last_name": lastName,
-              "username": userName,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.put(
+        Uri.parse('$baseUrl/$userId'),
+        body: jsonEncode({
+          "first_name": firstName,
+          "last_name": lastName,
+          "username": userName,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       return _handleResponse(response);
     } on SocketException {
@@ -82,19 +78,17 @@ class UserRemoteDataSource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http
-          .put(
-            Uri.parse('$baseUrl/profile/change-password'),
-            body: jsonEncode({
-              "oldPassword": oldPassword,
-              "newPassword": newPassword,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.put(
+        Uri.parse('$baseUrl/profile/change-password'),
+        body: jsonEncode({
+          "oldPassword": oldPassword,
+          "newPassword": newPassword,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       return _handleResponse(response);
     } on SocketException {
@@ -157,7 +151,7 @@ class UserRemoteDataSource {
   Future<Map<String, dynamic>> uploadProfilePic(File imageFile) async {
     try {
       final token = await tokenService.getAuthToken();
-      final uri = Uri.parse("$baseUrl/change-profile-pic");
+      final uri = Uri.parse("$baseUrl/profile/change-profile-pic");
       final request =
           http.MultipartRequest("POST", uri)
             ..headers['Authorization'] = 'Bearer $token'
@@ -170,12 +164,8 @@ class UserRemoteDataSource {
                 ),
               ),
             );
-
-      final response = await request.send().timeout(
-        const Duration(seconds: 30),
-      );
+      final response = await request.send();
       final responseString = await response.stream.bytesToString();
-
       return _handleResponse(
         http.Response(responseString, response.statusCode),
       );

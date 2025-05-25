@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
 import 'package:fuel_finder/core/themes/text_theme.dart';
 
@@ -12,7 +13,16 @@ class AppTheme {
 
   static final lightThemeMode = ThemeData(
     scaffoldBackgroundColor: Colors.white,
-    appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.green,
       primary: Colors.green,
@@ -62,8 +72,8 @@ class AppTheme {
         minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 45)),
       ),
     ),
-    dialogTheme: DialogTheme(backgroundColor: Colors.grey.shade200),
-    cardTheme: CardTheme(color: AppPallete.whiteColor),
+    cardTheme: const CardThemeData(color: AppPallete.whiteColor),
+    dialogTheme: DialogThemeData(backgroundColor: Colors.grey.shade200),
   );
 
   static final darkThemeMode = ThemeData(
@@ -71,6 +81,13 @@ class AppTheme {
     appBarTheme: const AppBarTheme(
       backgroundColor: AppPallete.darkBackgroundColor,
       foregroundColor: AppPallete.whiteColor,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: AppPallete.darkBackgroundColor,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
     ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppPallete.primaryColor,

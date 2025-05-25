@@ -4,9 +4,9 @@ import 'package:fuel_finder/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/forgot_password_verify_page.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});

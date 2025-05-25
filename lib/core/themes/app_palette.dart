@@ -29,7 +29,7 @@ class AppPallete {
   static const Color darkBorderColor = Color(0xFF3C3C3C);
   static const Color darkGreyColor = Color(0xFF9E9E9E);
   static const Color darkHintTextColor = Color(0xFFAAAAAA);
-  static const Color darkTextColor = Color(0xFFEFEFEF);
+  static const Color darkTextColor = Color(0xFFFFEFEF);
   static const Color darkIconColor = Color(0xFFB0B0B0);
   static const Color darkCardColor = Color(0xFF1F1F1F);
   static const Color darkBackgroundColor =Colors.black;

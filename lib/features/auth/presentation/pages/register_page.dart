@@ -6,9 +6,9 @@ import 'package:fuel_finder/features/auth/presentation/bloc/auth_state.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/email_verification.dart';
 import 'package:fuel_finder/features/auth/presentation/pages/login_page.dart';
 import 'package:fuel_finder/features/auth/presentation/widgets/auth_footer.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:fuel_finder/shared/lanuage_switcher.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -188,6 +188,45 @@ class _RegisterPageState extends State<RegisterPage> {
                         if (value.length < 6) {
                           return l10n.passwordErrorLength;
                         }
+                        final hasSpecialChar = RegExp(
+                          r'[!@#$%^&*()\-_=+{};:,<.>?]',
+                        ).hasMatch(value);
+                        final hasLetterAndNumber = RegExp(
+                          r'^(?=.*[a-zA-Z])(?=.*[0-9])',
+                        ).hasMatch(value);
+                        final commonPasswords = [
+                          'password',
+                          '123456',
+                          'qwerty123',
+                          'letmein',
+                          'welcome',
+                          'admin123',
+                          'password1',
+                          'abc123',
+                          'football',
+                          'iloveyou',
+                        ];
+
+                        String errorMessage = '';
+
+                        if (!hasLetterAndNumber) {
+                          errorMessage = l10n.passwordErrorLetterNumberCombo;
+                        } else if (commonPasswords.contains(
+                          value.toLowerCase(),
+                        )) {
+                          errorMessage = l10n.passwordErrorTooCommon;
+                        } else {
+                          if (!hasSpecialChar) {
+                            errorMessage +=
+                                (errorMessage.isNotEmpty ? '\n' : '') +
+                                l10n.passwordErrorSpecialChar;
+                          }
+                        }
+
+                        if (errorMessage.isNotEmpty) {
+                          return errorMessage;
+                        }
+
                         return null;
                       },
                       onToggleObscure: () {

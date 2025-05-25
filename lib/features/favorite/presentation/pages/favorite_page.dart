@@ -5,8 +5,8 @@ import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.da
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_event.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_state.dart';
 import 'package:fuel_finder/features/map/presentation/widgets/custom_app_bar.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:fuel_finder/shared/show_snackbar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});

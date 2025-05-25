@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuel_finder/core/themes/app_palette.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fuel_finder/features/feedback/presentation/pages/station_detail_page.dart';
+import 'package:fuel_finder/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fuel_finder/features/favorite/presentation/bloc/favorite_bloc.dart';

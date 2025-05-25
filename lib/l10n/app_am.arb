@@ -182,11 +182,19 @@
     "viewNearbyStations": "አቅራቢ የነዳጅ ጣቢያዎችን ይመልከቱ",
     "locationNotLoaded": "እባክዎ አካባቢዎን እየጫንን ሳለ ይጠብቁ",
 
-    
   "changeProfilePicture": "የመገለጫ ፎቶ ቀይር",
   "imagePickerError": "ፎቶ ማምረጥ አልተሳካም",
   "storagePermissionDenied": "ፎቶ ለመምረጥ የእቃ ቤት ፈቃድ ያስፈልጋል",
-  "cameraPermissionDenied": "ፎቶ ለመነሳት የካሜራ ፈቃድ ያስፈልጋል"
+  "cameraPermissionDenied": "ፎቶ ለመነሳት የካሜራ ፈቃድ ያስፈልጋል",
+
+  "passwordErrorLetterNumberCombo": "ፊደል እና ቁጥር በቅልቅል ሊኖረው ይገባል",
+  "passwordErrorTooCommon": "ይህ በጣም የተለመደ እና ደህንነቱ የተጋለጠ ነው",
+  "passwordErrorUppercase": "ቢያንስ አንድ አቢይ ፊደል ሊኖረው ይገባል",
+"passwordErrorLowercase": "ቢያንስ አንድ ትንሽ ፊደል ሊኖረው ይገባል",
+"passwordErrorNumber": "ቢያንስ አንድ ቁጥር ሊኖረው ይገባል",
+"passwordErrorSpecialChar": "ቢያንስ አንድ ልዩ ምልክት ሊኖረው ይገባል",
+"passwordErrorLength": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች ሊኖሩት ይገባል",
+"passwordErrorEmpty": "የይለፍ ቃል መሞላት አለበት"
 
 }
 
