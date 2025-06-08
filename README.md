@@ -15,5 +15,4 @@ Onboarding Screens: Simple walkthrough to guide new users.<br>
 Frontend: Flutter<br>
 Backend: Node.js (PostgreSQL + Express.js)<br>
 Maps: Google Maps API / Mapbox (configurable)<br>
-State Management: Bloc/GetX<br>
-Authentication: BetterAuth<br>
+State Management: Bloc<br>
