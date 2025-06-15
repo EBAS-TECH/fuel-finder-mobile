@@ -13,7 +13,6 @@ Onboarding Screens: Simple walkthrough to guide new users.<br>
 
 ## Tech Stack
 Frontend: Flutter<br>
-Backend: Node.js (PostgreSQL + Express.js)<br>
 Maps: Google Maps API / Mapbox (configurable)<br>
 State Management: Bloc<br>
 
@@ -22,8 +21,6 @@ State Management: Bloc<br>
 ### Prerequisites
 - Flutter SDK (v3.0.0 or later)
 - Dart SDK
-- Node.js (for backend)
-- PostgreSQL
 - Google Maps API key
 
 ### Clone the Repository
@@ -39,7 +36,6 @@ fuel-finder-mobile/
 │   │   ├── themes/             # App-wide themes (colors, text styles)
 │   │   ├── localizations/      # Localization setup
 │   │   └── utils/              # Utility functions
-│   │
 │   ├── features/               # Feature modules
 │   │   ├── auth/               # Authentication
 │   │   ├── favorite/           # Favorite stations
@@ -51,7 +47,6 @@ fuel-finder-mobile/
 │   │   ├── route/              # Navigation
 │   │   ├── settings/           # App settings
 │   │   └── user/               # User profile
-│   │
 ├── l10n/                       # Localization files
 ├── shared/                     # Shared components
 ├── test/                       # Test suites
