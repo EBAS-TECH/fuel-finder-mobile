@@ -16,3 +16,78 @@ Frontend: Flutter<br>
 Backend: Node.js (PostgreSQL + Express.js)<br>
 Maps: Google Maps API / Mapbox (configurable)<br>
 State Management: Bloc<br>
+
+## Installation 💻
+
+### Prerequisites
+- Flutter SDK (v3.0.0 or later)
+- Dart SDK
+- Node.js (for backend)
+- PostgreSQL
+- Google Maps API key
+
+### Clone the Repository
+```bash
+git clone https://github.com/EBAS-TECH/fuel-finder-mobile.git
+cd fuel-finder-mobile
+```
+### Project Structure 📂
+```plaintext
+fuel-finder-mobile/
+├── lib/
+│   ├── core/
+│   │   ├── themes/             # App-wide themes (colors, text styles)
+│   │   ├── localizations/      # Localization setup
+│   │   └── utils/              # Utility functions
+│   │
+│   ├── features/               # Feature modules
+│   │   ├── auth/               # Authentication
+│   │   ├── favorite/           # Favorite stations
+│   │   ├── feedback/           # User feedback
+│   │   ├── fuel_price/         # Price tracking
+│   │   ├── gas_station/        # Station data
+│   │   ├── map/                # Map services
+│   │   ├── onboarding/         # Onboarding flow
+│   │   ├── route/              # Navigation
+│   │   ├── settings/           # App settings
+│   │   └── user/               # User profile
+│   │
+├── l10n/                       # Localization files
+├── shared/                     # Shared components
+├── test/                       # Test suites
+├── .env                        # Environment config
+└── main.dart                   # App entry point
+```
+
+### Install Dependencies
+```bash
+flutter pub get
+```
+### Configure environment variables:
+- Create a .env file in the root directory:
+```bash
+GOOGLE_MAPS_API_KEY=API_KEY
+API_BASE_URL=BACK_END_URL (Will be provided)
+```
+### Run the app
+```bash
+flutter run
+```
+## Contributing 🤝
+
+1. Fork the project  
+2. Create your feature branch 
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes
+   ```bash
+   git commit -m 'Add some AmazingFeature'
+   ```
+4. Push your changes
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. Open pull request
+
+
