@@ -291,8 +291,9 @@ class _ExplorePageState extends State<ExplorePage>
                     context: context,
                     barrierDismissible: false,
                     builder:
-                        (context) =>
-                            const Center(child: CircularProgressIndicator()),
+                        (context) => const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                   );
 
                   late final StreamSubscription streamSubscription;
